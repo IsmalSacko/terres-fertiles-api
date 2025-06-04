@@ -1,0 +1,67 @@
+# Environnement virtuel
+venv/
+env/
+ENV/
+.venv/
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache pip
+pip-wheel-metadata/
+*.egg-info/
+dist/
+build/
+
+# Base de données locale (SQLite)
+*.sqlite3
+
+# Secrets et variables d’environnement
+.env
+.env.*
+
+# Logs et fichiers temporaires
+*.log
+*.pot
+*.mo
+*.bak
+*.swp
+.DS_Store
+*.tmp
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Fichiers système Windows
+Thumbs.db
+desktop.ini
+
+# Migrations (facultatif si recréées proprement)
+# Commenter si tu veux les versionner
+# **/migrations/
+# !**/migrations/__init__.py
+
+# Fichiers coverage / test
+htmlcov/
+.coverage
+coverage.xml
+.tox/
+.nox/
+.cache/
+.pytest_cache/
+
+# MyPy, Bandit, etc.
+.mypy_cache/
+.dmypy.json
+.pyre/
+.bandit
+
+# Django static/media files générés
+staticfiles/
+static/
+media/
