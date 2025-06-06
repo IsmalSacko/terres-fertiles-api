@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'terres_fertiles',
         'USER': 'root',  # ou ton utilisateur MySQL
-        'PASSWORD': '',  # mot de passe si défini
+        'PASSWORD': 'root',  # mot de passe si défini
         'HOST': 'localhost',
         'PORT': '3306',
     }

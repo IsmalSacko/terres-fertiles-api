@@ -1,5 +1,6 @@
 import uuid
 from datetime import date, datetime
+from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
@@ -98,23 +99,41 @@ class Compost(models.Model):
         verbose_name_plural = "Composts"
         ordering = ['-date_reception']
 
+class Plateforme(models.Model):
+    nom = models.CharField("Plateforme sans nom",max_length=100, unique=True)
+    localisation = models.CharField(max_length=255)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='plateformes',help_text="Responsable automatiquement défini à l'utilisateur connecté."
+)
+    date_creation = models.DateField(default=timezone.now,)  # Date de création de la plateforme
 
+    def __str__(self):
+        return f"Plateforme - {self.nom}"
+    class Meta:
+        db_table = 'plateforme'
+        verbose_name = "Plateforme"
+        verbose_name_plural = "Plateformes"
+        ordering = ['nom']
 class Melange(models.Model):
+    nom = models.CharField("Nom du mélange", max_length=255, null=True, blank=True)
+    date_creation = models.DateField(default=timezone.now) # Date de création du mélange
     reference_produit = models.CharField(max_length=100, unique=True, editable=False)
-    chantier = models.ForeignKey(Chantier, on_delete=models.SET_NULL, null=True, blank=True)
-    site_stockage = models.CharField(max_length=255)
+    plateforme = models.ForeignKey(Plateforme, on_delete=models.CASCADE, null=True, blank=True)
+    gisements = models.ManyToManyField('Gisement', related_name='melanges')
     fournisseur = models.CharField(max_length=255)
     couverture_vegetale = models.CharField(max_length=100, null=True, blank=True)
     periode_melange = models.CharField(max_length=100)
-    date_semis = models.DateField(null=True, blank=True)
+    date_semis = models.DateField(default=timezone.now)
     references_analyses = models.TextField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.reference_produit:
-            prefix = self.chantier.nom[:4].upper() if self.chantier and self.chantier.nom else "XXXX"
+            prefix = self.plateforme.nom[:4].upper() if self.plateforme and self.plateforme.nom else "XXXX"
             annee = str(date.today().year)
-            count = Melange.objects.filter(chantier=self.chantier).count() + 1
+            count = Melange.objects.filter(plateforme=self.plateforme).count() + 1
             self.reference_produit = f"{prefix}-{annee}-MEL-{count:03}"
+
         super().save(*args, **kwargs)
 
     def __str__(self):

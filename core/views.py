@@ -11,11 +11,11 @@ import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions
 from .models import (
     CustomUser, Chantier, DocumentGisement, Gisement, Compost,
-    Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire
+    Melange, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire
 )
 from .serializers import (
     CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, GisementSerializer, CompostSerializer,
-    MelangeSerializer, ProduitVenteSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer
+    MelangeSerializer, PlateformeSerializer, ProduitVenteSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer
 )
 
 
@@ -80,7 +80,13 @@ class AnalyseLaboratoireViewSet(viewsets.ModelViewSet):
         serializer.save(uploaded_by=self.request.user)
 
 
+class PlateformeViewSet(viewsets.ModelViewSet):
+    queryset = Plateforme.objects.all()
+    serializer_class = PlateformeSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(responsable=self.request.user)
 
 
 

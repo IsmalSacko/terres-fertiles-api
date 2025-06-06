@@ -1,6 +1,8 @@
+import requests
+from datetime import datetime
 from rest_framework import serializers
 from .models import (
-    CustomUser, Chantier, DocumentGisement, Gisement, Compost,
+    CustomUser, Chantier, DocumentGisement, Gisement, Compost, Plateforme,
     Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire
 )
 
@@ -82,11 +84,6 @@ class DocumentTechniqueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-
-
-
 class AnalyseLaboratoireSerializer(serializers.ModelSerializer):
     produit = serializers.PrimaryKeyRelatedField(queryset=ProduitVente.objects.all())
     uploaded_by = serializers.ReadOnlyField(source='uploaded_by.username')
@@ -97,3 +94,16 @@ class AnalyseLaboratoireSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('uploaded_by', None)
         return super().create(validated_data)
+    
+class PlateformeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plateforme
+        fields = '__all__'
+        read_only_fields = ['responsable']  # On empêche la modification côté frontend
+
+    def create(self, validated_data):
+        validated_data['responsable'] = self.context['request'].user
+        validated_data['date_creation'] = datetime.now().date() 
+        return super().create(validated_data)
+
+        

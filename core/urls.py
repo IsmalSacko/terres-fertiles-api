@@ -10,7 +10,8 @@ from .views import (
     DocumentTechniqueViewSet, 
     AnalyseLaboratoireViewSet,
     AnalysePdfParseView,
-    DocumentGisementViewSet
+    DocumentGisementViewSet,
+    PlateformeViewSet
 )
 
 router = DefaultRouter()
@@ -23,6 +24,7 @@ router.register(r'produits', ProduitVenteViewSet)
 router.register(r'documents-techniques', DocumentTechniqueViewSet)
 router.register(r'analyses-laboratoire', AnalyseLaboratoireViewSet)
 router.register(r'documents-gisements', DocumentGisementViewSet)
+router.register(r'plateformes', PlateformeViewSet)
 
 
 urlpatterns = [

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    CustomUser, Chantier, DocumentGisement, Gisement, Compost,
+    CustomUser, Chantier, DocumentGisement, Gisement, Compost, Plateforme,
     Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire
 )
 
@@ -24,7 +24,7 @@ class CompostAdmin(admin.ModelAdmin):
 
 @admin.register(Melange)
 class MelangeAdmin(admin.ModelAdmin):
-    list_display = ('reference_produit', 'chantier', 'periode_melange')
+    list_display = ('reference_produit', 'plateforme', 'periode_melange')
 
 @admin.register(ProduitVente)
 class ProduitVenteAdmin(admin.ModelAdmin):
@@ -44,3 +44,9 @@ class DocumentGisementAdmin(admin.ModelAdmin):
 @admin.register(AnalyseLaboratoire)
 class AnalyseLaboratoireAdmin(admin.ModelAdmin):
     list_display = ('produit', 'laboratoire', 'date_analyse', 'ph_eau')
+
+@admin.register(Plateforme)
+class PlateformeAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'localisation', 'latitude','longitude', 'responsable')
+    search_fields = ('nom', 'localisation', 'responsable__username')
+    list_filter = ('responsable__role',)
