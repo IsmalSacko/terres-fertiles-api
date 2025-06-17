@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'terres_fertiles',
         'USER': 'root',  # ou ton utilisateur MySQL
-        'PASSWORD': 'root',  # mot de passe si défini
+        'PASSWORD': '',  # mot de passe si défini
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -191,7 +191,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'core/static',  # ton JS est bien ici
+]
+STATIC_ROOT = BASE_DIR / 'staticfiles'  # 🔥 ajoute cette ligne
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 

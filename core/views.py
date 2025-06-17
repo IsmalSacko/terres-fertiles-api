@@ -1,5 +1,9 @@
 import io
-
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
+from django.db.models import Prefetch
+from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response  # ✅ BON import
 from rest_framework import status
@@ -11,7 +15,7 @@ import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions
 from .models import (
     CustomUser, Chantier, DocumentGisement, Gisement, Compost,
-    Melange, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire
+    Melange, MelangeIngredient, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire
 )
 from .serializers import (
     CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, GisementSerializer, CompostSerializer,
@@ -51,10 +55,39 @@ class CompostViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
+# class MelangeViewSet(viewsets.ModelViewSet):
+#     queryset = Melange.objects.all()
+#     serializer_class = MelangeSerializer
+#     permission_classes = [permissions.IsAuthenticated]
+@method_decorator(csrf_exempt, name="dispatch")
 class MelangeViewSet(viewsets.ModelViewSet):
-    queryset = Melange.objects.all()
+    """
+    CRUD complet + action POST /{pk}/avancer/ pour passer à l'étape suivante.
+    """
     serializer_class = MelangeSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    # → on pré-charge les ingrédients pour éviter le N+1
+    def get_queryset(self):
+        return (
+            Melange.objects.select_related("plateforme").prefetch_related(Prefetch("ingredients",  # related_name dans le modèle
+            queryset=MelangeIngredient.objects.select_related("gisement"))
+            )
+        )
+
+    # ---------- action métier : avancer l'état ----------
+    @action(detail=True, methods=["post"])
+    @csrf_exempt
+    def avancer(self, request, pk=None):
+        melange = self.get_object()
+        if melange.etat < Melange.Etat.VALIDATION:   # adapte si tu as renommé la classe
+            melange.etat += 1
+            melange.save()
+            return Response(self.get_serializer(melange).data, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "Mélange déjà validé."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class ProduitVenteViewSet(viewsets.ModelViewSet):

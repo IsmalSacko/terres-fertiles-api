@@ -19,7 +19,8 @@ router.register(r'auth/users', CustomUserViewSet)
 router.register(r'chantiers', ChantierViewSet)
 router.register(r'gisements', GisementViewSet)
 router.register(r'composts', CompostViewSet)
-router.register(r'melanges', MelangeViewSet)
+router.register(r'melanges', MelangeViewSet, basename='melanges')  # basename pour éviter les conflits de noms
+
 router.register(r'produits', ProduitVenteViewSet)
 router.register(r'documents-techniques', DocumentTechniqueViewSet)
 router.register(r'analyses-laboratoire', AnalyseLaboratoireViewSet)
