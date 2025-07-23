@@ -1,4 +1,5 @@
 import uuid
+from django.forms import ValidationError
 from django.utils.text import slugify
 from datetime import date, datetime
 from django.utils import timezone
@@ -6,7 +7,11 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from core.utils import document_upload_path, format_nom_gisement
+# models.py
+from datetime import date
+def today():
+    return date.today()
+
 
 
 class CustomUser(AbstractUser):
@@ -26,7 +31,7 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField("Téléphone", max_length=15, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.company_name or self.username} ({self.get_role_display()})"
+        return f"{self.username} ({self.get_role_display()})"
     class Meta:
         db_table = 'utilisateur'
         verbose_name = "Utilisateur"
@@ -36,8 +41,11 @@ class CustomUser(AbstractUser):
 
 class Chantier(models.Model):
     nom = models.CharField("Nom du chantier", max_length=255)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='chantiers', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     maitre_ouvrage = models.CharField(max_length=255)
     entreprise_terrassement = models.CharField(max_length=255)
+    date_creation = models.DateField(default=today)
+    
     localisation = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -65,8 +73,9 @@ class Gisement(models.Model):
     ]
    
     from django.utils import timezone
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='gisements', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom du gisement, généré automatiquement si vide.", editable=False,unique=True)
-    date_creation = models.DateField(default=timezone.now)
+    date_creation = models.DateField(default=today, help_text="Date de création du gisement")
     chantier = models.ForeignKey(Chantier, on_delete=models.CASCADE, related_name='gisements')
     commune = models.CharField(max_length=100)
     periode_terrassement = models.CharField(max_length=100) 
@@ -109,6 +118,7 @@ class MelangeIngredient(models.Model):
     melange = models.ForeignKey("Melange", on_delete=models.CASCADE, related_name="ingredients")
     gisement = models.ForeignKey(Gisement, on_delete=models.CASCADE)
     pourcentage = models.DecimalField(max_digits=5, decimal_places=2)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='melange_ingredients', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
 
     class Meta:
         db_table = 'melange_ingredient'
@@ -119,26 +129,42 @@ class MelangeIngredient(models.Model):
     def __str__(self):
         return f"{self.gisement.nom} dans {self.melange.reference_produit} ({self.pourcentage}%)"
     
-    
+class MelangeAmendement(models.Model):
+    melange = models.ForeignKey("Melange", on_delete=models.CASCADE, related_name="amendements")
+    utlisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='melange_amendements', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    amendementOrganique = models.ForeignKey("AmendementOrganique", on_delete=models.CASCADE)
+    pourcentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Pourcentage de l'émendent organique dans le mélange. Si vide, il est calculé automatiquement.")
+    class Meta:
+        db_table = 'melange_emendement'
+        verbose_name = "Amendement de mélange"
+        verbose_name_plural = "Amendements de mélange"
+        ordering = ['melange', 'amendementOrganique']
+        unique_together = [("melange", "amendementOrganique")]
 
-class Compost(models.Model):
-    chantier = models.ForeignKey(Chantier, on_delete=models.CASCADE, related_name='composts')
-    fournisseur = models.CharField(max_length=255)
-    date_reception = models.DateField()
-    volume = models.DecimalField(max_digits=10, decimal_places=2)
-    type_compost = models.CharField(max_length=100)
-    localisation = models.CharField(max_length=255)
+        def __str__(self):
+            return f"{self.amendementOrganique.nom} dans {self.melange.reference_produit} ({self.pourcentage}%)"
+
+
+class AmendementOrganique(models.Model):
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='amendements_organique', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    nom = models.CharField(max_length=255, unique=True, help_text="Nom de l'émendent organique, par exemple 'Fumier de cheval'")
+    fournisseur = models.CharField(max_length=255, help_text="Fournisseur de l'émendent organique")
+    date_reception = models.DateField(default=timezone.now)
+    date_semis = models.DateField(default=timezone.now, help_text="Date de semis de l'émendent organique")
+    plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True, related_name='emendements', help_text="Plateforme de compostage ou d'émendement associée.")
+    volume_disponible = models.DecimalField(max_digits=10, decimal_places=2, help_text="Volume disponible de l'émendent organique")
+    localisation = models.CharField(max_length=255, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Compost - {self.fournisseur}"
-
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='emendements', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     class Meta:
-        db_table = 'compost'
-        verbose_name = "Compost"
-        verbose_name_plural = "Composts"
-        ordering = ['-date_reception']
+        db_table = 'AmendementOrganique'
+        verbose_name = "Émendent organique"
+        verbose_name_plural = "Émendements organiques"
+        ordering = ['nom']
+    
+    def __str__(self):
+        return f"Émendent organique - {self.nom} ({self.fournisseur})"
 
 class Plateforme(models.Model):
     nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, par exemple 'Plateforme de compostage de Paris'")
@@ -157,8 +183,14 @@ class Plateforme(models.Model):
         verbose_name_plural = "Plateformes"
         ordering = ['nom']
 
-def today():
-    return timezone.now().date()       
+ 
+
+
+
+from django.db import models, transaction, IntegrityError
+from datetime import date
+import re
+
 class Melange(models.Model):
     class Etat(models.IntegerChoices):
         COMPOSITION = 1, "Composition"
@@ -167,42 +199,84 @@ class Melange(models.Model):
         CONTROLE_1 = 4, "Contrôle +1 mois"
         CONTROLE_2 = 5, "Contrôle +2 mois"
         VALIDATION = 6, "Validation finale (Fiche technique)"
-    
-    
-
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='melanges', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     nom = models.CharField("Nom du mélange", max_length=255, null=True, blank=True)
     gisements = models.ManyToManyField('Gisement', through='MelangeIngredient', related_name='melanges')
     date_creation = models.DateField(default=today)
-    date_semis = models.DateField(default=today)
+    date_semis = models.DateField(default=today
+    )
     reference_produit = models.CharField(max_length=100, unique=True, editable=False)
     plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True)
     fournisseur = models.CharField(max_length=255)
     couverture_vegetale = models.CharField(max_length=100, null=True, blank=True)
     periode_melange = models.CharField(max_length=100)
-    
     references_analyses = models.TextField(null=True, blank=True)
 
     etat = models.IntegerField(choices=Etat.choices, default=Etat.COMPOSITION)
-    ordre_conformite = models.TextField(null=True, blank=True)
-    consignes_melange = models.TextField(null=True, blank=True)
-    controle_1 = models.TextField("Rapport +1 mois", null=True, blank=True)
-    controle_2 = models.TextField("Rapport +2 mois", null=True, blank=True)
-    fiche_technique = models.TextField(null=True, blank=True)
-
+    ordre_conformite = models.FileField(upload_to='documents/ordres_conformite/', null=True, blank=True)
+    consignes_melange = models.FileField(upload_to='documents/consignes_melange/', null=True, blank=True)
+    controle_1 = models.FileField(upload_to='documents/controle_1/', null=True, blank=True)
+    controle_2 = models.FileField(upload_to='documents/controle_2/', null=True, blank=True)
+    fiche_technique = models.FileField(upload_to='documents/fiche_technique/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if not self.reference_produit:
-            prefix = self.plateforme.nom[:4].upper() if self.plateforme and self.plateforme.nom else "XXXX"
-            annee = str(date.today().year)
-            count = Melange.objects.filter(plateforme=self.plateforme).count() + 1
-            self.reference_produit = f"{prefix}-{annee}-MEL-{count:03}"
-        super().save(*args, **kwargs)
+        annee = str(date.today().year)[-2:]
+
+        # Numérotation unique du mélange pour l’année en cours (hors lui-même en cas de modif)
+        count = Melange.objects.filter(date_creation__year=date.today().year).exclude(pk=self.pk).count() + 1
+        numero = f"M{count:02}"
+
+        # Codes projet et entreprise
+        code_projet = "XXX"
+        code_entreprise = "ENT"
+
+        # Extraire le code projet depuis le nom (ex: MEL-25-M01-T09-CHZ ou M1-T09-CHAZAL)
+        if self.nom:
+            match = re.search(r"(?<=-)(T\d{2}|[A-Z]{3})(?=-)", self.nom)
+            if match:
+                code_projet = match.group(1)[:3].upper()
+
+        # Si projet toujours inconnu → utiliser plateforme ou gisement
+        if code_projet == "XXX":
+            if self.plateforme and self.plateforme.nom:
+                code_projet = re.sub(r'[^A-Z0-9]', '', self.plateforme.nom.upper())[:3]
+            elif self.pk and self.gisements.exists():
+                commune = self.gisements.first().commune or ''
+                code_projet = re.sub(r'[^A-Z]', '', commune.upper())[:3]
+
+        # Code entreprise à partir du fournisseur
+        if self.fournisseur:
+            code_entreprise = re.sub(r'[^A-Z]', '', self.fournisseur.upper())[:3]
+
+        # Base de la référence produit
+        base = f"MEL-{annee}-{numero}-{code_projet}-{code_entreprise}"
+
+        # Si la référence est absente ou incohérente → régénérer
+        if not self.reference_produit or not self.reference_produit.startswith(f"MEL-{annee}-{numero}-{code_projet}"):
+            for i in range(100):
+                tentative = base if i == 0 else f"{base}-{i}"
+                if not Melange.objects.filter(reference_produit=tentative).exclude(pk=self.pk).exists():
+                    self.reference_produit = tentative
+                    break
+
+        # Génération automatique du nom si vide ou par défaut
+        if not self.nom or self.nom.lower() in ['melange sans nom', 'mélange sans nom', '']:
+            self.nom = self.reference_produit
+
+        # Enregistrement sécurisé avec rollback en cas de duplication
+        try:
+            with transaction.atomic():
+                super().save(*args, **kwargs)
+        except IntegrityError:
+            self.reference_produit = None
+            self.save(*args, **kwargs)
+
+    
 
     def __str__(self):
         return f"Mélange {self.reference_produit} - État: {self.get_etat_display()}"
-    
+
     def tache_actuelle(self):
-        """Retourne la tâche attendue à l’étape actuelle."""
         return {
             self.Etat.COMPOSITION: "Veuillez composer le mélange avec les gisements.",
             self.Etat.CONFORMITE: "Veuillez renseigner un ordre de conformité.",
@@ -212,6 +286,13 @@ class Melange(models.Model):
             self.Etat.VALIDATION: "Fiche technique obligatoire.",
         }.get(self.etat, None)
 
+    def delete(self, *args, **kwargs):
+        # Supprime tous les fichiers liés s'ils existent
+        for field in ['ordre_conformite', 'consignes_melange', 'controle_1', 'controle_2', 'fiche_technique']:
+            file_field = getattr(self, field)
+            if file_field and file_field.name:
+                file_field.delete(save=False)
+        super().delete(*args, **kwargs)
 
     class Meta:
         db_table = 'melange'
@@ -221,37 +302,66 @@ class Melange(models.Model):
 
 
 class ProduitVente(models.Model):
-    reference_produit = models.CharField(max_length=100, unique=True, editable=False)
-    melange = models.OneToOneField(Melange, on_delete=models.SET_NULL, null=True, blank=True)
-    chantier = models.ForeignKey(Chantier, on_delete=models.SET_NULL, null=True, blank=True)
-    fournisseur = models.CharField(max_length=255)
-    nom_site = models.CharField(max_length=255)
-    volume_initial = models.DecimalField(max_digits=10, decimal_places=2)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='produits_vente',  # unique
+        help_text="Responsable automatiquement défini à l'utilisateur connecté."
+    )
+    reference_produit = models.CharField(max_length=100, unique=True)  
+    melange = models.OneToOneField(
+        Melange,
+        on_delete=models.CASCADE,
+        related_name='produit_vente'
+    )
+    fournisseur = models.CharField(max_length=255)  
+    nom_site = models.CharField(max_length=255,null=True, blank=True)  
+    volume_initial = models.DecimalField(max_digits=10, decimal_places=2)  
     volume_disponible = models.DecimalField(max_digits=10, decimal_places=2)
-    date_disponibilite = models.DateField()
-    commentaires_analyses = models.TextField(null=True, blank=True)
-    volume_vendu = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    acheteur = models.CharField(max_length=255, null=True, blank=True)
-    date_achat = models.DateField(null=True, blank=True)
-    periode_destockage = models.CharField(max_length=100, null=True, blank=True)
-    localisation_projet = models.CharField(max_length=255, null=True, blank=True)
+    date_disponibilite = models.DateField(default=today)
+    commentaires_analyses = models.TextField(null=True,blank=True)
+    volume_vendu = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    acheteur = models.CharField(max_length=255, blank=True, null=True)
+    date_achat = models.DateField(blank=True, null=True)
+    periode_destockage = models.CharField(max_length=255, blank=True)
+    localisation_projet = models.CharField(max_length=255, blank=True)
+    date_creation = models.DateField(auto_now_add=True)
+    pret_pour_vente = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        if not self.reference_produit:
-            prefix = self.chantier.nom[:4].upper() if self.chantier and self.chantier.nom else "XXXX"
-            annee = str(date.today().year)
-            count = ProduitVente.objects.filter(chantier=self.chantier).count() + 1
-            self.reference_produit = f"{prefix}-{annee}-VENTE-{count:03}"
-        super().save(*args, **kwargs)
+
+
 
     def __str__(self):
-        return f"Produit {self.reference_produit}"
-
+        return f"Produit {self.reference_produit} - {self.melange.nom} ({self.fournisseur})"
+    
     class Meta:
         db_table = 'produit_vente'
         verbose_name = "Produit de vente"
         verbose_name_plural = "Produits de vente"
-        ordering = ['-date_disponibilite']
+        ordering = ['-date_creation']
+
+
+class DocumentProduitVente(models.Model):
+    produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name="doc_produit_vente")
+  
+    type_document = models.CharField(
+        max_length=50,
+        choices=[
+            ('FTP', 'Fiche technique produit'),
+            ('ANALYSE', 'Analyse'),
+            ('SUIVI', 'Suivi visuel'),
+            ('AUTRE', 'Autre document de traçabilité')
+        ]
+    )
+    fichier = models.FileField(upload_to='documents_produits/')
+    remarque = models.TextField(blank=True, null=True)
+    date_ajout = models.DateTimeField(auto_now_add=True)
+    
+
+    def __str__(self):
+        return f"{self.get_type_document_display()} - {self.produit.reference_produit}"
+
 
 
 class DocumentTechnique(models.Model):
@@ -267,6 +377,11 @@ class DocumentTechnique(models.Model):
         ('autre', 'Autre'),
     ])
     date_ajout = models.DateField(auto_now_add=True)
+
+    def delete(self, *args, **kwargs):
+        if self.fichier:
+            self.fichier.delete(save=False)
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.type_document} pour {self.produit.reference_produit}"
@@ -286,7 +401,7 @@ class DocumentGisement(models.Model):
         ('agronomique', 'Analyse agronomique'),
         ('autre', 'Autre document'),
     ]
-
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='documents_gisements', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     gisement = models.ForeignKey(Gisement, on_delete=models.CASCADE, related_name='documents')
     type_document = models.CharField(max_length=50, choices=TYPE_CHOICES, default='autre',blank=True, null=True)
     fichier = models.FileField(upload_to='documents_gisements/',blank=True, null=True)
@@ -312,6 +427,7 @@ class DocumentGisement(models.Model):
 
 
 class AnalyseLaboratoire(models.Model):
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='analyses_laboratoire', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name='analyses')
     laboratoire = models.CharField(max_length=255)
     code_rapport = models.CharField(max_length=100)
@@ -369,3 +485,81 @@ class AnalyseLaboratoire(models.Model):
         verbose_name = "Analyse de laboratoire"
         verbose_name_plural = "Analyses de laboratoire"
         ordering = ['-date_analyse']
+
+
+class SaisieVente(models.Model):
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='produits_a_vendre', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name='ventes')
+    nom_client = models.CharField(max_length=255)
+    volume_tonne = models.DecimalField(max_digits=10, decimal_places=2)
+    date_vente = models.DateField()
+    nom_chantier_recepteur = models.CharField(max_length=255)
+    adresse_chantier = models.CharField(max_length=255)
+
+    est_validee = models.BooleanField(default=False, help_text="Indique si la vente a été validée par l'entreprise")
+
+    date_achat = models.DateTimeField(auto_now_add=True)
+    date_modification_vente = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Vente {self.nom_client} - {self.produit.reference_produit} - {'Validée' if self.est_validee else 'En attente'}"
+
+    class Meta:
+        db_table = 'saisie_vente'
+        verbose_name = "Saisie de vente"
+        verbose_name_plural = "Saisies de vente"
+        ordering = ['-date_achat', 'nom_client']
+
+
+
+
+
+
+class ChantierRecepteur(models.Model):
+    STATUT_CHOICES = [
+    ('en_attente', 'En attente'),
+    ('en_cours', 'En cours'),
+    ('termine', 'Terminé'),]
+
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='chantiers_recepteurs', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    vente = models.OneToOneField('SaisieVente', on_delete=models.CASCADE, related_name='chantier_recepteur')
+    nom = models.CharField(max_length=255)
+    projet_nom = models.CharField(max_length=255, verbose_name="Nom du projet")
+    adresse = models.TextField(max_length=500, help_text="Adresse du chantier récepteur")
+    date_creation = models.DateField(default=today, help_text="Date de création du chantier récepteur")
+
+    # Champs optionnels pour le chantier récepteur
+    date_debut = models.DateField(null=True, blank=True, help_text="Date de début du chantier récepteur")
+    date_fin = models.DateField(null=True, blank=True, help_text="Date de fin du chantier récepteur")
+    volume_receptionne = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Volume de matériau réceptionné sur le chantier récepteur")
+    volume_restant = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Volume restant à réceptionner sur le chantier récepteur")
+    prix = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Prix du chantier récepteur")
+    
+    # Optionnel : coordonnées GPS
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+
+    def __str__(self):
+        return f"{self.nom} ({self.projet_nom})"
+    
+    def clean(self):
+        if self.volume_receptionne and self.vente.volume and self.volume_receptionne > self.vente.volume:
+            raise ValidationError("Le volume réceptionné ne peut pas dépasser le volume de la vente.")
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        # Logique de validation automatique de la vente
+        vente = self.vente
+        if not vente.est_validee:
+            if self.volume_receptionne >= vente.volume_tonne or self.statut == 'termine':
+                vente.est_validee = True
+                vente.save()
+    class Meta:
+        db_table = 'chantier_recepteur'
+        verbose_name = "Chantier récepteur"
+        verbose_name_plural = "Chantiers récepteurs"
+        ordering = ['-date_creation', 'nom']

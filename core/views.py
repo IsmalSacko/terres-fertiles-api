@@ -3,6 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response  # ✅ BON import
@@ -12,23 +13,33 @@ from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 import re
 import fitz  # PyMuPDF
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, generics
+
+from core.utils import HasCustomAccessPermission, IsEntrepriseOrSuperUser
 from .models import (
-    CustomUser, Chantier, DocumentGisement, Gisement, Compost,
-    Melange, MelangeIngredient, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire
+    CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
+    Melange, MelangeAmendement, MelangeIngredient, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente
 )
 from .serializers import (
-    CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, GisementSerializer, CompostSerializer,
-    MelangeSerializer, PlateformeSerializer, ProduitVenteSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer
+    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
+    MelangeSerializer, PlateformeSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer
 )
+
+
+
+class CurrentUserView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
-    def perform_create(self, serializer):
-        serializer.save(uploaded_by=self.request.user)
+  
 
 
 class ChantierViewSet(viewsets.ModelViewSet):
@@ -46,24 +57,28 @@ class DocumentGisementViewSet(viewsets.ModelViewSet):
 class GisementViewSet(viewsets.ModelViewSet):
     queryset = Gisement.objects.all()
     serializer_class = GisementSerializer
+    permission_classes = [permissions.AllowAny]
+
+
+class AmendementOrganiqueViewSet(viewsets.ModelViewSet):
+    queryset = AmendementOrganique.objects.all()
+    serializer_class = AmendementOrganiqueSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        serializer.save(responsable=self.request.user)
 
-class CompostViewSet(viewsets.ModelViewSet):
-    queryset = Compost.objects.all()
-    serializer_class = CompostSerializer
+
+class MelangeAmendementViewSet(viewsets.ModelViewSet):
+    queryset = MelangeAmendement.objects.all()
+    serializer_class = MelangeAmendementSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+  
 
-# class MelangeViewSet(viewsets.ModelViewSet):
-#     queryset = Melange.objects.all()
-#     serializer_class = MelangeSerializer
-#     permission_classes = [permissions.IsAuthenticated]
 @method_decorator(csrf_exempt, name="dispatch")
 class MelangeViewSet(viewsets.ModelViewSet):
-    """
-    CRUD complet + action POST /{pk}/avancer/ pour passer à l'étape suivante.
-    """
+  
     serializer_class = MelangeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -89,11 +104,49 @@ class MelangeViewSet(viewsets.ModelViewSet):
             status=status.HTTP_400_BAD_REQUEST
         )
 
+    # ---------- AJOUTEZ CETTE ACTION ----------
+    @action(detail=True, methods=["post"], url_path="ingredients")
+    @csrf_exempt
+    def ingredients(self, request, pk=None):
+        """Ajouter plusieurs ingrédients au mélange"""
+        try:
+            melange = self.get_object()
+            ingredients_data = request.data.get('ingredients', [])
+            
+            if not ingredients_data:
+                return Response(
+                    {'error': 'ingredients est requis'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            created_ingredients = []
+            
+            for ingredient_data in ingredients_data:
+                ingredient = MelangeIngredient.objects.create(
+                    melange=melange,
+                    gisement_id=ingredient_data['gisement'],
+                    pourcentage=ingredient_data['pourcentage']
+                )
+                created_ingredients.append(ingredient)
+            
+            serializer = MelangeIngredientSerializer(created_ingredients, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    def perform_create(self, serializer):
+        serializer.save(responsable=self.request.user)
 
 class ProduitVenteViewSet(viewsets.ModelViewSet):
     queryset = ProduitVente.objects.all()
-    serializer_class = ProduitVenteSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ProduitVenteDetailSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(utilisateur=self.request.user)
 
 
 class DocumentTechniqueViewSet(viewsets.ModelViewSet):
@@ -212,3 +265,115 @@ class AnalysePdfParseView(APIView):
         except Exception as e:
             print(f"Erreur interne lors de l'analyse du PDF : {e}")
             return Response({'error': f'Une erreur est survenue lors de l\'analyse du fichier PDF: {e}'}, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def custom_reset_password(request):
+    email = request.data.get('email')
+
+    if not email:
+        return Response({'error': 'Adresse email requise.'}, status=400)
+
+    try:
+        user = get_user_model().objects.get(email=email)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_link = f"http://localhost:4200/reset-password-confirm/{uid}/{token}"
+
+        context = {
+            'user': user,
+            'reset_link': reset_link
+        }
+
+        html_message = render_to_string('core/emails/password_reset.html', context)
+
+        send_mail(
+            subject='Réinitialisation de votre mot de passe - Terres Fertiles',
+            message='Voici le lien pour réinitialiser votre mot de passe.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message
+        )
+
+        return Response({'detail': 'Email de réinitialisation envoyé.'})
+
+    except get_user_model().DoesNotExist:
+        return Response({'error': 'Aucun utilisateur avec cet email.'}, status=404)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password_confirm(request):
+    from django.utils.http import urlsafe_base64_decode
+    from django.contrib.auth.tokens import default_token_generator
+
+    uid = request.data.get("uid")
+    token = request.data.get("token")
+    new_password = request.data.get("new_password")
+
+    try:
+        uid = urlsafe_base64_decode(uid).decode()
+        user = get_user_model().objects.get(pk=uid)
+    except Exception:
+        return Response({"detail": "Lien invalide."}, status=400)
+
+    if not default_token_generator.check_token(user, token):
+        return Response({"detail": "Token invalide ou expiré."}, status=400)
+
+    user.set_password(new_password)
+    user.save()
+    return Response({"detail": "Mot de passe mis à jour avec succès."})
+
+
+class DocumentProduitVenteViewSet(viewsets.ModelViewSet):
+    queryset = DocumentProduitVente.objects.all()
+    serializer_class = DocumentProduitVenteSerializer
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), HasCustomAccessPermission()]
+
+    def create(self, request, *args, **kwargs):
+        fichiers = request.FILES.getlist('fichier')  # plusieurs fichiers sous clé 'fichier'
+        produit_id = request.data.get('produit')
+        type_document = request.data.get('type_document')
+        remarque = request.data.get('remarque', '')
+
+        documents_crees = []
+        for fichier in fichiers:
+            doc = DocumentProduitVente.objects.create(
+                produit_id=produit_id,
+                type_document=type_document,
+                fichier=fichier,
+                remarque=remarque
+            )
+            documents_crees.append(doc)
+
+        serializer = self.get_serializer(documents_crees, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class SaisieVenteViewSet(viewsets.ModelViewSet):
+    queryset = SaisieVente.objects.all()
+    serializer_class = SaisieVenteSerializer
+
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsEntrepriseOrSuperUser()]

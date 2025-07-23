@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import messages as messages
 from django.shortcuts import redirect
 from django.utils.html import format_html  
@@ -10,8 +11,8 @@ from django.views.decorators.csrf import csrf_protect
 
 
 from .models import (
-    CustomUser, Chantier, DocumentGisement, Gisement, Compost, Plateforme,
-    Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire, MelangeIngredient
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, Plateforme,
+    Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire, MelangeIngredient, SaisieVente
 )
 
 # ───────────── Inlines ─────────────
@@ -32,21 +33,15 @@ class MelangeAdmin(admin.ModelAdmin):
     list_display = (
         'reference_produit',
         'ingredients_affiches',
-        'plateforme',
+        'nom',
         'etat_display',
         'tache_display',
         'avancer_button',
     )
     readonly_fields = ['ingredients_affiches', 'tache_actuelle_display']
     inlines = [MelangeIngredientInline]
+
    
-
-
-
-
-
-    class Media:
-        js = ['admin/js/melange_etapes.js']
 
     def get_urls(self):
         urls = super().get_urls()
@@ -103,7 +98,7 @@ class MelangeAdmin(admin.ModelAdmin):
 # ───────────── Admins ─────────────
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'company_name', 'role', 'email')
+    list_display = ('username', 'company_name', 'role', 'email', 'is_active', 'date_joined', 'is_staff', 'is_superuser')
     list_filter = ('role',)
 
 @admin.register(Chantier)
@@ -112,22 +107,30 @@ class ChantierAdmin(admin.ModelAdmin):
 
 @admin.register(Gisement)
 class GisementAdmin(admin.ModelAdmin):
-    list_display = ('commune', 'nom', 'periode_terrassement', 'volume_terrasse')
+    list_display = ('id','commune', 'nom', 'periode_terrassement', 'volume_terrasse')
     list_filter = ('type_de_sol','commune', 'periode_terrassement')
     search_fields = ('nom', 'commune', 'chantier__nom')
 
     list_per_page = 10
 
-@admin.register(Compost)
-class CompostAdmin(admin.ModelAdmin):
-    list_display = ('fournisseur', 'date_reception', 'volume')
+@admin.register(AmendementOrganique)
+class EmendentOrganique(admin.ModelAdmin):
+    list_display = ('fournisseur', 'date_reception', 'volume_disponible')
 
 
 
 
 @admin.register(ProduitVente)
 class ProduitVenteAdmin(admin.ModelAdmin):
-    list_display = ('reference_produit', 'chantier', 'volume_disponible', 'volume_vendu')
+    list_display = ('reference_produit', 'volume_disponible', 'volume_vendu')
+
+    readonly_fields = ('utilisateur',)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.utilisateur = request.user
+        super().save_model(request, obj, form, change)
+    
 
 @admin.register(DocumentTechnique)
 class DocumentTechniqueAdmin(admin.ModelAdmin):
@@ -149,3 +152,77 @@ class PlateformeAdmin(admin.ModelAdmin):
     list_display = ('nom', 'localisation', 'latitude','longitude', 'responsable')
     search_fields = ('nom', 'localisation', 'responsable__username')
     list_filter = ('responsable__role',)
+    readonly_fields = ('responsable',)
+
+
+@admin.register(MelangeIngredient)
+class MelangeIngredientAdmin(admin.ModelAdmin):
+    list_display = ('melange', 'gisement', 'pourcentage')
+
+@admin.register(MelangeAmendement)
+class MelangeAmendementAdmin(admin.ModelAdmin):
+    list_display = ('melange', 'amendementOrganique', 'pourcentage')
+
+class DocumentProduitVenteAdminForm(forms.ModelForm):
+    class Meta:
+        model = DocumentProduitVente
+        fields = ['produit', 'type_document', 'fichier', 'remarque']
+       
+
+@admin.register(DocumentProduitVente)
+class DocumentProduitVenteAdmin(admin.ModelAdmin):
+    list_display = ('produit', 'fichier', 'date_ajout')
+    search_fields = ('produit__reference_produit', 'fichier')
+    list_filter = ('produit__reference_produit', 'date_ajout')
+    ordering = ('-date_ajout',)
+
+    form = DocumentProduitVenteAdminForm
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # on ajoute l'attribut 'multiple' manuellement sur le champ fichier
+        form.base_fields['fichier'].widget.attrs.update({'multiple': True})
+        return form
+
+    def save_model(self, request, obj, form, change):
+        fichiers = request.FILES.getlist('fichier')
+        for fichier in fichiers:
+            DocumentProduitVente.objects.create(
+                produit=form.cleaned_data['produit'],
+                type_document=form.cleaned_data['type_document'],
+                fichier=fichier,
+                remarque=form.cleaned_data['remarque']
+        )
+
+@admin.register(SaisieVente)
+class SaisieVenteAdmin(admin.ModelAdmin):
+    list_display = ('produit', 'responsable', 'date_achat', 'volume_tonne')
+    search_fields = ('produit__reference_produit', 'responsable__username')
+    list_filter = ('responsable__role',)
+    ordering = ('-date_achat',)
+
+    readonly_fields = ('responsable',)
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.responsable = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(ChantierRecepteur)
+class ChantierRecepteurAdmin(admin.ModelAdmin):
+    list_display = (
+        'nom',
+        'projet_nom',
+        'responsable',
+        'statut',
+        'date_creation',
+        'date_debut',
+        'date_fin',
+        'volume_receptionne',
+        'volume_restant',
+        'prix',
+    )
+    list_filter = ('statut', 'date_creation', 'responsable')
+    search_fields = ('nom', 'projet_nom', 'responsable__username', 'adresse')
+    ordering = ('-date_creation',)
