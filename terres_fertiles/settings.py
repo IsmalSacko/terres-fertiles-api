@@ -179,6 +179,7 @@ JAZZMIN_SETTINGS = {
     "core.amendementorganique": "fas fa-apple-alt",
     "core.DocumentProduitVente": "fas fa-file-invoice",
     "core.SaisieVente": "fas fa-receipt",
+    "core.Planning": "fas fa-calendar-alt",
 },
     "topmenu_links": [
         {"name": "Documentation", "url": "https://docs.terres-fertiles.com", "new_window": True, "icon": "fas fa-book"},

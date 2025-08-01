@@ -1,3 +1,4 @@
+from decimal import Decimal
 import uuid
 from django.forms import ValidationError
 from django.utils.text import slugify
@@ -274,7 +275,7 @@ class Melange(models.Model):
     
 
     def __str__(self):
-        return f"Mélange {self.reference_produit} - État: {self.get_etat_display()}"
+        return f"Mélange {self.nom}"
 
     def tache_actuelle(self):
         return {
@@ -330,7 +331,11 @@ class ProduitVente(models.Model):
     pret_pour_vente = models.BooleanField(default=False)
 
 
-
+    @property
+    def volume_disponible(self):
+        volume_initial = self.volume_initial or Decimal(0)
+        volume_vendu = self.volume_vendu or Decimal(0)
+        return volume_initial - volume_vendu
 
     def __str__(self):
         return f"Produit {self.reference_produit} - {self.melange.nom} ({self.fournisseur})"
@@ -545,9 +550,9 @@ class ChantierRecepteur(models.Model):
     def __str__(self):
         return f"{self.nom} ({self.projet_nom})"
     
-    def clean(self):
-        if self.volume_receptionne and self.vente.volume and self.volume_receptionne > self.vente.volume:
-            raise ValidationError("Le volume réceptionné ne peut pas dépasser le volume de la vente.")
+    # def clean(self):
+    #     if self.volume_receptionne and self.volume_restant and self.volume_receptionne > self.vente.volume_tonne:
+    #         raise ValidationError("Le volume réceptionné ne peut pas dépasser le volume de la vente.")
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -563,3 +568,18 @@ class ChantierRecepteur(models.Model):
         verbose_name = "Chantier récepteur"
         verbose_name_plural = "Chantiers récepteurs"
         ordering = ['-date_creation', 'nom']
+
+class Planning(models.Model):
+    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='plannings', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    melange = models.ForeignKey("Melange", on_delete=models.CASCADE, related_name="plannings")
+    titre = models.CharField(max_length=255)
+    date_debut = models.DateField()
+    duree_jours = models.IntegerField(default=1)
+    statut = models.CharField(max_length=50, choices=[
+        ("done", "Terminé"),
+        ("active", "En cours"),
+        ("planned", "Planifié")
+    ])
+
+    def __str__(self):
+        return f"{self.titre} ({self.melange})"

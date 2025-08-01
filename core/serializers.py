@@ -10,7 +10,7 @@ from datetime import date, datetime
 from rest_framework import serializers
 
 from .models import (
-    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Plateforme,
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
     Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire
 )
 
@@ -112,6 +112,7 @@ class DocumentGisementSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['utilisateur']  # On empêche la modification côté frontend
 
+
 class GisementSerializer(serializers.ModelSerializer):
     chantier = serializers.PrimaryKeyRelatedField(queryset=Chantier.objects.all())
     chantier_nom = serializers.CharField(source='chantier.nom', read_only=True)
@@ -201,8 +202,7 @@ class MelangeAmendementSerializer(serializers.ModelSerializer):
 
     
 class MelangeSerializer(serializers.ModelSerializer):
- 
-    
+
     etat_display = serializers.CharField(source='get_etat_display', read_only=True)
     ingredients = MelangeIngredientSerializer(many=True)
     amendements = MelangeAmendementSerializer(many=True, required=False)
@@ -219,7 +219,14 @@ class MelangeSerializer(serializers.ModelSerializer):
         read_only_fields = ['plateforme_nom', 'date_creation', 'utilisateur','amendements', 'nom_complet']  # On empêche la modification côté frontend
 
     def get_nom_complet(self, obj):
-        return f"{obj.utilisateur.first_name} {obj.utilisateur.last_name}"
+        user = getattr(obj, 'utilisateur', None)
+        if user:
+            first_name = getattr(user, 'first_name', '') or ''
+            last_name = getattr(user, 'last_name', '') or ''
+            full_name = f"{first_name} {last_name}".strip()
+            return full_name if full_name else getattr(user, 'username', '')
+        return ''
+
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop("ingredients", [])
@@ -307,11 +314,12 @@ class ProduitVenteDetailSerializer(serializers.ModelSerializer):
     plateforme = serializers.SerializerMethodField()
     temps_sur_plateforme = serializers.SerializerMethodField()
     delai_avant_disponibilite = serializers.SerializerMethodField()
+    volume_restant = serializers.ReadOnlyField(read_only=True)  # Utilise le champ calculé dans le modèle
 
     class Meta:
         model = ProduitVente
         fields = [
-            'id', 'reference_produit', 'fournisseur', 'volume_initial', 'volume_disponible',
+            'id', 'reference_produit', 'fournisseur', 'volume_initial', 'volume_disponible', 'volume_restant',
             'date_disponibilite', 'volume_vendu', 'acheteur', 'date_achat', 'periode_destockage', 'localisation_projet',
             'commentaires_analyses',
             'melange', 'documents', 'analyses', 'utilisateur',
@@ -363,6 +371,7 @@ class DocumentProduitVenteSerializer(serializers.ModelSerializer):
 # Le champ 'responsable' est en lecture seule et affiche le nom d'utilisateur du responsable.
 class SaisieVenteSerializer(serializers.ModelSerializer):
     responsable = serializers.ReadOnlyField(source='responsable.username')
+    produit = ProduitVenteDetailSerializer(read_only=True)
 
     class Meta:
         model = SaisieVente
@@ -378,3 +387,20 @@ class ChantierRecepteurSerializer(serializers.ModelSerializer):
         model = ChantierRecepteur
         fields = '__all__'
         read_only_fields = ['responsable']  # On empêche la modification côté frontend
+
+
+
+
+class PlanningSerializer(serializers.ModelSerializer):
+    
+    melange_nom = serializers.CharField(source='melange.nom', read_only=True)
+    responsable = serializers.ReadOnlyField(source='responsable.username')
+    
+    class Meta:
+        model = Planning
+        fields = ['id', 'titre', 'date_debut', 'duree_jours', 'statut', 'melange', 'melange_nom', 'responsable']
+        read_only_fields = ['melange_nom', 'responsable']
+     # faire en sorte que l'utilisateur connecté soit automatiquement le responsable
+    def create(self, validated_data):
+        validated_data['responsable'] = self.context['request'].user
+        return super().create(validated_data)

@@ -1,11 +1,14 @@
 import io
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
-from rest_framework import status
+from rest_framework import status   
 from rest_framework.response import Response  # ✅ BON import
 from rest_framework import status
 from rest_framework.views import APIView
@@ -15,14 +18,14 @@ import re
 import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions, generics
 
-from core.utils import HasCustomAccessPermission, IsEntrepriseOrSuperUser
+from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, IsEntrepriseOrSuperUser
 from .models import (
-    CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
-    Melange, MelangeAmendement, MelangeIngredient, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
+    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente
 )
 from .serializers import (
     AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
-    MelangeSerializer, PlateformeSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer
 )
 
 
@@ -177,13 +180,6 @@ class PlateformeViewSet(viewsets.ModelViewSet):
 
 
 
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser
-from rest_framework.response import Response
-import fitz
-import io
-import re
 
 class AnalysePdfParseView(APIView):
     parser_classes = [MultiPartParser]
@@ -377,3 +373,21 @@ class SaisieVenteViewSet(viewsets.ModelViewSet):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated(), IsEntrepriseOrSuperUser()]
+
+
+class PlanningViewSet(viewsets.ModelViewSet):
+    queryset = Planning.objects.select_related("melange", "melange__plateforme").all()
+    serializer_class = PlanningSerializer
+
+
+class ChantierRecepteurViewSet(viewsets.ModelViewSet):
+    queryset = ChantierRecepteur.objects.all()
+    serializer_class = ChantierRecepteurSerializer
+    
+    def get_permissions(self):
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated(), IsClientOrEntrepriseOrStaffOrSuperuser()]   
+
+    def perform_create(self, serializer):
+        serializer.save(responsable=self.request.user)

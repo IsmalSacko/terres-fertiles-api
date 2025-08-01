@@ -1,0 +1,19 @@
+---
+config:
+  layout: dagre
+id: 051f5891-6266-4ded-95bc-241fdb18cfac
+---
+flowchart TD
+ subgraph subGraph0["Client (Navigateur)"]
+        A["Application Angular"]
+  end
+ subgraph subGraph1["Serveur Web"]
+        B["API Django REST Framework"]
+  end
+ subgraph subGraph2["Base de Données"]
+        C["MySQL"]
+  end
+    A -- Requêtes HTTP (JSON) --> B
+    B -- Réponses JSON --> A
+    B -- Requêtes SQL via ORM --> C
+    C -- Données --> B

@@ -9,13 +9,16 @@ from .views import (
     GisementViewSet, 
     AmendementOrganiqueViewSet,
     MelangeAmendementViewSet,
-    MelangeViewSet, 
+    MelangeViewSet,
+    PlanningViewSet, 
     ProduitVenteViewSet, 
     DocumentTechniqueViewSet, 
     AnalyseLaboratoireViewSet,
     AnalysePdfParseView,
     DocumentGisementViewSet,
     PlateformeViewSet,
+    SaisieVenteViewSet,
+    ChantierRecepteurViewSet,
     custom_reset_password,
     reset_password_confirm
     
@@ -34,6 +37,9 @@ router.register(r'documents-produits-vente', DocumentProduitVenteViewSet, basena
 router.register(r'analyses-laboratoire', AnalyseLaboratoireViewSet)
 router.register(r'documents-gisements', DocumentGisementViewSet)
 router.register(r'plateformes', PlateformeViewSet)
+router.register(r'plannings', PlanningViewSet)
+router.register(r'saisies-vente', SaisieVenteViewSet)
+router.register(r'chantiers-recepteurs', ChantierRecepteurViewSet)
 
 
 urlpatterns = [
@@ -43,7 +49,7 @@ urlpatterns = [
     path('analyse-pdf-parse/', AnalysePdfParseView.as_view(), name='analyse_pre_remplir'),
     path('', include(router.urls)),  # toutes les routes des modèles
     path('user/me/', CurrentUserView.as_view(), name='current_user'),  # pour récupérer l'utilisateur courant
-   path('users/custom-reset-password/', custom_reset_password, name='custom_reset_password'),
+    path('users/custom-reset-password/', custom_reset_password, name='custom_reset_password'),
     path('users/reset-password-confirm/', reset_password_confirm),
 
 ]

@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_protect
 
 
 from .models import (
-    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, Plateforme,
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, Planning, Plateforme,
     Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire, MelangeIngredient, SaisieVente
 )
 
@@ -226,3 +226,19 @@ class ChantierRecepteurAdmin(admin.ModelAdmin):
     list_filter = ('statut', 'date_creation', 'responsable')
     search_fields = ('nom', 'projet_nom', 'responsable__username', 'adresse')
     ordering = ('-date_creation',)
+
+@admin.register(Planning)
+class PlanningAdmin(admin.ModelAdmin):
+    list_display = ('titre', 'date_debut', 'duree_jours', 'statut', 'melange_nom')
+    search_fields = ('titre', 'melange__nom')
+    list_filter = ('statut', 'date_debut')
+    readonly_fields = ('melange_nom',)
+
+    def melange_nom(self, obj):
+        return obj.melange.nom if obj.melange else "N/A"
+    melange_nom.short_description = "Mélange associé"
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.responsable = request.user
+        super().save_model(request, obj, form, change)
