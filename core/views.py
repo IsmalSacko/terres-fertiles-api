@@ -141,7 +141,7 @@ class MelangeViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
     def perform_create(self, serializer):
-        serializer.save(responsable=self.request.user)
+        serializer.save(utilisateur=self.request.user)
 
 class ProduitVenteViewSet(viewsets.ModelViewSet):
     queryset = ProduitVente.objects.all()
@@ -372,7 +372,25 @@ class SaisieVenteViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated(), IsEntrepriseOrSuperUser()]
+        return [permissions.IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        # Option 1: Si le produit doit être fourni dans la requête
+        produit_id = self.request.data.get('produit')
+        if not produit_id:
+            raise ValueError("Le champ 'produit' est requis")
+        
+        serializer.save(responsable=self.request.user, produit_id=produit_id)
+
+
+
+    # pour la modification
+    def perform_update(self, serializer):
+        produit_id = self.request.data.get('produit')
+        if not produit_id:
+            raise ValueError("Le champ 'produit' est requis")
+
+        serializer.save(responsable=self.request.user, produit_id=produit_id)
 
 
 class PlanningViewSet(viewsets.ModelViewSet):

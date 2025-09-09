@@ -213,19 +213,14 @@ class SaisieVenteAdmin(admin.ModelAdmin):
 class ChantierRecepteurAdmin(admin.ModelAdmin):
     list_display = (
         'nom',
-        'projet_nom',
-        'responsable',
-        'statut',
+        'adresse',
         'date_creation',
-        'date_debut',
-        'date_fin',
-        'volume_receptionne',
-        'volume_restant',
-        'prix',
+    
     )
-    list_filter = ('statut', 'date_creation', 'responsable')
-    search_fields = ('nom', 'projet_nom', 'responsable__username', 'adresse')
-    ordering = ('-date_creation',)
+
+    search_fields = ('nom', 'adresse', 'date_creation')
+    list_filter = ('nom', 'adresse', 'date_creation')
+
 
 @admin.register(Planning)
 class PlanningAdmin(admin.ModelAdmin):

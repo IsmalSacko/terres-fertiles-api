@@ -46,7 +46,7 @@ class Chantier(models.Model):
     maitre_ouvrage = models.CharField(max_length=255)
     entreprise_terrassement = models.CharField(max_length=255)
     date_creation = models.DateField(default=today)
-    
+    is_active = models.BooleanField(default=True) 
     localisation = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
@@ -493,18 +493,46 @@ class AnalyseLaboratoire(models.Model):
 
 
 class SaisieVente(models.Model):
-    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='produits_a_vendre', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
-    produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name='ventes')
+    responsable = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='saisies_ventes',
+        help_text="Responsable automatiquement défini à l'utilisateur connecté."
+    )
+    produit = models.ForeignKey(
+        ProduitVente,
+        on_delete=models.CASCADE,
+        related_name='ventes'
+    )
     nom_client = models.CharField(max_length=255)
     volume_tonne = models.DecimalField(max_digits=10, decimal_places=2)
     date_vente = models.DateField()
+
     nom_chantier_recepteur = models.CharField(max_length=255)
     adresse_chantier = models.CharField(max_length=255)
 
-    est_validee = models.BooleanField(default=False, help_text="Indique si la vente a été validée par l'entreprise")
+    chantier = models.ForeignKey(
+        'ChantierRecepteur',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+    est_validee = models.BooleanField(
+        default=False,
+        help_text="Indique si la vente a été validée par l'entreprise"
+    )
 
     date_achat = models.DateTimeField(auto_now_add=True)
     date_modification_vente = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.adresse_chantier:
+            chantier, created = ChantierRecepteur.objects.get_or_create(
+                adresse=self.adresse_chantier,
+                defaults={'nom': self.nom_chantier_recepteur}
+            )
+            self.chantier = chantier
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Vente {self.nom_client} - {self.produit.reference_produit} - {'Validée' if self.est_validee else 'En attente'}"
@@ -517,57 +545,20 @@ class SaisieVente(models.Model):
 
 
 
-
-
-
 class ChantierRecepteur(models.Model):
-    STATUT_CHOICES = [
-    ('en_attente', 'En attente'),
-    ('en_cours', 'En cours'),
-    ('termine', 'Terminé'),]
-
-    responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='chantiers_recepteurs', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
-    vente = models.OneToOneField('SaisieVente', on_delete=models.CASCADE, related_name='chantier_recepteur')
     nom = models.CharField(max_length=255)
-    projet_nom = models.CharField(max_length=255, verbose_name="Nom du projet")
-    adresse = models.TextField(max_length=500, help_text="Adresse du chantier récepteur")
-    date_creation = models.DateField(default=today, help_text="Date de création du chantier récepteur")
-
-    # Champs optionnels pour le chantier récepteur
-    date_debut = models.DateField(null=True, blank=True, help_text="Date de début du chantier récepteur")
-    date_fin = models.DateField(null=True, blank=True, help_text="Date de fin du chantier récepteur")
-    volume_receptionne = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Volume de matériau réceptionné sur le chantier récepteur")
-    volume_restant = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Volume restant à réceptionner sur le chantier récepteur")
-    prix = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Prix du chantier récepteur")
-    
-    # Optionnel : coordonnées GPS
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
+    adresse = models.CharField(max_length=255, unique=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.nom} ({self.projet_nom})"
-    
-    # def clean(self):
-    #     if self.volume_receptionne and self.volume_restant and self.volume_receptionne > self.vente.volume_tonne:
-    #         raise ValidationError("Le volume réceptionné ne peut pas dépasser le volume de la vente.")
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        # Logique de validation automatique de la vente
-        vente = self.vente
-        if not vente.est_validee:
-            if self.volume_receptionne >= vente.volume_tonne or self.statut == 'termine':
-                vente.est_validee = True
-                vente.save()
+        return f"{self.nom} - {self.adresse}"
     class Meta:
         db_table = 'chantier_recepteur'
         verbose_name = "Chantier récepteur"
         verbose_name_plural = "Chantiers récepteurs"
-        ordering = ['-date_creation', 'nom']
+        ordering = ['nom']
+
+
 
 class Planning(models.Model):
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='plannings', help_text="Responsable automatiquement défini à l'utilisateur connecté.")

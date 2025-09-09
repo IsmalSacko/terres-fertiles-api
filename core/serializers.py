@@ -7,7 +7,26 @@ from django.core.mail import send_mail
 from django.conf import settings
 from decouple import config
 from datetime import date, datetime
+
 from rest_framework import serializers
+
+# ...existing code...
+
+# Exemple d'un serializer ProduitVenteDetailSerializer avec sécurisation de l'accès à la plateforme
+class ProduitVenteDetailSerializer(serializers.ModelSerializer):
+    plateforme = serializers.SerializerMethodField()
+    # ...existing code...
+
+    def get_plateforme(self, obj):
+        melange = getattr(obj, 'melange', None)
+        plateforme = getattr(melange, 'plateforme', None) if melange else None
+        if plateforme:
+            return {
+                'id': plateforme.id,
+                'nom': plateforme.nom,
+                'localisation': plateforme.localisation
+            }
+        return None
 
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
@@ -291,6 +310,7 @@ class AnalyseLaboratoireSerializer(serializers.ModelSerializer):
     
 class PlateformeSerializer(serializers.ModelSerializer):
     responsable = serializers.ReadOnlyField(source='responsable.username')
+    
     class Meta:
         model = Plateforme
         fields = '__all__'

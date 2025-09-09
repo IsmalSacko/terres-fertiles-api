@@ -6,6 +6,7 @@ from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.core.files.storage import default_storage
+from .models import SaisieVente
 
 from .models import DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange
 
@@ -138,3 +139,9 @@ def replace_melange_files(sender, instance, **kwargs):
                         os.rmdir(dir_path)
                 except Exception:
                     pass
+
+@receiver(post_delete, sender=SaisieVente)
+def delete_unused_chantier(sender, instance, **kwargs):
+    chantier = instance.chantier
+    if chantier and not chantier.saisievente_set.exists():
+        chantier.delete()
