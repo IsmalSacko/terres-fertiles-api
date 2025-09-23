@@ -1,0 +1,175 @@
+
+
+ @if (loadingGlobal) {
+    <div class="list-edit-spinner-container">
+      <mat-spinner diameter="48" color="primary"></mat-spinner>
+      <span class="list-edit-spinner-text">Chargement en cours...</span>
+    </div>
+  }
+<div class="dashboard-component">
+  <!-- En-tête moderne -->
+  <div class="dashboard-header">
+    <h2 class="">Tableau de bord</h2>
+    <p class="dashboard-subtitle mb-5">Gestion moderne Terres Fertiles</p>
+  </div>
+
+  <!-- Conteneur principal -->
+  <div class="dashboard-container py-4">
+    
+    <!-- Section statistiques rapides -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card stat-primary">
+          <div class="stat-icon">
+            <mat-icon>construction</mat-icon>
+          </div>
+          <div class="stat-value">{{ chantierActifs }}</div>
+          <div class="stat-label">Chantiers actifs</div>
+        </div>
+        
+        <div class="stat-card stat-success">
+          <div class="stat-icon">
+            <mat-icon>eco</mat-icon>
+          </div>
+          <div class="stat-value">{{ gisements }}</div>
+          <div class="stat-label">Gisements disponibles</div>
+        </div>
+        
+        <div class="stat-card stat-secondary">
+          <div class="stat-icon">
+            <mat-icon>blender</mat-icon>
+          </div>
+
+          <div class="stat-value">{{ melanges }}</div>
+          <div class="stat-label">Mélanges crés</div>
+        </div>
+        
+        <div class="stat-card stat-warning">
+          <div class="stat-icon">
+            <mat-icon>schedule</mat-icon>
+          </div>
+          <div class="stat-value">{{ plannings }}</div>
+          <div class="stat-label">Tâches planifiées</div>
+        </div>
+
+                <div class="stat-card stat-secondary">
+          <div class="stat-icon">
+            <mat-icon>shopping_cart</mat-icon>
+          </div>
+
+          <div class="stat-value">{{ produitVente }}</div>
+          <div class="stat-label">Produits créés</div>
+        </div>
+        
+        <div class="stat-card stat-warning">
+          <div class="stat-icon">
+            <mat-icon>receipt_long</mat-icon>
+          </div>
+          <div class="stat-value">{{ saisiesVente }}</div>
+          <div class="stat-label">Fiches de vente</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grille des cartes principales -->
+    <div class="dashboard-grid">
+      
+      <!-- Carte Chantiers -->
+      <div class="modern-card card-chantiers" routerLink="/chantiers">
+        <div class="card-icon">
+          <mat-icon>construction</mat-icon>
+        </div>
+        <h3 class="card-title">Gestion des Chantiers</h3>
+        <p class="card-description">
+          Suivez et gérez tous vos chantiers en cours. Planification, ressources et équipes.
+        </p>
+        <button class="card-action">Accéder aux chantiers</button>
+      </div>
+
+      <!-- Carte Gisements -->
+      <div class="modern-card card-gisements" routerLink="/gisements">
+        <div class="card-icon">
+          <mat-icon>terrain</mat-icon>
+        </div>
+        <h3 class="card-title">Gisements</h3>
+        <p class="card-description">
+          Explorez et gérez vos sources de matières premières organiques disponibles.
+        </p>
+        <button class="card-action">Voir les gisements</button>
+      </div>
+
+      <!-- Carte Mélanges -->
+      <div class="modern-card card-melanges" routerLink="/melanges">
+        <div class="card-icon">
+          <mat-icon>blender</mat-icon>
+        </div>
+        <h3 class="card-title">Mélanges</h3>
+        <p class="card-description">
+          Créez et optimisez vos formulations d'amendements organiques personnalisés.
+        </p>
+        <button class="card-action">Gérer les mélanges</button>
+      </div>
+
+      <!-- Carte Planning -->
+      <div class="modern-card card-planning" routerLink="/planning">
+        <div class="card-icon">
+          <mat-icon>calendar_today</mat-icon>
+        </div>
+        <h3 class="card-title">Planning</h3>
+        <p class="card-description">
+          Organisez et planifiez vos activités de production et de livraison.
+        </p>
+        <button class="card-action">Ouvrir le planning</button>
+      </div>
+
+      <!-- Carte Analyses
+      <div class="modern-card card-analyses" routerLink="/analyses">
+        <div class="card-icon">
+          <mat-icon>science</mat-icon>
+        </div>
+        <h3 class="card-title">Analyses</h3>
+        <p class="card-description">
+          Consultez les résultats d'analyses de laboratoire et suivez la qualité.
+        </p>
+        <button class="card-action">Voir les analyses</button>
+      </div> -->
+
+      <!-- Carte Vente -->
+      <div class="modern-card card-vente" routerLink="/produits">
+        <div class="card-icon">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+        <h3 class="card-title">Produits & Vente</h3>
+        <p class="card-description">
+          Gérez votre catalogue de produits et suivez vos ventes.
+        </p>
+        <button class="card-action">Accéder aux produits</button>
+      </div>
+
+      <!-- Carte Saisies de Vente -->
+      <div class="modern-card card-saisies-vente" routerLink="/saisies-vente">
+        <div class="card-icon">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <h3 class="card-title">Fiches de Vente</h3>
+        <p class="card-description">
+          Consultez et gérez toutes vos saisies de vente avec validation.
+        </p>
+        <button class="card-action">Voir les fiches</button>
+      </div>
+
+      <!-- Carte Administration
+      <div class="modern-card card-admin" routerLink="/compte">
+        <div class="card-icon">
+          <mat-icon>settings</mat-icon>
+        </div>
+        <h3 class="card-title">Administration</h3>
+        <p class="card-description">
+          Paramètres du compte, utilisateurs et configuration système.
+        </p>
+        <button class="card-action">Paramètres</button>
+      </div> -->
+
+    </div>
+  </div>
+</div>

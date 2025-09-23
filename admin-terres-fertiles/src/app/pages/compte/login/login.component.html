@@ -1,0 +1,34 @@
+<div class="login-container">
+  <mat-card>
+    <mat-card-title>Connexion</mat-card-title>
+    <mat-card-content>
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <mat-form-field appearance="fill" class="full-width-field">
+          <mat-label>Nom d'utilisateur</mat-label>
+          <mat-icon matIconPrefix>person</mat-icon>
+          <input matInput id="username" name="username" [(ngModel)]="username" required autocomplete="username">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width-field">
+          <mat-label>Mot de passe</mat-label>
+          <mat-icon matIconPrefix>lock</mat-icon>
+          <input matInput id="password" name="password" [type]="hidePassword ? 'password' : 'text'" [(ngModel)]="password" required autocomplete="current-password">
+          <button mat-icon-button matSuffix (click)="togglePasswordVisibility()" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div *ngIf="errorMsg" class="error-message">{{ errorMsg }}</div>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || !loginForm.form.valid" class="full-width-button">
+          {{ loading ? 'Connexion...' : 'Se connecter' }}
+        </button>
+
+        <!-- Lien mot de passe oublié -->
+        <div class="forgot-password-link mt-2">
+          <a routerLink="/reset-password">Mot de passe oublié&nbsp;?</a>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

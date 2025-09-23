@@ -1,0 +1,134 @@
+<div class="container" *ngIf="!loading; else loadingTemplate">
+  <mat-card class="product-card">
+    <mat-card-header>
+      <mat-card-title>
+        <span class="site-title">{{ produit?.nom_site }}</span>
+        <mat-chip [style.background-color]="getStatutColor()" [style.color]="'white'" class="status-chip">
+          {{ getStatutProduit() }}
+        </mat-chip>
+      </mat-card-title>
+      <mat-card-subtitle>
+        <mat-icon>calendar_today</mat-icon>
+        Disponible à partir du {{ produit?.date_disponibilite | date:'dd/MM/yyyy' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="big-info">
+        <mat-icon>inventory_2</mat-icon>
+        <span class="big-volume">{{ produit?.volume_disponible | number:'1.0-2'  }} m³</span>
+        <span class="label">disponibles</span>
+      </div>
+      <mat-divider></mat-divider>
+      <section>
+        <h3><mat-icon>track_changes</mat-icon> Traçabilité</h3>
+        <div class="trace-grid">
+          <div>
+            <mat-icon>engineering</mat-icon>
+            <strong>Origine :</strong> {{ produit?.chantier_info?.nom || '' }} ({{ produit?.chantier_info?.localisation || '' }})
+          </div>
+          <div>
+            <mat-icon>factory</mat-icon>
+            <strong>Plateforme :</strong> {{ produit?.plateforme?.nom || '' }} ({{ produit?.plateforme?.localisation || '' }})
+          </div>
+          <div>
+            <mat-icon>login</mat-icon>
+            <strong>Arrivé sur plateforme :</strong> {{ produit?.melange?.date_creation | date:'dd/MM/yyyy' }}
+          </div>
+          <div>
+            <mat-icon>hourglass_bottom</mat-icon>
+            <strong>Temps sur plateforme :</strong> {{ produit?.temps_sur_plateforme }} jours
+          </div>
+          <div>
+            <mat-icon>schedule</mat-icon>
+            <strong>Disponible dans :</strong> {{ produit?.delai_avant_disponibilite }} jours
+          </div>
+        </div>
+      </section>
+      <mat-divider></mat-divider>
+      <section>
+        <h3><mat-icon>science</mat-icon> Composition</h3>
+        <ul>
+          <li *ngFor="let ing of produit?.melange?.ingredients || []">
+            <mat-icon>landscape</mat-icon> {{ ing.nom }} ({{ ing.pourcentage }}%)
+          </li>
+          <li *ngFor="let am of produit?.melange?.amendements || []">
+            <mat-icon>eco</mat-icon> {{ am.nom }} ({{ am.pourcentage }}%)
+          </li>
+        </ul>
+      </section>
+      <mat-divider></mat-divider>
+      <section *ngIf="produit?.documents?.length">
+        <h3><mat-icon>description</mat-icon> Documents techniques</h3>
+        <ul>
+          <li *ngFor="let doc of produit?.documents || []">
+            <mat-icon>attach_file</mat-icon> {{ doc.nom_fichier }} ({{ doc.type_document }})
+            <a [href]="doc.fichier" target="_blank">Voir</a>
+          </li>
+        </ul>
+      </section>
+      <mat-divider *ngIf="produit?.analyses?.length"></mat-divider>
+      <section *ngIf="produit?.analyses?.length">
+        <h3><mat-icon>analytics</mat-icon> Analyses de laboratoire</h3>
+        <ul>
+          <li *ngFor="let ana of produit?.analyses || []">
+            <mat-icon>science</mat-icon> {{ ana.laboratoire }} - {{ ana.date_analyse | date:'dd/MM/yyyy' }}
+            <a *ngIf="ana.fichier_pdf" [href]="ana.fichier_pdf" target="_blank">PDF</a>
+          </li>
+        </ul>
+      </section>
+      <mat-divider></mat-divider>
+      <section>
+        <h3><mat-icon>shopping_cart</mat-icon> Informations de vente</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="label">Volume initial</span>
+            <span class="value">{{ produit?.volume_initial ? (produit?.volume_initial | number:'1.0-2') : '—' }} m³</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Volume disponible</span>
+            <span class="value">{{ produit?.volume_disponible ? (produit?.volume_disponible | number:'1.0-2') : '—' }} m³</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Volume vendu</span>
+            <span class="value">{{ produit?.volume_vendu ? (produit?.volume_vendu | number:'1.0-2') : '—' }} m³</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Acheteur</span>
+            <span class="value">{{ produit?.acheteur || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Date d'achat</span>
+            <span class="value">{{ produit?.date_achat ? (produit?.date_achat | date:'dd/MM/yyyy') : '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Période de déstockage</span>
+            <span class="value">{{ produit?.periode_destockage || '—' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Localisation projet</span>
+            <span class="value">{{ produit?.localisation_projet || '—' }}</span>
+          </div>
+        </div>
+      </section>
+      <mat-divider></mat-divider>
+      <section>
+        <h3><mat-icon>comment</mat-icon> Commentaires sur les analyses</h3>
+        <p>{{ produit?.commentaires_analyses || '—' }}</p>
+      </section>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="contactVendeur()">
+        <mat-icon>mail</mat-icon>
+        Contacter le vendeur
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template>
+<div class="error-message" *ngIf="errorMsg">
+  {{ errorMsg }}
+</div>

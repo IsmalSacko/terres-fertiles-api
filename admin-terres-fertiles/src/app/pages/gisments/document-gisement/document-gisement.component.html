@@ -1,0 +1,179 @@
+<div class="container" *ngIf="!loading; else loadingTemplate">
+  <mat-card class="document-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="icon-document">picture_as_pdf</mat-icon>
+        Documents du gisement
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="upload-section">
+        <button mat-raised-button color="primary" (click)="toggleGisementForm()">
+          <mat-icon>description</mat-icon>
+          {{ showGisementForm ? 'Annuler' : 'Ajouter un gisement' }}
+        </button>
+      </div>
+
+      <form *ngIf="showGisementForm" [formGroup]="gisementForm" (ngSubmit)="onSubmitGisement()" class="gisement-form">
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Chantier</mat-label>
+            <mat-icon matPrefix class="field-icon">business</mat-icon>
+            <mat-select formControlName="chantier" required>
+              <mat-option *ngFor="let chantier of chantiers" [value]="chantier.id">
+                {{ chantier.nom }} - {{ chantier.localisation }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="gisementForm.get('chantier')?.hasError('required')">
+              Le chantier est requis
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Commune</mat-label>
+            <mat-icon matPrefix class="field-icon">location_city</mat-icon>
+            <input matInput formControlName="commune" required>
+            <mat-error *ngIf="gisementForm.get('commune')?.hasError('required')">
+              La commune est requise
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Période de terrassement</mat-label>
+            <mat-icon matPrefix class="field-icon">calendar_today</mat-icon>
+            <input matInput formControlName="periode_terrassement" required>
+            <mat-error *ngIf="gisementForm.get('periode_terrassement')?.hasError('required')">
+              La période est requise
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Volume terrasse (m³)</mat-label>
+            <mat-icon matPrefix class="field-icon">straighten</mat-icon>
+            <input matInput type="number" formControlName="volume_terrasse" required>
+            <mat-error *ngIf="gisementForm.get('volume_terrasse')?.hasError('required')">
+              Le volume est requis
+            </mat-error>
+            <mat-error *ngIf="gisementForm.get('volume_terrasse')?.hasError('min')">
+              Le volume doit être positif
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Matériau</mat-label>
+            <mat-icon matPrefix class="field-icon">category</mat-icon>
+            <input matInput formControlName="materiau" required>
+            <mat-error *ngIf="gisementForm.get('materiau')?.hasError('required')">
+              Le matériau est requis
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Type de sol</mat-label>
+            <mat-icon matPrefix class="field-icon">landscape</mat-icon>
+            <mat-select formControlName="type_de_sol" required>
+              <mat-option *ngFor="let type of typesDeSol" [value]="type.value">
+                {{ type.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="gisementForm.get('type_de_sol')?.hasError('required')">
+              Le type de sol est requis
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Localisation</mat-label>
+            <mat-icon matPrefix class="field-icon">place</mat-icon>
+            <input matInput formControlName="localisation" required>
+            <mat-error *ngIf="gisementForm.get('localisation')?.hasError('required')">
+              La localisation est requise
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field>
+            <mat-label>Latitude</mat-label>
+            <mat-icon matPrefix class="field-icon">explore</mat-icon>
+            <input matInput type="number" formControlName="latitude">
+          </mat-form-field>
+
+          <mat-form-field>
+            <mat-label>Longitude</mat-label>
+            <mat-icon matPrefix class="field-icon">explore</mat-icon>
+            <input matInput type="number" formControlName="longitude">
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <input type="file" 
+                 #fileInput 
+                 style="display: none" 
+                 (change)="onFileSelected($event)"
+                 accept=".pdf,.doc,.docx">
+          <button mat-button type="button" (click)="fileInput.click()">
+            <mat-icon>upload_file</mat-icon>
+            Sélectionner un document
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="!gisementForm.valid || loading">
+            <mat-icon>save</mat-icon>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+
+      <div class="documents-grid" *ngIf="documents.length; else emptyList">
+        <mat-card class="document-item" *ngFor="let doc of documents">
+          <div class="document-header">
+            <mat-icon class="icon-document">picture_as_pdf</mat-icon>
+            <div class="document-info">
+              <h4>{{ doc.nom_fichier }}</h4>
+              <div class="document-meta">
+                <span class="document-date">
+                  <mat-icon class="icon-small">event</mat-icon>
+                  {{ doc.date_ajout | date:'dd/MM/yyyy' }}
+                </span>
+                <span class="document-gisement">
+                  <mat-icon class="icon-small">location_on</mat-icon>
+                  {{ doc.gisement.commune }}
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="document-actions">
+            <button mat-icon-button color="primary" (click)="previewDocument(doc)" title="Aperçu">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button mat-icon-button (click)="downloadDocument(doc)" title="Télécharger">
+              <mat-icon>download</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteDocument(doc)" title="Supprimer">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-card>
+      </div>
+
+      <ng-template #emptyList>
+        <div class="empty-list">
+          <mat-icon>folder_open</mat-icon>
+          <p>Aucun document disponible</p>
+        </div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+</ng-template> 

@@ -1,0 +1,64 @@
+<div class="plateforme-detail-container" *ngIf="plateforme">
+  <mat-card class="plateforme-detail-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>location_city</mat-icon>
+        {{ plateforme.nom }}
+      </mat-card-title>
+      <mat-card-subtitle class="text-white">ID: {{ plateforme.id }}</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="plateforme-detail-grid">
+        <div class="plateforme-detail-infos">
+
+         @if (plateforme.responsable) {
+           <div class="plateforme-detail-info">
+             <mat-icon color="primary">person_outline</mat-icon>
+             <span>{{ plateforme.responsable }}</span>
+           </div>
+         }
+         @else {
+           <div class="plateforme-detail-info">
+             <mat-icon color="primary">person_outline</mat-icon>
+             <span>Aucun responsable assigné</span>
+           </div>
+         }
+          <div class="plateforme-detail-info">
+            <mat-icon color="primary">place</mat-icon>
+            <span>{{ plateforme.localisation }}</span>
+          </div>
+          <div class="plateforme-detail-info">
+            <mat-icon color="primary">calendar_today</mat-icon>
+            @if (plateforme.date_creation) {
+              <span>Date de création&nbsp;: {{ plateforme.date_creation | date:'longDate':'':'fr-FR' }}</span>
+            }
+            @else {
+              <span>Date de création&nbsp;: inconnue</span>
+            }
+          </div>
+          <div class="plateforme-detail-info">
+            <mat-icon color="primary">my_location</mat-icon>
+            <span>Latitude : {{ plateforme.latitude }} / Longitude : {{ plateforme.longitude }}</span>
+          </div>
+        </div>
+        <div class="plateforme-detail-map-wrapper">
+          <div id="map-detail" class="map-detail"></div>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-stroked-button color="primary" (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon> Retour à la liste
+      </button>
+      <button mat-stroked-button color="accent" (click)="editPlateforme(plateforme.id)">
+        <mat-icon>edit</mat-icon> Modifier
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+@if (!plateforme) {
+  <div  class="empty-message">
+  <mat-icon>info</mat-icon>
+  Plateforme introuvable.
+</div>
+}

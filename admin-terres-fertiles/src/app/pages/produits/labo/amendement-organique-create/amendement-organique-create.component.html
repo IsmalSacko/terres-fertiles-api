@@ -1,0 +1,55 @@
+<h2 class="form-title text-white ">Ajout d'une nouvelle matière organique</h2>
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="amendement-form">
+    <div class="row">
+      <div>
+        <label>Nom</label>
+        <input formControlName="nom" required>
+      </div>
+      <div>
+        <label>Fournisseur</label>
+        <input formControlName="fournisseur" required>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Date de réception</label>
+        <input type="date" formControlName="date_reception" required>
+      </div>
+      <div>
+        <label>Date de semis</label>
+        <input type="date" formControlName="date_semis" required>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Volume disponible</label>
+        <input type="number" formControlName="volume_disponible" required>
+      </div>
+      <div>
+        <label>Localisation</label>
+        <input formControlName="localisation" required>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Latitude</label>
+        <input type="number" formControlName="latitude">
+      </div>
+      <div>
+        <label>Longitude</label>
+        <input type="number" formControlName="longitude">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Plateforme</label>
+        <select formControlName="plateforme" required>
+          <option value="">Sélectionner une plateforme</option>
+          <option *ngFor="let p of plateformes" [value]="p.id">{{ p.nom }}</option>
+        </select>
+      </div>
+    </div>
+    <button type="submit" [disabled]="form.invalid || loading">Créer</button>
+    <div *ngIf="success" class="success-message">Amendement créé avec succès !</div>
+    <div *ngIf="error" class="error-message">Erreur lors de la création.</div>
+  </form>

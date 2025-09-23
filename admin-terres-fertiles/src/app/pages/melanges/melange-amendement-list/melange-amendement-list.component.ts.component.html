@@ -1,0 +1,66 @@
+<div class="container mt-4">
+  <header class="page-header">
+    <h1 class="text-white">Mélanges & Amendements</h1>
+    <p class="subtitle text-white">Ajoutez des amendements organiques à vos mélanges existants.</p>
+  </header>
+
+  <div *ngIf="loading" class="loader">
+    <div class="spinner"></div>
+    <span>Chargement des données...</span>
+  </div>
+
+  <div class="melange-list">
+    <div *ngFor="let melange of melanges; let i = index" 
+         class="melange-card" 
+         [id]="'melange-card-' + melange.id" 
+         [style.animation-delay.ms]="i * 100">
+      <div class="card-header">
+        <h3 class="melange-amendement-details">
+          <mat-icon aria-label="Mélange" class="melange-icon" style="vertical-align: middle; margin-right: 6px;">science</mat-icon>
+          {{ melange.nom }} </h3>
+        <span class="chip">Plateforme : {{ melange.plateforme_nom }}</span>
+      </div>
+      <p class="card-meta melange-amendement-details">
+        <mat-icon aria-label="Date de création" style="vertical-align: middle; margin-right: 4px;">event</mat-icon>
+        Créé le : {{ melange.date_creation | date:'dd/MM/yyyy' }}
+      </p>
+      <p class="card-meta melange-amendement-details">
+      <mat-icon aria-label="Utilisateur" style="vertical-align: middle; margin-right: 4px;">person</mat-icon>
+      Créé par : {{ melange.utilisateur }}
+      </p>
+
+
+      <div class="card-body">
+        <form *ngIf="forms[melange.id!]" [formGroup]="forms[melange.id!]" (ngSubmit)="onSubmit(melange.id!)" class="amendement-form">
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Amendement organique</mat-label>
+            <mat-select formControlName="amendementOrganique" required>
+              <mat-option *ngFor="let amend of amendementsOrganiques" [value]="amend.id">
+                {{ amend.nom }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="form-field">
+            <mat-label>Pourcentage</mat-label>
+            <input #pourcentageInput matInput type="number" formControlName="pourcentage" min="0" max="100" required placeholder="Ex: 15">
+            <span matSuffix>%</span>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="forms[melange.id!].invalid" class="submit-btn">
+            Ajouter
+          </button>
+        </form>
+      </div>
+
+      <div class="card-footer">
+        <div *ngIf="successMessages[melange.id!]" class="alert success-message">
+          {{ successMessages[melange.id!] }}
+        </div>
+        <div *ngIf="errorMessages[melange.id!]" class="alert error-message">
+          {{ errorMessages[melange.id!] }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

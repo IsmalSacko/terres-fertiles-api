@@ -1,0 +1,89 @@
+
+<div class="chantiers-container">
+ 
+  <!-- Header moderne -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="page-title">
+          <mat-icon class="title-icon">construction</mat-icon>
+          Gestion des Chantiers
+        </h1>
+        <p class="page-subtitle">Suivi et coordination de vos projets de construction</p>
+      </div>
+      <button mat-raised-button class="add-button" (click)="addChantier()">
+        <mat-icon>add</mat-icon>
+        Nouveau Chantier
+      </button>
+    </div>
+  </div>
+
+  <!-- États de chargement et erreurs -->
+  <div *ngIf="loading" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement des chantiers...</p>
+  </div>
+
+  <div *ngIf="errorMsg" class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <p>{{ errorMsg }}</p>
+  </div>
+
+  <!-- Grille des chantiers -->
+  <div *ngIf="!loading && chantiers.length" class="chantiers-grid">
+    <div *ngFor="let chantier of chantiers" class="chantier-card">
+      <div class="card-header">
+        <div class="card-icon">
+          <mat-icon>business</mat-icon>
+        </div>
+        <div class="card-status">
+          <span class="status-badge active">Actif</span>
+        </div>
+      </div>
+      
+      <div class="card-body">
+        <h3 class="chantier-title">{{ chantier.nom }}</h3>
+        <p class="chantier-client">{{ chantier.maitre_ouvrage }}</p>
+        
+        <div class="chantier-details">
+          <div class="detail-item">
+            <mat-icon>location_on</mat-icon>
+            <span>{{ chantier.localisation || 'Localisation non renseignée' }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>business</mat-icon>
+            <span>{{ chantier.entreprise_terrassement || 'Entreprise à définir' }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-actions">
+        <button mat-icon-button class="action-btn info" (click)="goToDetail(chantier.id)" matTooltip="Voir les détails">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button mat-icon-button class="action-btn success" (click)="ajouterGisementAuChantier(chantier.id)" matTooltip="Ajouter un gisement">
+          <mat-icon>add_location</mat-icon>
+        </button>
+        <button mat-icon-button class="action-btn warning" (click)="editChantier(chantier.id)" matTooltip="Modifier">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button class="action-btn danger" (click)="deleteChantier(chantier.id)" matTooltip="Supprimer">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- État vide -->
+  <div *ngIf="!loading && !chantiers.length" class="empty-state">
+    <div class="empty-icon">
+      <mat-icon>construction</mat-icon>
+    </div>
+    <h3>Aucun chantier disponible</h3>
+    <p>Commencez par créer votre premier chantier</p>
+    <button mat-raised-button class="add-button" (click)="addChantier()">
+      <mat-icon>add</mat-icon>
+      Créer un chantier
+    </button>
+  </div>
+</div> 

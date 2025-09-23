@@ -1,0 +1,72 @@
+<div class="add-button-container">
+  <button mat-raised-button  class="btn-add" [routerLink]="['/plateformes/new']">
+    <mat-icon class="add-icon">add</mat-icon> Plateforme
+  </button>
+</div>
+<div class="plateformes-list-container">
+  <app-plateformes-map></app-plateformes-map>
+  <h2 class="list-title">
+    <mat-icon>cloud</mat-icon>
+    Plateformes disponibles
+  </h2>
+
+    @if (loadingPlateformes) {
+    <div class="spinner-container">
+      <mat-spinner diameter="48" color="primary"></mat-spinner>
+      <span class="spinner-text">Suppression en cours...</span>
+    </div>
+  }
+
+
+  @if (loadingDelete) {
+    <div class="spinner-container">
+      <mat-spinner diameter="48" color="primary"></mat-spinner>
+      <span class="spinner-text">Suppression en cours...</span>
+    </div>
+  }
+
+
+  @if (loadingGlobal) {
+    <div class="list-edit-spinner-container">
+      <mat-spinner diameter="48" color="primary"></mat-spinner>
+      <span class="list-edit-spinner-text">Chargement en cours...</span>
+    </div>
+  }
+
+  <div class="plateformes-grid" [class.blur-grid]="loadingDelete">
+    @if (plateformes.length === 0) {
+      <div class="empty-message">
+        <mat-icon>info</mat-icon>
+        Aucune plateforme trouvée.
+      </div>
+    }
+    @for (item of plateformes; track item.id) {
+      <mat-card class="plateforme-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>location_city</mat-icon>
+            {{ item.nom }}
+          </mat-card-title>
+          <mat-card-subtitle>ID: {{ item.id }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="plateforme-info">
+            <mat-icon>place</mat-icon>
+            <span>{{ item.localisation }}</span>
+          </div>
+        </mat-card-content>
+        <mat-card-actions *ngIf="!loadingDelete">
+          <button mat-stroked-button class="btn-view" (click)="viewPlateforme(item.id)">
+            <mat-icon>visibility</mat-icon> Voir Détails
+          </button>
+          <button mat-stroked-button class="btn-edit" (click)="editPlateforme(item.id)">
+            <mat-icon>edit</mat-icon> Modifier
+          </button>
+          <button mat-stroked-button class="btn-delete" (click)="deletePlateforme(item.id)">
+            <mat-icon>delete</mat-icon> Supprimer
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+</div>

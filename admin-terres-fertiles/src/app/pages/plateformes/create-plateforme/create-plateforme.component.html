@@ -1,0 +1,34 @@
+<div class="create-plateforme-container">
+    
+  <h2>Créer une plateforme</h2>
+  <form [formGroup]="pForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="nom" placeholder="Le nom est auto-généré">
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Localisation</mat-label>
+      <input matInput formControlName="localisation" placeholder="Localisation de la plateforme" required>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Entreprise gestionnaire</mat-label>
+      <input matInput formControlName="entreprise_gestionnaire" placeholder="Entreprise gestionnaire de la plateforme" required>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Latitude</mat-label>
+      <input matInput type="number" formControlName="latitude" placeholder="Latitude de la plateforme" >
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Longitude</mat-label>
+      <input matInput type="number" formControlName="longitude" placeholder="Longitude de la plateforme" >
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date de création</mat-label>
+      <input matInput type="date" formControlName="date_creation" required>
+    </mat-form-field>
+    <div class="actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="pForm.invalid">Créer</button>
+      <button mat-button type="button" (click)="goToPlateformes()">Annuler</button>
+    </div>
+  </form>
+</div>

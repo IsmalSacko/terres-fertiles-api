@@ -1,0 +1,434 @@
+<div class="modern-container fade-in">
+  <!-- Header moderne avec gradient -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="header-icon">
+          <mat-icon>{{ isEditMode ? 'edit_location' : (isViewOnly ? 'location_city' : 'add_location_alt') }}</mat-icon>
+        </div>
+        <div class="header-text">
+          <h1 class="header-title">
+            {{ isEditMode ? 'Modifier le chantier' : (isViewOnly ? 'Détails du chantier' : 'Créer un nouveau chantier') }}
+          </h1>
+          <p class="header-subtitle">
+            {{ isEditMode ? 'Mettez à jour les informations du chantier' : (isViewOnly ? 'Informations détaillées du projet' : 'Configurez votre nouveau projet de construction') }}
+          </p>
+        </div>
+      </div>
+      <div class="header-actions" *ngIf="!loading">
+        <button mat-button (click)="cancel()" class="back-button">
+          <mat-icon>arrow_back</mat-icon>
+          Retour
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- États de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="loading-content">
+      <mat-spinner diameter="48"></mat-spinner>
+      <h3>{{ isEditMode ? 'Chargement du chantier...' : 'Préparation du formulaire...' }}</h3>
+      <p>Veuillez patienter un instant</p>
+    </div>
+  </div>
+
+  <!-- Messages d'erreur -->
+  <div *ngIf="errorMsg" class="alert-card error-alert slide-in">
+    <div class="alert-icon">
+      <mat-icon>error_outline</mat-icon>
+    </div>
+    <div class="alert-content">
+      <h4>Erreur</h4>
+      <p>{{ errorMsg }}</p>
+    </div>
+  </div>
+
+  <!-- Messages de succès -->
+  <div *ngIf="successMsg" class="alert-card success-alert slide-in">
+    <div class="alert-icon">
+      <mat-icon>check_circle</mat-icon>
+    </div>
+    <div class="alert-content">
+      <h4>Succès</h4>
+      <p>{{ successMsg }}</p>
+    </div>
+  </div>
+
+  <!-- Mode vue seule moderne -->
+  <div *ngIf="isViewOnly && !loading" class="view-mode-modern slide-in">
+    <div class="stats-cards">
+      <div class="stat-card primary">
+        <div class="stat-icon">
+          <mat-icon>construction</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ chantier.nom }}</div>
+          <div class="stat-label">Nom du chantier</div>
+        </div>
+      </div>
+      
+      <div class="stat-card secondary">
+        <div class="stat-icon">
+          <mat-icon>business</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ chantier.maitre_ouvrage }}</div>
+          <div class="stat-label">Maître d'ouvrage</div>
+        </div>
+      </div>
+      
+      <div class="stat-card accent">
+        <div class="stat-icon">
+          <mat-icon>groups</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ chantier.entreprise_terrassement }}</div>
+          <div class="stat-label">Entreprise terrassement</div>
+        </div>
+      </div>
+      
+      <div class="stat-card info">
+        <div class="stat-icon">
+          <mat-icon>place</mat-icon>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ chantier.localisation }}</div>
+          <div class="stat-label">Localisation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Gisements et Carte -->
+    <div class="content-sections">
+      <div class="section-card gisements-section">
+        <div class="section-header">
+          <mat-icon>layers</mat-icon>
+          <span>Gisements associés 
+            ({{ getGisementsCount() }} gisement{{ getGisementsCount() > 1 ? 's' : '' }} - {{ getTotalVolume() }} m³)
+          </span>
+        </div>
+        <div class="map-container">
+          <mat-tab-group animationDuration="0ms" (selectedTabChange)="onTabChange($event)">
+            <mat-tab label="Plan">
+              <google-map
+                height="300px"
+                width="100%"
+                [center]="mapCenter"
+                [zoom]="mapZoom"
+                [mapTypeId]="mapTypeId"
+                [options]="mapOptions">
+                <!-- Marqueur du chantier principal -->
+                <map-marker
+                  #mainChantierMarker="mapMarker"
+                  [position]="mapCenter"
+                  [options]="viewModeMarkerOptions"
+                  (mapClick)="chantierInfoWindow.open(mainChantierMarker)">
+                  <map-info-window #chantierInfoWindow="mapInfoWindow">
+                    <div>
+                      <strong>Chantier:</strong> {{ chantier.nom }}
+                    </div>
+                  </map-info-window>
+                </map-marker>
+                
+                <!-- Marqueurs des gisements -->
+                <map-marker
+                  *ngFor="let gisement of gisements; let i = index"
+                  #gisementMarker="mapMarker"
+                  [position]="{ lat: gisement.latitude || 0, lng: gisement.longitude || 0 }"
+                  [options]="{ 
+                    icon: gisementMarkerIcon,
+                    title: getGisementTooltipInfo(gisement)
+                  }"
+                  (mapClick)="openGisementDetails(gisement)"
+                  (mapMouseover)="onGisementMouseOver(gisementMarker, gisementHoverInfoWindow)"
+                  (mapMouseout)="onGisementMouseOut()">
+                  
+                  <!-- InfoWindow pour le survol -->
+                  <map-info-window #gisementHoverInfoWindow="mapInfoWindow">
+                    <div class="gisement-hover-tooltip" 
+                         (mouseenter)="onInfoWindowMouseEnter()" 
+                         (mouseleave)="onInfoWindowMouseLeave()">
+                      <div class="tooltip-header">
+                        <mat-icon class="tooltip-icon">place</mat-icon>
+                        <strong>{{ gisement.nom || gisement.commune || 'Gisement' }}</strong>
+                      </div>
+                      <div class="tooltip-content">
+                        <div class="info-row" *ngIf="gisement.commune">
+                          <mat-icon>location_city</mat-icon>
+                          <span>{{ gisement.commune }}</span>
+                        </div>
+                        <div class="info-row">
+                          <mat-icon>straighten</mat-icon>
+                          <span>{{ gisement.volume_terrasse || '0' }} m³</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.materiau">
+                          <mat-icon>category</mat-icon>
+                          <span>{{ gisement.materiau }}</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.type_de_sol">
+                          <mat-icon>terrain</mat-icon>
+                          <span>{{ gisement.type_de_sol }}</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.periode_terrassement">
+                          <mat-icon>schedule</mat-icon>
+                          <span>{{ gisement.periode_terrassement }}</span>
+                        </div>
+                      </div>
+                      <div class="tooltip-footer">
+                        <small>Cliquez pour plus de détails</small>
+                      </div>
+                    </div>
+                  </map-info-window>
+                </map-marker>
+              </google-map>
+            </mat-tab>
+            
+            <mat-tab label="Satellite">
+              <google-map
+                height="600px"
+                width="100%"
+                [center]="mapCenter"
+                [zoom]="mapZoom"
+                [mapTypeId]="mapTypeId"
+                [options]="mapOptions">
+                <!-- Marqueur du chantier principal -->
+                <map-marker
+                  #mainChantierMarkerSatellite="mapMarker"
+                  [position]="mapCenter"
+                  [options]="viewModeMarkerOptions"
+                  (mapClick)="chantierInfoWindowSatellite.open(mainChantierMarkerSatellite)">
+                  <map-info-window #chantierInfoWindowSatellite="mapInfoWindow">
+                    <div>
+                      <strong>Chantier:</strong> {{ chantier.nom }}
+                    </div>
+                  </map-info-window>
+                </map-marker>
+                
+                <!-- Marqueurs des gisements -->
+                <map-marker
+                  *ngFor="let gisement of gisements; let i = index"
+                  #gisementMarkerSatellite="mapMarker"
+                  [position]="{ lat: gisement.latitude || 0, lng: gisement.longitude || 0 }"
+                  [options]="{ 
+                    icon: gisementMarkerIcon,
+                    title: getGisementTooltipInfo(gisement)
+                  }"
+                  (mapClick)="openGisementDetails(gisement)"
+                  (mapMouseover)="onGisementMouseOver(gisementMarkerSatellite, gisementHoverInfoWindowSatellite)"
+                  (mapMouseout)="onGisementMouseOut()">
+                  
+                  <!-- InfoWindow pour le survol en mode satellite -->
+                  <map-info-window #gisementHoverInfoWindowSatellite="mapInfoWindow">
+                    <div class="gisement-hover-tooltip" 
+                         (mouseenter)="onInfoWindowMouseEnter()" 
+                         (mouseleave)="onInfoWindowMouseLeave()">
+                      <div class="tooltip-header">
+                        <mat-icon class="tooltip-icon">place</mat-icon>
+                        <strong>{{ gisement.nom || gisement.commune || 'Gisement' }}</strong>
+                      </div>
+                      <div class="tooltip-content">
+                        <div class="info-row" *ngIf="gisement.commune">
+                          <mat-icon>location_city</mat-icon>
+                          <span>{{ gisement.commune }}</span>
+                        </div>
+                        <div class="info-row">
+                          <mat-icon>straighten</mat-icon>
+                          <span>{{ gisement.volume_terrasse || '0' }} m³</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.materiau">
+                          <mat-icon>category</mat-icon>
+                          <span>{{ gisement.materiau }}</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.type_de_sol">
+                          <mat-icon>terrain</mat-icon>
+                          <span>{{ gisement.type_de_sol }}</span>
+                        </div>
+                        <div class="info-row" *ngIf="gisement.periode_terrassement">
+                          <mat-icon>schedule</mat-icon>
+                          <span>{{ gisement.periode_terrassement }}</span>
+                        </div>
+                      </div>
+                      <div class="tooltip-footer">
+                        <small>Cliquez pour plus de détails</small>
+                      </div>
+                    </div>
+                  </map-info-window>
+                </map-marker>
+              </google-map>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mode édition ou création moderne -->
+  <div *ngIf="!isViewOnly && !loading" class="form-mode-modern slide-in">
+    <form (ngSubmit)="saveChantier()" #chantierForm="ngForm" class="modern-form">
+      
+      <!-- Section 1: Informations principales -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <mat-icon>info</mat-icon>
+          </div>
+          <div class="section-title">
+            <h3>Informations principales</h3>
+            <p>Renseignez les données essentielles du chantier</p>
+          </div>
+        </div>
+        
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="modern-field">
+            <mat-label>Nom du chantier</mat-label>
+            <input matInput name="nom" [(ngModel)]="chantier.nom" 
+                   placeholder="Généré automatiquement si laissé vide">
+            <mat-icon matPrefix>construction</mat-icon>
+            <mat-error *ngIf="chantierForm.form.get('nom')?.hasError('required')">
+              Le nom du chantier est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="modern-field">
+            <mat-label>Maître d'ouvrage</mat-label>
+            <input matInput name="maitre_ouvrage" [(ngModel)]="chantier.maitre_ouvrage" required
+                   placeholder="Ex: Société d'Aménagement Urbain">
+            <mat-icon matPrefix>business</mat-icon>
+            <mat-error *ngIf="chantierForm.form.get('maitre_ouvrage')?.hasError('required')">
+              Le maître d'ouvrage est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="modern-field">
+            <mat-label>Commune</mat-label>
+            <input matInput name="commune" [(ngModel)]="chantier.commune" required
+                   placeholder="Ex: Paris">
+            <mat-icon matPrefix>place</mat-icon>
+            <mat-error *ngIf="chantierForm.form.get('commune')?.hasError('required')">
+              La commune est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+        
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="modern-field">
+            <mat-label>Entreprise de terrassement</mat-label>
+            <input matInput name="entreprise_terrassement" [(ngModel)]="chantier.entreprise_terrassement" required
+                   placeholder="Ex: TP Constructions SARL">
+            <mat-icon matPrefix>engineering</mat-icon>
+            <mat-error *ngIf="chantierForm.form.get('entreprise_terrassement')?.hasError('required')">
+              L'entreprise de terrassement est obligatoire
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="modern-field">
+            <mat-label>Localisation</mat-label>
+            <input matInput name="localisation" [(ngModel)]="chantier.localisation" required
+                   placeholder="Ex: Zone industrielle de Villefranche">
+            <mat-icon matPrefix>place</mat-icon>
+            <mat-error *ngIf="chantierForm.form.get('localisation')?.hasError('required')">
+              La localisation est obligatoire
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Section 2: Géolocalisation interactive -->
+      <div class="form-section">
+        <div class="section-header">
+          <div class="section-icon">
+            <mat-icon>map</mat-icon>
+          </div>
+          <div class="section-title">
+            <h3>Géolocalisation</h3>
+            <p>Positionnez votre chantier sur la carte en cliquant ou glissant le marqueur</p>
+          </div>
+        </div>
+        
+        <div class="map-form-container">
+          <div class="interactive-map">
+            <google-map
+              height="400px"
+              width="100%"
+              [center]="mapCenter"
+              [zoom]="mapZoom"
+              [options]="mapOptions"
+              (mapClick)="updatePosition($event)">
+              <map-marker
+                [position]="markerPosition"
+                [options]="markerOptions"
+                (mapDragend)="onMarkerDragEnd($event)">
+              </map-marker>
+            </google-map>
+            <div class="map-instructions">
+              <mat-icon>info</mat-icon>
+              <span>Cliquez sur la carte ou glissez le marqueur pour définir la position exacte</span>
+            </div>
+          </div>
+          
+          <div class="coordinates-form">
+            <h4>Coordonnées GPS</h4>
+            <div class="coordinates-grid">
+              <mat-form-field appearance="outline" class="coordinate-field">
+                <mat-label>Latitude</mat-label>
+                <input matInput type="number" [(ngModel)]="chantier.latitude" name="latitude" 
+                       step="0.000001" placeholder="48.8566">
+                <mat-icon matSuffix>north</mat-icon>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="coordinate-field">
+                <mat-label>Longitude</mat-label>
+                <input matInput type="number" [(ngModel)]="chantier.longitude" name="longitude" 
+                       step="0.000001" placeholder="2.3522">
+                <mat-icon matSuffix>east</mat-icon>
+              </mat-form-field>
+            </div>
+            
+            <div class="coordinate-helpers">
+              <button type="button" mat-stroked-button class="helper-btn" 
+                      (click)="getCurrentLocation()">
+                <mat-icon>my_location</mat-icon>
+                Ma position
+              </button>
+              <button type="button" mat-stroked-button class="helper-btn"
+                      *ngIf="chantier.latitude && chantier.longitude"
+                      (click)="openGoogleMaps()">
+                <mat-icon>open_in_new</mat-icon>
+                Voir dans Maps
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions du formulaire -->
+      <div class="form-actions">
+        <div class="actions-left">
+          <button type="button" mat-stroked-button (click)="cancel()" class="cancel-btn">
+            <mat-icon>close</mat-icon>
+            Annuler
+          </button>
+        </div>
+        
+        <div class="actions-right">
+          <button type="button" mat-raised-button color="warn" 
+                  (click)="deleteChantier()" 
+                  *ngIf="isEditMode && chantier.id" 
+                  [disabled]="loading" 
+                  class="delete-btn">
+            <mat-icon>delete_forever</mat-icon>
+            Supprimer
+          </button>
+          
+          <button type="submit" mat-raised-button color="primary" 
+                  [disabled]="loading || !chantierForm.form.valid" 
+                  class="submit-btn">
+            <mat-icon>{{ loading ? 'hourglass_empty' : (isEditMode ? 'save' : 'add_task') }}</mat-icon>
+            {{ loading ? 'Enregistrement...' : (isEditMode ? 'Mettre à jour' : 'Créer le chantier') }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

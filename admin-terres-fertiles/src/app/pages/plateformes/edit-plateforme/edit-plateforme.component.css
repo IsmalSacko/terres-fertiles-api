@@ -1,0 +1,97 @@
+/* Spinner centré pour l'édition */
+.edit-spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  margin: 4rem auto;
+}
+
+.edit-spinner-text {
+  margin-top: 1.2rem;
+  font-size: 1.2rem;
+  color: var(--primary-color, #2563eb);
+  font-weight: 500;
+}
+
+.edit-plateforme-container {
+  max-width: 500px;
+  margin: 4rem auto;
+  padding: 2rem 1.5rem;
+  background: var(--surface-color);
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  border: 1.5px solid var(--primary-light);
+  color: var(--text-primary);
+  animation: cardEntrance 0.7s cubic-bezier(0.4,0,0.2,1);
+}
+
+.edit-plateforme-container form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 1.2rem;
+}
+
+button[mat-raised-button] {
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 100%) !important;
+  color: #fff !important;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(46,125,50,0.10);
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+button[mat-raised-button]:hover {
+  box-shadow: 0 8px 32px var(--primary-light);
+  transform: translateY(-2px) scale(1.03);
+}
+.edit-plateforme-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--secondary-light);
+  font-weight: 700;
+  text-align: center !important;
+}
+button[mat-button] {
+  color: #fff !important;
+  background: linear-gradient(90deg, var(--secondary-color) 0%, var(--secondary-light) 100%) !important;
+  font-weight: 600;
+  border-radius: 8px;
+  margin-left: 0.5rem;
+  padding: 10px 22px;
+  box-shadow: 0 2px 8px rgba(121,85,72,0.10);
+  transition: box-shadow 0.3s, transform 0.3s, background-color 0.3s;
+}
+button[mat-button]:hover {
+  background: linear-gradient(90deg, var(--secondary-dark) 0%, var(--secondary-color) 100%) !important;
+  box-shadow: 0 6px 18px var(--secondary-light);
+  transform: translateY(-1px) scale(1.02);
+}
+
+mat-form-field {
+  --mdc-outlined-text-field-outline-color: var(--primary-light);
+  --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+  --mdc-outlined-text-field-label-text-color: var(--primary-dark);
+  --mdc-outlined-text-field-input-text-color: var(--text-primary);
+  --mdc-outlined-text-field-hover-outline-color: var(--accent-color);
+}
+
+input[matInput] {
+  color: var(--text-primary);
+  background: var(--surface-color);
+}
+
+@media (max-width: 600px) {
+  .edit-plateforme-container {
+    margin: 1.2rem 0.2rem;
+    padding: 1rem 0.2rem;
+  }
+}

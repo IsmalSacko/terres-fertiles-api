@@ -1,0 +1,41 @@
+@if (!loading) {
+
+
+  <div class="edit-plateforme-container">
+    <h2 class="edit-plateforme-title">
+      <mat-icon>edit</mat-icon>
+      Modifier la plateforme
+    </h2>
+    <form [formGroup]="plateformeForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="nom" required>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Localisation</mat-label>
+        <input matInput formControlName="localisation" required>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Entreprise gestionnaire</mat-label>
+        <input matInput formControlName="entreprise_gestionnaire" required>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Latitude</mat-label>
+        <input matInput formControlName="latitude" >
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Longitude</mat-label>
+        <input matInput formControlName="longitude" >
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="plateformeForm.invalid || loading">
+        Enregistrer
+      </button>
+      <button mat-button type="button" (click)="goBack()">Annuler</button>
+    </form>
+  </div>
+} @else {
+  <div class="edit-spinner-container">
+    <mat-spinner diameter="48" color="primary"></mat-spinner>
+    <span class="edit-spinner-text">Traitement en cours...</span>
+  </div>
+}

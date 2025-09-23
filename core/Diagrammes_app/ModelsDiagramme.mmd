@@ -1,0 +1,224 @@
+classDiagram
+    direction LR
+
+    %% --- Utilisateur ---
+    class CustomUser {
+        +role
+        +company_name
+        +siret_number
+        +address
+        +city
+        +postal_code
+        +country
+        +phone_number
+    }
+
+    %% --- Chantiers et Gisements ---
+    class Chantier {
+        +nom
+        +maitre_ouvrage
+        +entreprise_terrassement
+        +date_creation
+        +localisation
+        +latitude
+        +longitude
+    }
+
+    class Gisement {
+        +nom
+        +date_creation
+        +commune
+        +periode_terrassement
+        +volume_terrasse
+        +materiau
+        +localisation
+        +latitude
+        +longitude
+        +type_de_sol
+    }
+
+    class DocumentGisement {
+        +type_document
+        +fichier
+        +nom_fichier
+        +description
+        +date_ajout
+    }
+
+    %% --- Mélanges et Amendements ---
+    class Melange {
+        +nom
+        +date_creation
+        +date_semis
+        +reference_produit
+        +fournisseur
+        +couverture_vegetale
+        +periode_melange
+        +references_analyses
+        +etat
+    }
+
+    class MelangeIngredient {
+        +pourcentage
+    }
+
+    class MelangeAmendement {
+        +pourcentage
+    }
+
+    class AmendementOrganique {
+        +nom
+        +fournisseur
+        +date_reception
+        +date_semis
+        +volume_disponible
+        +localisation
+        +latitude
+        +longitude
+    }
+
+    %% --- Plateformes ---
+    class Plateforme {
+        +nom
+        +localisation
+        +latitude
+        +longitude
+        +date_creation
+    }
+
+    %% --- Produits et Ventes ---
+    class ProduitVente {
+        +reference_produit
+        +fournisseur
+        +nom_site
+        +volume_initial
+        +volume_disponible
+        +date_disponibilite
+        +commentaires_analyses
+        +volume_vendu
+        +acheteur
+        +date_achat
+        +periode_destockage
+        +localisation_projet
+        +date_creation
+        +pret_pour_vente
+    }
+
+    class DocumentProduitVente {
+        +type_document
+        +fichier
+        +remarque
+        +date_ajout
+    }
+
+    class DocumentTechnique {
+        +nom_fichier
+        +fichier
+        +type_document
+        +date_ajout
+    }
+
+    class AnalyseLaboratoire {
+        +laboratoire
+        +code_rapport
+        +date_reception
+        +date_analyse
+        +profondeur_prelevement
+        +localisation_echantillon
+        +ph_eau
+        +ph_kcl
+        +calcaire_total
+        +calcaire_actif
+        +conductivite
+        +matiere_organique
+        +azote_total
+        +c_n
+        +cec
+        +saturation
+        +argile
+        +limons_fins
+        +limons_grossiers
+        +sables_fins
+        +sables_grossiers
+        +calcium
+        +magnesium
+        +potassium
+        +phosphore
+        +fer
+        +cuivre
+        +zinc
+        +manganese
+        +densite_apparente
+        +porosite_totale
+        +porosite_drainage
+        +eau_capillaire
+        +permeabilite
+        +iam
+        +refus_gravier_2mm
+        +fichier_pdf
+        +commentaires
+    }
+
+    class SaisieVente {
+        +nom_client
+        +volume_tonne
+        +date_vente
+        +nom_chantier_recepteur
+        +adresse_chantier
+        +est_validee
+        +date_achat
+        +date_modification_vente
+    }
+
+    class ChantierRecepteur {
+        +nom
+        +projet_nom
+        +adresse
+        +date_creation
+        +date_debut
+        +date_fin
+        +volume_receptionne
+        +volume_restant
+        +prix
+        +latitude
+        +longitude
+        +created_at
+        +statut
+    }
+
+    %% --- Relations ---
+    CustomUser "1" -- "0..*" Chantier : responsable
+    CustomUser "1" -- "0..*" Gisement : responsable
+    CustomUser "1" -- "0..*" MelangeIngredient : responsable
+    CustomUser "1" -- "0..*" MelangeAmendement : responsable
+    CustomUser "1" -- "0..*" AmendementOrganique : responsable
+    CustomUser "1" -- "0..*" Plateforme : responsable
+    CustomUser "1" -- "0..*" Melange : responsable
+    CustomUser "1" -- "0..*" ProduitVente : responsable
+    CustomUser "1" -- "0..*" DocumentGisement : responsable
+    CustomUser "1" -- "0..*" AnalyseLaboratoire : responsable
+    CustomUser "1" -- "0..*" SaisieVente : responsable
+    CustomUser "1" -- "0..*" ChantierRecepteur : responsable
+
+    Chantier "1" -- "0..*" Gisement : contient
+    Gisement "1" -- "0..*" DocumentGisement : document
+    Gisement "1" -- "0..*" MelangeIngredient : composant
+    Gisement "0..*" -- "0..*" Melange : via MelangeIngredient
+
+    Melange "1" -- "0..*" MelangeIngredient : ingredient
+    Melange "1" -- "0..*" MelangeAmendement : amendement
+    Melange "1" -- "1" ProduitVente : produit
+
+    MelangeAmendement "1" -- "1" AmendementOrganique : amendement
+    AmendementOrganique "1" -- "0..*" MelangeAmendement : utilisé_dans
+    AmendementOrganique "1" -- "0..*" Plateforme : plateforme
+
+    Plateforme "1" -- "0..*" AmendementOrganique : amendement
+    Plateforme "1" -- "0..*" Melange : melange
+
+    ProduitVente "1" -- "0..*" DocumentProduitVente : document
+    ProduitVente "1" -- "0..*" DocumentTechnique : document
+    ProduitVente "1" -- "0..*" AnalyseLaboratoire : analyse
+    ProduitVente "1" -- "0..*" SaisieVente : vente
+
+    SaisieVente "1" -- "1" ChantierRecepteur : chantier_recepteur

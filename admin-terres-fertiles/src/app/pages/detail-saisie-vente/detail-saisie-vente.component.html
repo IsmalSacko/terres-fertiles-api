@@ -1,0 +1,330 @@
+
+<div class="saisie-vente-container">
+	<!-- En-tête de la page -->
+	<div class="page-header">
+		<div class="header-content">
+			<div class="header-title">
+				<mat-icon class="header-icon">receipt_long</mat-icon>
+				<div class="title-text">
+					<h1>Détail de la Saisie de Vente</h1>
+					<p>Gestion des ventes de produits et mélanges</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+		<!-- État de chargement -->
+		@if (loading) {
+			<div class="loading-state">
+				<mat-spinner class="loading-spinner"></mat-spinner>
+				<p>Chargement de la saisie de vente...</p>
+			</div>
+		}
+
+		<!-- Message d'erreur -->
+		@if (!loading && errorMsg) {
+			<div class="error-state">
+				<mat-icon>error</mat-icon>
+				<p class="error-message">{{ errorMsg }}</p>
+			</div>
+		}
+
+		<!-- Affichage du détail -->
+		@if (!loading && !errorMsg && saisieVente) {
+			<div class="vente-card">
+			<!-- En-tête de la carte -->
+			<div class="vente-header">
+				<div class="header-main">
+					<div class="client-info-header">
+						<mat-icon class="client-icon">person</mat-icon>
+						<div class="client-details">
+											<h3 class="client-name">{{ saisieVente.nom_client }}</h3>
+														@if (saisieVente.produit) {
+															<span class="vente-id">Vente # {{ saisieVente.produit.melange.nom || saisieVente.produit.reference_produit }}</span>
+														} @else {
+															<span class="vente-id">Vente #{{ saisieVente.id }}</span>
+														}
+						</div>
+					</div>
+					<div class="validation-status">
+									<span class="validation-badge" [ngClass]="saisieVente.est_validee ? 'validated' : 'pending'">
+										<mat-icon>{{ saisieVente.est_validee ? 'verified' : 'pending' }}</mat-icon>
+										<span>{{ saisieVente.est_validee ? 'Validée' : 'En attente' }}</span>
+									</span>
+					</div>
+				</div>
+			</div>
+
+			<!-- Corps de la carte -->
+			<div class="vente-body">
+				<!-- Section informations client -->
+				<div class="client-section">
+					<h4>
+						<mat-icon>account_circle</mat-icon>
+						Informations Client & Vente
+					</h4>
+					<div class="client-info">
+						<div class="info-item">
+							<div class="info-label"><mat-icon>person</mat-icon>Client</div>
+							  <div class="info-value">{{ saisieVente.nom_client }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>admin_panel_settings</mat-icon>Responsable</div>
+							  <div class="info-value">{{ saisieVente.responsable }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>scale</mat-icon>Volume</div>
+							<div class="info-value">{{ formatVolumeWithConversion(+saisieVente.volume_tonne) }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>sell</mat-icon>Date de vente</div>
+							  <div class="info-value">{{ saisieVente.date_vente | date:'dd/MM/yyyy' }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>calendar_today</mat-icon>Date d'achat</div>
+							  <div class="info-value">{{ saisieVente.date_achat | date:'dd/MM/yyyy' }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>update</mat-icon>Dernière modification</div>
+							  <div class="info-value">{{ saisieVente.date_modification_vente | date:'dd/MM/yyyy à HH:mm' }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>location_on</mat-icon>Chantier récepteur</div>
+							  <div class="info-value">{{ saisieVente.nom_chantier_recepteur }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>home</mat-icon>Adresse chantier</div>
+							  <div class="info-value">{{ saisieVente.adresse_chantier }}</div>
+						</div>
+						<div class="info-item">
+							<div class="info-label"><mat-icon>check_circle</mat-icon>Statut validation</div>
+							<div class="info-value">
+																@if (saisieVente.est_validee) {
+																	<span class="status-validated">✅ Validée</span>
+																} @else {
+																	<span class="status-pending">⏳ En attente</span>
+																}
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Section produit et mélange -->
+					@if (saisieVente.produit) {
+							<div class="produit-section">
+						<h4><mat-icon>inventory</mat-icon>Détails du Produit</h4>
+						<div class="client-info">
+							<div class="info-item">
+								<div class="info-label"><mat-icon>person_outline</mat-icon>Utilisateur</div>
+								<div class="info-value">{{ saisieVente.produit.utilisateur }}</div>
+							</div>
+							<div class="info-item">
+								<div class="info-label"><mat-icon>tag</mat-icon>Référence</div>
+								<div class="info-value">{{ saisieVente.produit.melange.nom || saisieVente.produit.reference_produit }}</div>
+							</div>
+							<div class="info-item">
+								<div class="info-label"><mat-icon>business</mat-icon>Fournisseur</div>
+								<div class="info-value">{{ saisieVente.produit.fournisseur }}</div>
+							</div>
+							<div class="info-item info-wide">
+								<div class="info-label">
+									<mat-icon>inventory</mat-icon>
+									Évolution du Stock
+								</div>
+								<div class="stock-summary">
+									<div class="stock-line">
+										<span class="stock-label">Stock initial:</span>
+										<span class="stock-value">{{ (+saisieVente.produit.volume_initial).toLocaleString() }} m³</span>
+									</div>
+									<ng-container *ngIf="saisieVente.produit.volume_vendu">
+										<div class="stock-line">
+											<span class="stock-label">Déjà vendu:</span>
+											<span class="stock-value sold">{{ (+saisieVente.produit.volume_vendu).toLocaleString() }} m³</span>
+										</div>
+									</ng-container>
+									<div class="stock-line before-sale">
+										<span class="stock-label">Avant cette vente:</span>
+										<span class="stock-value">{{ (+saisieVente.produit.volume_disponible).toLocaleString() }} m³</span>
+									</div>
+									<div class="stock-line current-sale">
+										<span class="stock-label">Achat actuel:</span>
+										<span class="stock-value purchase">
+											<mat-icon>shopping_cart</mat-icon>
+											{{ formatVolumeWithConversion(+saisieVente.volume_tonne) }}
+										</span>
+									</div>
+									<div class="stock-line highlight after-sale">
+										<span class="stock-label">Après cette vente:</span>
+										<ng-container [ngSwitch]="getStockStatus(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne)">
+											<span *ngSwitchCase="'critical'" class="stock-critical">
+												<mat-icon>warning</mat-icon>
+												{{ calculateStockAfterSale(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne).toLocaleString() }} m³
+												<small>Survente!</small>
+											</span>
+											<span *ngSwitchCase="'low'" class="stock-low">
+												<mat-icon>inventory_2</mat-icon>
+												{{ calculateStockAfterSale(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne).toLocaleString() }} m³
+												<small>Stock faible</small>
+											</span>
+											<span *ngSwitchCase="'medium'" class="stock-medium">
+												<mat-icon>inventory_2</mat-icon>
+												{{ calculateStockAfterSale(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne).toLocaleString() }} m³
+												<small>Stock modéré</small>
+											</span>
+											<span *ngSwitchDefault class="stock-good">
+												<mat-icon>check_circle</mat-icon>
+												{{ calculateStockAfterSale(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne).toLocaleString() }} m³
+												<small>Stock suffisant</small>
+											</span>
+										</ng-container>
+									</div>
+								</div>
+							</div>
+							<div class="info-item">
+								<div class="info-label"><mat-icon>event_available</mat-icon>Disponible le</div>
+								<div class="info-value">{{ saisieVente.produit.date_disponibilite | date:'dd/MM/yyyy' }}</div>
+							</div>
+											@if (saisieVente.produit.chantier_info) {
+												<div class="info-item">
+													<div class="info-label"><mat-icon>construction</mat-icon>Chantier source</div>
+													<div class="info-value">{{ saisieVente.produit.chantier_info.nom }} - {{ saisieVente.produit.chantier_info.localisation }}</div>
+												</div>
+											}
+											@if (saisieVente.produit.plateforme) {
+												<div class="info-item">
+													<div class="info-label"><mat-icon>warehouse</mat-icon>Plateforme</div>
+													<div class="info-value">{{ saisieVente.produit.plateforme.nom }} - {{ saisieVente.produit.plateforme.localisation }}</div>
+												</div>
+											}
+											@if (saisieVente.produit.temps_sur_plateforme !== undefined) {
+												<div class="info-item">
+													<div class="info-label"><mat-icon>schedule</mat-icon>Temps sur plateforme</div>
+													<div class="info-value">{{ saisieVente.produit.temps_sur_plateforme }} jours</div>
+												</div>
+											}
+											@if (saisieVente.produit.delai_avant_disponibilite !== undefined) {
+												<div class="info-item">
+													<div class="info-label"><mat-icon>timer</mat-icon>Délai avant disponibilité</div>
+													<div class="info-value">
+														@if (saisieVente.produit.delai_avant_disponibilite > 0) {
+															<span class="status-warning">{{ saisieVente.produit.delai_avant_disponibilite }} jours</span>
+														} @else if (saisieVente.produit.delai_avant_disponibilite === 0) {
+															<span class="status-validated">Disponible maintenant</span>
+														} @else {
+															<span class="status-validated">Disponible depuis {{ saisieVente.produit.delai_avant_disponibilite * -1 }} jours</span>
+														}
+													</div>
+												</div>
+											}
+						</div>
+
+						<!-- Détails du mélange -->
+									@if (saisieVente.produit.melange) {
+										<div class="melange-details">
+								<div class="melange-header">
+									<div class="melange-title">
+										<mat-icon>science</mat-icon>
+										{{ saisieVente.produit.melange.nom }}
+									</div>
+									<div class="melange-status">
+										{{ saisieVente.produit.melange.etat_display }}
+									</div>
+								</div>
+								<div class="client-info">
+									<div class="info-item">
+										<div class="info-label"><mat-icon>person_outline</mat-icon>Créateur</div>
+										<div class="info-value">{{ saisieVente.produit.melange.utilisateur }}</div>
+									</div>
+														@if (saisieVente.produit.melange.nom_complet) {
+															<div class="info-item">
+																<div class="info-label"><mat-icon>badge</mat-icon>Nom complet</div>
+																<div class="info-value">{{ saisieVente.produit.melange.nom_complet }}</div>
+															</div>
+														}
+									<div class="info-item">
+										<div class="info-label"><mat-icon>business</mat-icon>Fournisseur</div>
+										<div class="info-value">{{ saisieVente.produit.melange.fournisseur }}</div>
+									</div>
+									<div class="info-item">
+										<div class="info-label"><mat-icon>calendar_today</mat-icon>Date création</div>
+										<div class="info-value">{{ saisieVente.produit.melange.date_creation | date:'dd/MM/yyyy' }}</div>
+									</div>
+									<div class="info-item">
+										<div class="info-label"><mat-icon>eco</mat-icon>Couverture végétale</div>
+										<div class="info-value">{{ saisieVente.produit.melange.couverture_vegetale || 'Non spécifiée' }}</div>
+									</div>
+									<div class="info-item">
+										<div class="info-label"><mat-icon>schedule</mat-icon>Période mélange</div>
+										<div class="info-value">{{ saisieVente.produit.melange.periode_melange }}</div>
+									</div>
+									<div class="info-item">
+										<div class="info-label"><mat-icon>grass</mat-icon>Date semis</div>
+										<div class="info-value">{{ saisieVente.produit.melange.date_semis | date:'dd/MM/yyyy' }}</div>
+									</div>
+									<div class="info-item">
+										<div class="info-label"><mat-icon>location_city</mat-icon>Plateforme</div>
+										<div class="info-value">{{ saisieVente.produit.melange.plateforme_nom || 'Non spécifiée' }}</div>
+									</div>
+														@if (saisieVente.produit.melange.references_analyses) {
+															<div class="info-item">
+																<div class="info-label"><mat-icon>science</mat-icon>Références analyses</div>
+																<div class="info-value">{{ saisieVente.produit.melange.references_analyses }}</div>
+															</div>
+														}
+								</div>
+								<!-- Composition du mélange -->
+								<div class="composition-grid">
+									<!-- Ingrédients -->
+									<div class="composition-section">
+										<div class="composition-title">
+											<mat-icon>terrain</mat-icon>
+											Ingrédients ({{ saisieVente.produit.melange.ingredients.length || 0 }})
+										</div>
+															@if (saisieVente.produit.melange.ingredients && saisieVente.produit.melange.ingredients.length > 0) {
+																@for (ingredient of saisieVente.produit.melange.ingredients; track ingredient.gisement_details?.nom) {
+																	<div class="ingredient-item">
+																		<div class="ingredient-name">{{ ingredient.gisement_details?.nom || 'Gisement inconnu' }}</div>
+																		<div class="ingredient-percentage">{{ ingredient.pourcentage }}%</div>
+																	</div>
+																}
+															} @else {
+																<div class="empty-state">
+																	<mat-icon>terrain</mat-icon>
+																	<p>Aucun ingrédient</p>
+																</div>
+															}
+									</div>
+									<!-- Amendements -->
+									<div class="composition-section">
+										<div class="composition-title">
+											<mat-icon>eco</mat-icon>
+											Amendements ({{ saisieVente.produit.melange.amendements.length || 0 }})
+										</div>
+															@if (saisieVente.produit.melange.amendements && saisieVente.produit.melange.amendements.length > 0) {
+																@for (amendement of saisieVente.produit.melange.amendements; track amendement.id) {
+																	<div class="amendement-item">
+																		<div class="amendement-name">{{ amendement.amendement_details?.nom || 'Amendement #' + (amendement.amendementOrganique || amendement.amendement_organique) || 'Amendement inconnu' }}</div>
+																		<div class="amendement-percentage">{{ amendement.pourcentage }}%</div>
+																	</div>
+																}
+															} @else {
+																<div class="empty-state">
+																	<mat-icon>eco</mat-icon>
+																	<p>Aucun amendement</p>
+																</div>
+															}
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+						} @else {
+							<div class="empty-state">
+								<mat-icon>inventory</mat-icon>
+								<p>Produit non disponible</p>
+							</div>
+						}
+			</div>
+		</div>
+		}
+</div>

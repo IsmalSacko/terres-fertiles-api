@@ -1,0 +1,60 @@
+<!-- Overlay qui ferme le menu au clic -->
+<div *ngIf="isSidenavOpen" class="mobile-menu-backdrop" (click)="closeSidenav()"></div>
+
+<!-- Menu mobile overlay custom -->
+<div class="mobile-menu-overlay" *ngIf="isSidenavOpen">
+  <div class="mobile-menu-header">
+    <div class="mobile-logo">
+      <mat-icon>landscape</mat-icon>
+      <span>Terres Fertiles</span>
+    </div>
+    <button mat-icon-button class="close-menu-btn" (click)="closeSidenav()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <nav class="mobile-nav-links">
+    <a (click)="navigateAndClose('/dashboard')"><mat-icon>dashboard</mat-icon> </a>
+    <a (click)="navigateAndClose('/produits')"><mat-icon>shopping_cart</mat-icon> Produits</a>
+    <a (click)="navigateAndClose('/chantiers')"><mat-icon>location_city</mat-icon> Chantiers</a>
+    <a (click)="navigateAndClose('/gisements')"><mat-icon>landscape</mat-icon> Gisements</a>
+    <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> Plateforme</a>
+    <div class="mobile-menu-divider"></div>
+    <button *ngIf="isLoggedIn" (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
+    <button *ngIf="!isLoggedIn" (click)="login()"><mat-icon>login</mat-icon> Connexion</button>
+    <button *ngIf="!isLoggedIn" (click)="register()"><mat-icon>person_add</mat-icon> Inscription</button>
+  </nav>
+</div>
+
+<!-- Toolbar classique -->
+<mat-toolbar class="navbar-glass">
+  <span class="logo" routerLink="/">
+    <mat-icon>landscape</mat-icon>
+    Terres Fertiles
+  </span>
+  <span class="spacer"></span>
+  <nav class="nav-links">
+    <a mat-button routerLink="/dashboard" routerLinkActive="active-link"><mat-icon>dashboard</mat-icon></a>
+    <a mat-button routerLink="/produits" routerLinkActive="active-link"><mat-icon>shopping_cart</mat-icon> Produits</a>
+    <a mat-button routerLink="/chantiers" routerLinkActive="active-link"><mat-icon>location_city</mat-icon> Chantiers</a>
+    <a mat-button routerLink="/gisements" routerLinkActive="active-link"><mat-icon>landscape</mat-icon> Gisements</a>
+    <a mat-button routerLink="/plateformes" routerLinkActive="active-link"><mat-icon>home_work</mat-icon> Plateforme</a>
+  </nav>
+  <button mat-icon-button class="mobile-menu-btn" (click)="openSidenav()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <button mat-icon-button class="avatar-btn" [matMenuTriggerFor]="userMenu">
+    <img src="https://i.pravatar.cc/40?img=3" alt="avatar" class="avatar-img"/>
+    <span *ngIf="isLoggedIn && userName" class="user-name-below">{{ userName }}</span>
+  </button>
+  <mat-menu #userMenu="matMenu">
+    <button mat-menu-item *ngIf="isLoggedIn" (click)="logout()">Déconnexion</button>
+    <button mat-menu-item *ngIf="isLoggedIn" (click)="goToProfile()">
+      <mat-icon>account_circle</mat-icon>
+      Profil
+    </button>
+    <button mat-menu-item *ngIf="!isLoggedIn" (click)="login()">Connexion</button>
+    <button mat-menu-item *ngIf="!isLoggedIn" (click)="register()"><mat-icon>person_add</mat-icon> Inscription</button>
+  </mat-menu>
+</mat-toolbar>
+
+

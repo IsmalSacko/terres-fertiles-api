@@ -1,0 +1,418 @@
+/* Container principal */
+.chantiers-container {
+  background: linear-gradient(135deg, 
+    #f8fafc 0%, 
+    #e2e8f0 25%, 
+    #f1f5f9 50%, 
+    #e2e8f0 75%, 
+    #f8fafc 100%);
+  min-height: 100vh;
+  padding: 2rem;
+  padding-top: 90px !important; /* Éviter que le contenu soit caché sous la navbar */
+}
+
+/* Header de la page */
+.page-header {
+  margin-bottom: 3rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.header-text {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a202c;
+  letter-spacing: -0.02em;
+}
+
+.title-icon {
+  font-size: 2.5rem;
+  color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #718096;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* États de chargement et erreurs */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  margin: 2rem 0;
+  gap: 1rem;
+}
+
+.loading-state p {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.error-state {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #dc2626;
+  margin: 2rem 0;
+}
+
+.error-state mat-icon {
+  font-size: 1.5rem;
+}
+
+.error-state p {
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Grille des chantiers */
+.chantiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+/* Cartes des chantiers */
+.chantier-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.chantier-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.chantier-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  border-color: #ef4444;
+}
+
+/* Header de la carte */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.card-icon {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 12px;
+  padding: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.card-icon mat-icon {
+  color: #ef4444;
+  font-size: 1.8rem;
+}
+
+.status-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-badge.active {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+/* Corps de la carte */
+.card-body {
+  margin-bottom: 1.5rem;
+}
+
+.chantier-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1a202c;
+  letter-spacing: -0.01em;
+}
+
+.chantier-client {
+  margin: 0 0 1rem 0;
+  color: #718096;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.chantier-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: #4a5568;
+  font-size: 0.9rem;
+}
+
+.detail-item mat-icon {
+  font-size: 1.2rem;
+  color: #718096;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Actions de la carte */
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0 0 0;
+  border-top: 1px solid #e2e8f0;
+  margin-top: auto;
+}
+
+.action-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+}
+
+.action-btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.action-btn.info {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #3b82f6;
+  border-color: #bfdbfe;
+}
+
+.action-btn.success {
+  background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+  color: #10b981;
+  border-color: #a7f3d0;
+}
+
+.action-btn.warning {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  color: #f59e0b;
+  border-color: #fde68a;
+}
+
+.action-btn.danger {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn.info:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #93c5fd;
+}
+
+.action-btn.success:hover {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  border-color: #6ee7b7;
+}
+
+.action-btn.warning:hover {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #fcd34d;
+}
+
+.action-btn.danger:hover {
+  background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+  border-color: #f87171;
+}
+
+/* État vide */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 16px;
+  margin: 2rem 0;
+  text-align: center;
+}
+
+.empty-icon {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-radius: 50%;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.empty-icon mat-icon {
+  font-size: 3rem;
+  color: #ef4444;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.empty-state p {
+  margin: 0 0 2rem 0;
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chantiers-container {
+    padding: 1rem;
+    padding-top: 90px !important;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .chantier-card {
+    padding: 1.2rem;
+  }
+  
+  .card-actions {
+    gap: 0.5rem;
+    justify-content: center;
+    padding-top: 1rem;
+  }
+  
+  .action-btn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .action-btn mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chantiers-container {
+    padding-top: 85px !important;
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+    gap: 0.8rem;
+  }
+  
+  .chantier-title {
+    font-size: 1.1rem;
+  }
+  
+  .detail-item {
+    font-size: 0.85rem;
+  }
+  
+  .card-actions {
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    gap: 0.4rem;
+  }
+  
+  .action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+  
+  .action-btn mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+} 

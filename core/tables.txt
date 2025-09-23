@@ -1,0 +1,14 @@
+✅ CustomUser
+
+✅ Chantier (avec champ nom)
+
+✅ Gisement
+
+✅ Compost
+
+✅ Melange avec génération automatique de reference_produit (BRON-2025-MEL-001)
+
+✅ ProduitVente avec génération automatique de reference_produit (LYON-2025-VENTE-001)
+
+✅ DocumentTechnique
+

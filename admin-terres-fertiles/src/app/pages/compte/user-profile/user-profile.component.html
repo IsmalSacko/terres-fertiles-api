@@ -1,0 +1,81 @@
+<div class="container">
+    <h2 class="user-profile-title">
+        Mon profil utilisateur
+    </h2>
+    <form class="user-profile-form" [formGroup]="userForm" (ngSubmit)="onUpdate()">
+  <div class="row">
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Nom d'utilisateur</mat-label>
+        <input matInput formControlName="username">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Email</mat-label>
+        <input matInput formControlName="email">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Prénom</mat-label>
+        <input matInput formControlName="first_name">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Nom</mat-label>
+        <input matInput formControlName="last_name">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Rôle</mat-label>
+        <input matInput formControlName="role">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Nom entreprise</mat-label>
+        <input matInput formControlName="company_name">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>SIRET</mat-label>
+        <input matInput formControlName="siret_number">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Adresse</mat-label>
+        <input matInput formControlName="address">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Ville</mat-label>
+        <input matInput formControlName="city">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Code postal</mat-label>
+        <input matInput formControlName="postal_code">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Pays</mat-label>
+        <input matInput formControlName="country">
+      </mat-form-field>
+    </div>
+    <div class="col-md-6">
+      <mat-form-field appearance="outline"><mat-label>Téléphone</mat-label>
+        <input matInput formControlName="phone_number">
+      </mat-form-field>
+    </div>
+  </div>
+  <div class="d-flex flex-wrap mt-3">
+    <button mat-raised-button color="primary" type="submit" class="primary">Mettre à jour</button>
+    <ng-container *ngIf="!showDeleteConfirm">
+      <button mat-raised-button color="warn" type="button" (click)="showDeleteConfirm = true" class="warn">Supprimer mon compte</button>
+    </ng-container>
+    <ng-container *ngIf="showDeleteConfirm">
+      <span style="margin-right:12px; font-weight:600; color:var(--danger-color)">Confirmer la suppression ?</span>
+      <button mat-raised-button color="warn" type="button" (click)="onDelete()" class="warn">Oui, supprimer</button>
+      <button mat-raised-button color="primary" type="button" (click)="showDeleteConfirm = false">Annuler</button>
+    </ng-container>
+  </div>
+</form>
+
+</div>

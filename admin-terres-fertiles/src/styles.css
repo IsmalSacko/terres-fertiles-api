@@ -1,0 +1,307 @@
+/* You can add global styles to this file, and also import other style files */
+
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+html, body { height: 100%; }
+body { 
+  margin: 0; 
+  font-family: Roboto, 
+  "Helvetica Neue", sans-serif;
+  
+ }
+.container{
+  margin-top: 30px;
+
+}
+.icon-view {
+    color: #1976d2; /* ou primary si tu veux */
+  }
+
+
+  /* You can add global styles to this file, and also import other style files */
+
+/* Variables globales - Charte graphique naturelle */
+:root {
+  /* Couleurs principales */
+  --primary-color: #2E7D32; /* Vert forêt */
+  --primary-light: #4CAF50; /* Vert clair */
+  --primary-dark: #1B5E20; /* Vert foncé */
+  
+  /* Couleurs secondaires */
+  --secondary-color: #795548; /* Brun terre */
+  --secondary-light: #A1887F; /* Brun clair */
+  --secondary-dark: #4E342E; /* Brun foncé */
+  
+  /* Couleurs d'accent */
+  --accent-color: #FFA000; /* Orange ambre */
+  --accent-light: #FFB74D; /* Orange clair */
+  --accent-dark: #F57C00; /* Orange foncé */
+  
+  /* Couleurs de statut */
+  --success-color: #43A047; /* Vert succès */
+  --warning-color: #FFA000; /* Orange attention */
+  --danger-color: #D32F2F; /* Rouge erreur */
+  
+  /* Couleurs neutres */
+  --background-color: #F5F5F5; /* Gris très clair */
+  --surface-color: #FFFFFF; /* Blanc */
+  --text-primary: #263238; /* Gris foncé */
+  --text-secondary: #546E7A; /* Gris moyen */
+  
+  /* Ombres et effets */
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  --transition-speed: 0.3s;
+}
+
+
+
+html, body { 
+  height: 100%; 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-primary);
+}
+
+/* Couleurs des icônes par catégorie */
+.icon-location { color: var(--primary-color) !important; }
+.icon-calendar { color: var(--accent-color) !important; }
+.icon-measurement { color: var(--secondary-color) !important; }
+.icon-material { color: var(--primary-dark) !important; }
+.icon-document { color: var(--secondary-dark) !important; }
+.icon-action { color: var(--primary-color) !important; }
+.icon-warning { color: var(--warning-color) !important; }
+.icon-error { color: var(--danger-color) !important; }
+.icon-view { color: var(--primary-color) !important; }
+
+/* Styles communs pour les cartes */
+mat-card {
+  background: rgba(255,255,255,0.85) !important;
+  backdrop-filter: blur(2px);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+  margin-bottom: 20px;
+}
+
+mat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow) !important;
+}
+
+/* En-têtes de carte */
+mat-card-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  padding: 24px;
+  border-radius: 12px 12px 0 0;
+}
+
+mat-card-title {
+  font-size: 1.5em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Styles communs pour les icônes */
+mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* Styles communs pour les boutons */
+button[mat-raised-button] {
+  border-radius: 24px;
+  padding: 8px 24px;
+  transition: all var(--transition-speed);
+}
+
+button[mat-raised-button].primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+button[mat-raised-button].accent {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+button[mat-raised-button].warn {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+/* Styles communs pour les formulaires */
+mat-form-field {
+  width: 100%;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  color: var(--primary-light);
+}
+
+.mat-form-field-label {
+  color: var(--text-secondary);
+}
+
+/* Styles communs pour les tableaux */
+.mat-table {
+  background: var(--surface-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mat-header-cell {
+  background-color: var(--background-color);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.mat-row:hover {
+  background-color: var(--background-color);
+}
+
+/* Styles communs pour les messages */
+.error-message {
+  background-color: #ffebee;
+  color: var(--danger-color);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.success-message {
+  background-color: #e8f5e9;
+  color: var(--success-color);
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Styles communs pour les listes */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 16px;
+}
+
+.info-item {
+  background: var(--surface-color);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  transition: all var(--transition-speed);
+}
+
+.info-item:hover {
+  transform: translateX(5px);
+  box-shadow: var(--hover-shadow);
+  border-color: var(--primary-light);
+}
+
+/* Styles communs pour les titres de section */
+.section-title {
+  color: var(--primary-color);
+  font-size: 1.3em;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Styles communs pour les labels et valeurs */
+.label {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.value {
+  color: var(--text-primary);
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+/* Styles communs pour les documents */
+.document-card {
+  background: var(--surface-color);
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid var(--background-color);
+  transition: all var(--transition-speed);
+}
+
+.document-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--hover-shadow);
+  border-color: var(--primary-light);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  mat-card {
+    margin: 10px;
+  }
+
+  button[mat-raised-button] {
+    width: 100%;
+    margin: 4px 0;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+.success-snackbar,
+.success-snackbar .mat-mdc-snack-bar-label,
+.success-snackbar .mat-simple-snackbar,
+.success-snackbar .mat-simple-snackbar span,
+.success-snackbar .mdc-snackbar__label {
+  color: #fff !important;
+  background: linear-gradient(90deg, var(--primary-color) 0%, var(--accent-color) 40%, var(--accent-dark) 50%) !important;
+  font-weight: 600;
+  font-size: 1.15rem;
+  border-radius: 32px !important;
+  box-shadow: 0 8px 32px var(--primary-light) !important;
+  letter-spacing: 0.5px;
+}

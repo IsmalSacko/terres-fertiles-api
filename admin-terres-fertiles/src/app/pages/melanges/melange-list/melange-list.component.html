@@ -1,0 +1,127 @@
+<div class="container-fluid mt-5 page-with-intense-plants">
+  <div class="d-flex justify-content-between align-items-center mb-4 ">
+    <h1 class="h3 mb-0">Mélanges</h1>
+    <a routerLink="/melanges/new" class="btn mel-btn mt-2">
+      <i class="bi bi-plus-circle"></i> Nouveau mélange
+    </a>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement des mélanges...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+    <button type="button" class="btn btn-outline-danger btn-sm ms-3" (click)="loadMelanges()">
+      Réessayer
+    </button>
+  </div>
+
+  <!-- Melanges list -->
+  <div *ngIf="!loading && !error" class="row">
+    <div *ngFor="let melange of melanges" class="col-lg-6 col-xl-4 mb-4">
+
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">{{ melange.nom || 'Mélange sans nom' }}</h5>
+          <span class="badge bg-{{ getEtatColor(melange.etat) }}">
+            {{ getEtatLabel(melange.etat) }}
+          </span>
+        </div>
+        
+        <div class="card-body">
+          <div class="mb-3">
+            <strong>Référence:</strong> {{ melange.reference_produit }}
+          </div>
+          
+          <div class="mb-3">
+            <strong>Fournisseur:</strong> {{ melange.fournisseur }}
+          </div>
+          
+          <div class="mb-3">
+            <strong>Période:</strong> {{ melange.periode_melange }}
+          </div>
+          
+          <div class="mb-3">
+            <i class="bi bi-calendar-event me-1"></i>
+            <strong>Date de création:</strong> {{ melange.date_creation | date:'dd/MM/yyyy' }}
+            
+          <div class="mb-3">
+            <i class="bi bi-person "></i>
+            <strong >Crée par : {{melange.utilisateur}}</strong> 
+          </div>
+
+          <!-- Progress bar -->
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <small class="text-muted">Progression</small>
+              <small class="text-muted">{{ getProgressPercentage(melange.etat) | number:'1.0-0' }}%</small>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-{{ getEtatColor(melange.etat) }}" 
+                   [style.width.%]="getProgressPercentage(melange.etat)"
+                   role="progressbar">
+              </div>
+            </div>
+          </div>
+
+          <!-- Current task -->
+          <div class="alert alert-info py-2 mb-3">
+            <small>
+              <i class="bi bi-info-circle"></i>
+              {{ getTacheActuelle(melange.etat) }}
+            </small>
+          </div>
+
+          <!-- Ingredients summary -->
+          <div class="mb-3">
+            <strong>Ingrédients:</strong>
+            <span class="badge gis-amendement ms-2">{{ melange.ingredients.length || 0 }} 
+              {{ melange.ingredients.length > 1 ? 'gisements' : 'gisement' }}
+              </span>
+            <span class="badge gis-amendement ms-2">{{ melange.amendements.length || 0 }}
+              {{ melange.amendements.length > 1 ? 'Matières organiques' : 'Matière organique' }}
+              </span>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="d-flex justify-content-between align-items-center">
+            <a [routerLink]="['/melanges', melange.id]" class="btn mel-btn btn-sm">
+              <i class="bi bi-eye"></i> détails
+            </a>
+
+            
+            <div class="btn-group" role="group">
+              <button type="button" class="btn mel-btn btn-sm" 
+                      [disabled]="melange.etat === 1"
+                      (click)="previousStep(melange)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              <button type="button" style="margin-left: 3px !important;" class="btn mel-btn btn-sm"
+                      [disabled]="melange.etat === 6"
+                      (click)="nextStep(melange)">
+                <i class="bi bi-chevron-right"></i> 
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && !error && melanges.length === 0" class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <h3 class="mt-3">Aucun mélange trouvé</h3>
+    <p class="text-muted">Commencez par créer votre premier mélange.</p>
+    <a routerLink="/melanges/new" class="mel-btn">
+      <i class="bi bi-plus-circle"></i> Créer un mélange
+    </a>
+  </div>
+</div>

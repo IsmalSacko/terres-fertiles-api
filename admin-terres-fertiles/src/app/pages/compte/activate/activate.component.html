@@ -1,0 +1,15 @@
+<div class="activation-bg">
+  <div class="activation-card">
+    <div class="success-icon" *ngIf="success">
+      <span class="checkmark">✔️</span>
+    </div>
+    <div class="error-icon" *ngIf="error">
+      <span class="crossmark">❌</span>
+    </div>
+    <h2 class="activation-title" *ngIf="success">Compte activé avec succès !</h2>
+    <h2 class="activation-title error" *ngIf="error">Échec de l'activation : {{ error }}</h2>
+    <p class="activation-message">Redirection vers la connexion dans quelques secondes...</p>
+    <button mat-raised-button color="primary" class="activation-btn" (click)="goToLogin()">Connexion</button>
+    <canvas id="confetti-canvas" *ngIf="success"></canvas>
+  </div>
+</div>

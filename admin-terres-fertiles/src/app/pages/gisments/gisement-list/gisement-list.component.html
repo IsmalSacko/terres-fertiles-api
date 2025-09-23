@@ -1,0 +1,143 @@
+@if (loadingGlobal) {
+ <div class="list-gisement-spinner-container">
+   <mat-spinner diameter="48" color="primary"></mat-spinner>
+   <span class="list-gisement-spinner-text">Chargement en cours...</span>
+ </div>
+}
+<div class="modern-container fade-in page-with-intense-plants">
+  <!-- Header moderne avec gradient -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="header-icon">
+          <mat-icon>landscape</mat-icon>
+        </div>
+        <div class="header-text">
+          <h1 class="header-title">Gisements</h1>
+          <p class="header-subtitle">Gérez vos gisements de terre et matériaux</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button (click)="addGisement()" class="add-button">
+          <mat-icon>add</mat-icon>
+          Nouveau gisement
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte des gisements -->
+  <div class="map-section slide-in">
+    <app-gisements-map/>
+  </div>
+  <!-- Grille moderne des gisements -->
+  @if (gisements.length) {
+    <div class="gisements-section slide-in">
+      <div class="section-header">
+        <h2>Tous les gisements</h2>
+        <div class="stats-badge">
+          <mat-icon>inventory</mat-icon>
+          <span>{{ gisements.length }} gisement{{ gisements.length > 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+      <div class="gisements-grid">
+        @for (g of gisements; track g.id) {
+          <div class="gisement-card" [style.animation-delay]="(g.id * 0.1) + 's'">
+            <div class="card-header">
+              <div class="gisement-avatar">
+                <mat-icon>landscape</mat-icon>
+              </div>
+              <div class="card-menu">
+                <button mat-icon-button [matMenuTriggerFor]="menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-menu-item (click)="goToDetail(g.id, 'view')">
+                    <mat-icon>visibility</mat-icon>
+                    <span>Voir les détails</span>
+                  </button>
+                  <button mat-menu-item (click)="goToDetail(g.id, 'edit')">
+                    <mat-icon>edit</mat-icon>
+                    <span>Modifier</span>
+                  </button>
+                  <mat-divider></mat-divider>
+                  <button mat-menu-item (click)="deleteGisement(g.id)" class="delete-menu-item">
+                    <mat-icon>delete</mat-icon>
+                    <span>Supprimer</span>
+                  </button>
+                </mat-menu>
+              </div>
+            </div>
+            <div class="card-content" (click)="goToDetail(g.id, 'view')">
+              <h3 class="gisement-name">{{ g.nom }}</h3>
+              <div class="gisement-stats">
+                <div class="stat-item primary">
+                  <mat-icon>straighten</mat-icon>
+                  <div class="stat-details">
+                    <span class="stat-value">{{ g.volume_terrasse || '0' }}</span>
+                    <span class="stat-label">m³</span>
+                  </div>
+                </div>
+                <div class="stat-item secondary">
+                  <mat-icon>category</mat-icon>
+                  <div class="stat-details">
+                    <span class="stat-value">{{ g.materiau || 'Non spécifié' }}</span>
+                    <span class="stat-label">Matériau</span>
+                  </div>
+                </div>
+              </div>
+              <div class="gisement-info">
+                @if (g.commune) {
+                  <div class="info-item">
+                    <mat-icon>location_city</mat-icon>
+                    <span>{{ g.commune }}</span>
+                  </div>
+                }
+                @if (g.periode_terrassement) {
+                  <div class="info-item">
+                    <mat-icon>schedule</mat-icon>
+                    <span>{{ g.periode_terrassement }}</span>
+                  </div>
+                }
+                @if (g.date_creation) {
+                  <div class="info-item">
+                    <mat-icon>calendar_today</mat-icon>
+                    <span>{{ g.date_creation | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
+                @if (g.type_de_sol) {
+                  <div class="info-item">
+                    <mat-icon>terrain</mat-icon>
+                    <span>{{ g.type_de_sol }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="card-actions">
+              <button mat-button (click)="goToDetail(g.id, 'view')" class="view-button">
+                <mat-icon>visibility</mat-icon>
+                Voir
+              </button>
+              <button mat-button (click)="goToDetail(g.id, 'edit')" class="edit-button">
+                <mat-icon>edit</mat-icon>
+                Modifier
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="empty-state slide-in">
+      <div class="empty-icon">
+        <mat-icon>landscape</mat-icon>
+      </div>
+      <h3>Aucun gisement disponible</h3>
+      <p>Commencez par créer votre premier gisement de matériaux</p>
+      <button mat-raised-button (click)="addGisement()" class="empty-action-button">
+        <mat-icon>add</mat-icon>
+        Créer un gisement
+      </button>
+    </div>
+  }
+</div>

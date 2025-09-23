@@ -1,0 +1,158 @@
+.planning-table {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--background-color);
+  overflow-x: auto;
+  font-size: 14px;
+  position: relative;
+  width: calc(100% - 40px);
+  background: var(--surface-color);
+  backdrop-filter: blur(5px);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  margin: 20px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  padding: 16px 24px;
+}
+
+.planning-table .plateforme-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.planning-table .plateforme-row > div {
+  display: flex;
+  align-items: center;
+}
+
+.corner-cell {
+  width: 160px;
+  min-width: 200px;
+  background: var(--primary-light);
+  font-weight: 600;
+  border-right: 1px solid var(--background-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  user-select: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  outline: 1px solid var(--background-color);
+  height: 36px;
+  font-size: 14px;
+}
+
+.planning-table input[type="text"],
+.planning-table input[type="date"],
+.planning-table input[type="number"],
+.planning-table select {
+  flex-grow: 1;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  border: 1px solid var(--background-color);
+  border-radius: 6px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline-offset: 2px;
+  transition: border-color var(--transition-speed);
+  color: var(--text-primary);
+  background-color: var(--surface-color);
+}
+
+.planning-table input[type="text"]:focus,
+.planning-table input[type="date"]:focus,
+.planning-table input[type="number"]:focus,
+.planning-table select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 6px var(--primary-light);
+}
+
+.planning-table .actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.planning-table button {
+  cursor: pointer;
+  border-radius: 24px;
+  padding: 8px 24px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+  border: none;
+}
+
+.planning-table button[type="submit"] {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+}
+
+.planning-table button[type="submit"]:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  box-shadow: 0 6px 16px rgba(27, 94, 32, 0.6);
+}
+
+.planning-table button[type="submit"]:disabled {
+  background-color: var(--background-color);
+  color: var(--text-secondary);
+  cursor: default;
+  box-shadow: none;
+}
+
+.planning-table button[type="button"] {
+  background-color: var(--background-color);
+  color: var(--text-primary);
+  border: 1px solid var(--background-color);
+}
+
+.planning-table button[type="button"]:hover {
+  background-color: var(--secondary-light);
+  color: var(--secondary-dark);
+  border-color: var(--secondary-dark);
+}
+
+/* Responsive : réductions sur mobiles */
+@media (max-width: 768px) {
+  .corner-cell {
+    width: 120px;
+    min-width: 200px;
+    font-size: 0.9rem;
+    height: 40px;
+    line-height: 40px;
+  }
+
+  .planning-table input[type="text"],
+  .planning-table input[type="date"],
+  .planning-table input[type="number"],
+  .planning-table select {
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .planning-table {
+    width: calc(100% - 20px);
+    margin: 10px;
+    padding: 12px 16px;
+  }
+
+  .planning-table .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .planning-table button {
+    width: 100%;
+  }
+}

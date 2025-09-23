@@ -1,0 +1,649 @@
+/* ================================
+   DESIGN MODERNE - MÉLANGE DÉTAIL
+   Style équilibré avec palette variée et animations magiques
+   ================================ */
+
+/* Variables de couleurs modernes */
+:host {
+  --primary-blue: #2563eb;
+  --primary-indigo: #4f46e5;
+  --accent-orange: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --success-green: #10b981;
+  --warning-amber: #f59e0b;
+  --error-red: #ef4444;
+  --neutral-gray: #6b7280;
+  --light-gray: #f3f4f6;
+  --dark-gray: #374151;
+  --white: #ffffff;
+}
+
+/* Conteneur principal avec gradient sombre et fertile */
+.melange-detail-container {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
+  min-height: 100vh;
+  padding: 2rem;
+  padding-top: 90px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Graines étincelantes et pousses vertes pour melange detail */
+.melange-detail-container::before,
+:host::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Graines dorées qui scintillent */
+    radial-gradient(circle at 20% 30%, rgba(255, 215, 0, 0.8) 2px, transparent 2px),
+    radial-gradient(circle at 80% 20%, rgba(255, 215, 0, 0.6) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.9) 2px, transparent 2px),
+    radial-gradient(circle at 90% 60%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 10% 90%, rgba(255, 215, 0, 0.8) 1.5px, transparent 1.5px),
+    /* Petites pousses vertes */
+    radial-gradient(circle at 30% 90%, rgba(76, 175, 80, 0.9) 1px, transparent 1px),
+    radial-gradient(circle at 70% 95%, rgba(76, 175, 80, 0.8) 1px, transparent 1px),
+    radial-gradient(circle at 90% 80%, rgba(76, 175, 80, 0.7) 1px, transparent 1px),
+    /* Étoiles scintillantes */
+    radial-gradient(circle at 5% 5%, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+    radial-gradient(circle at 95% 10%, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 
+    300px 300px, 220px 220px, 400px 400px, 270px 270px, 360px 360px,
+    290px 290px, 340px 340px, 310px 310px,
+    470px 470px, 390px 390px;
+  pointer-events: none;
+  z-index: -1;
+  animation: melangeDetailNature 12s ease-in-out infinite;
+}
+
+/* Petits arbres qui poussent en bas pour melange detail */
+.melange-detail-container::after,
+:host::after {
+  content: '';
+  position: fixed;
+  bottom: -30px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background-image: 
+    /* Sol fertile */
+    linear-gradient(to top, rgba(139, 69, 19, 0.4) 0%, transparent 30%),
+    /* Petits arbres stylisés */
+    radial-gradient(ellipse at 6% 60%, rgba(34, 139, 34, 0.6) 15px, transparent 20px),
+    radial-gradient(ellipse at 19% 55%, rgba(34, 139, 34, 0.5) 12px, transparent 17px),
+    radial-gradient(ellipse at 34% 62%, rgba(34, 139, 34, 0.7) 18px, transparent 23px),
+    radial-gradient(ellipse at 51% 58%, rgba(34, 139, 34, 0.4) 14px, transparent 19px),
+    radial-gradient(ellipse at 68% 60%, rgba(34, 139, 34, 0.6) 16px, transparent 21px),
+    radial-gradient(ellipse at 84% 56%, rgba(34, 139, 34, 0.5) 13px, transparent 18px);
+  background-size: 100% 100%, 
+    170px 50px, 150px 45px, 190px 55px, 160px 48px, 180px 52px, 140px 42px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  z-index: -1;
+  animation: melangeDetailTrees 15s ease-in-out infinite;
+}
+
+/* Animations magiques spécifiques aux détails de mélanges */
+@keyframes melangeDetailNature {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.5;
+    filter: brightness(1);
+  }
+  25% {
+    transform: scale(1.1) rotate(0.2deg);
+    opacity: 0.8;
+    filter: brightness(1.4);
+  }
+  50% {
+    transform: scale(1.0) rotate(-0.1deg);
+    opacity: 0.9;
+    filter: brightness(1.7);
+  }
+  75% {
+    transform: scale(1.2) rotate(0.3deg);
+    opacity: 0.7;
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.5;
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes melangeDetailTrees {
+  0% {
+    transform: translateY(20px) scaleY(0.3);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(10px) scaleY(0.6);
+    opacity: 0.6;
+  }
+  60% {
+    transform: translateY(0px) scaleY(1.1);
+    opacity: 0.9;
+  }
+  80% {
+    transform: translateY(-5px) scaleY(1.0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(8px) scaleY(0.7);
+    opacity: 0.4;
+  }
+}
+
+.card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-purple) 0%, var(--primary-blue) 50%, var(--success-green) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.25);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card-header {
+  background: linear-gradient(135deg, var(--accent-purple) 0%, var(--primary-indigo) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  font-size: 1.1rem;
+}
+
+.card-body {
+  padding: 2rem;
+  color: var(--dark-gray);
+}
+
+.progress {
+  height: 1.2rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  border-radius: 12px;
+  background: linear-gradient(90deg, var(--success-green) 0%, var(--primary-blue) 100%);
+  transition: all 0.3s ease;
+}
+
+.list-group-item {
+  border: 1px solid #dee2e6;
+  padding: 1rem;
+  background-color: white;
+}
+
+.list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.list-group-item.active {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.list-group-item-success {
+  background-color: #d1e7dd;
+  border-color: #badbcc;
+  color: #0f5132;
+}
+
+.badge {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-control, .form-select {
+  border: 2px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.table {
+  background-color: white;
+  border-radius: 0.375rem;
+  overflow: hidden;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  color: #495057;
+  padding: 1rem 0.75rem;
+}
+
+.table tbody td {
+  padding: 0.75rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.btn {
+  font-weight: 500;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.btn-success {
+  background-color: #198754;
+  border-color: #198754;
+}
+
+.btn-success:hover {
+  background-color: #157347;
+  border-color: #146c43;
+}
+
+.btn-outline-danger {
+  color: #dc3545;
+  border-color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.alert {
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+  color: #856404;
+}
+
+.table th {
+  border-top: none;
+  font-weight: 600;
+  color: #6c757d;
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.btn-group .btn {
+  border-radius: 0.375rem;
+}
+
+.btn-group .btn:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.btn-group .btn:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.card.border-primary {
+  border-color: #0d6efd !important;
+}
+
+.card.border-primary .card-header {
+  background-color: rgba(13, 110, 253, 0.1);
+  border-bottom-color: #0d6efd;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .table-responsive {
+    border-radius: 0.375rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+  
+  .btn-group {
+    width: 100%;
+  }
+  
+  .btn-group .btn {
+    flex: 1;
+  }
+}
+
+/* Styles pour améliorer la lisibilité et l'organisation */
+dl.row dt {
+  font-weight: 600;
+  color: #495057;
+  padding: 0.5rem 0;
+}
+
+dl.row dd {
+  padding: 0.5rem 0;
+  color: #6c757d;
+}
+
+/* Espacement général */
+.mb-3 {
+  margin-bottom: 1.5rem !important;
+}
+
+.mb-4 {
+  margin-bottom: 2rem !important;
+}
+
+/* Amélioration des sections */
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+/* Amélioration des inputs numériques */
+input[type="number"] {
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Amélioration des checkboxes */
+.form-check-input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+}
+
+.form-check-label {
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+/* Amélioration des textarea */
+textarea.form-control {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+/* Amélioration de la sidebar */
+.col-lg-4 .card {
+  position: sticky;
+  top: 1rem;
+}
+
+/* Styles pour les zones de téléchargement de fichiers */
+.file-upload-container {
+  position: relative;
+  border: 2px dashed #dee2e6;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.file-upload-container:hover {
+  border-color: #0d6efd;
+  background-color: #e7f3ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+}
+
+.file-upload-container.dragover {
+  border-color: #198754;
+  background-color: #d1e7dd;
+  transform: scale(1.02);
+}
+
+.file-upload-container input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.file-upload-info {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.file-upload-info i {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.file-upload-container:hover .file-upload-info i {
+  color: #0d6efd;
+  transform: scale(1.1);
+}
+
+.file-upload-info p {
+  font-size: 1.1rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.file-upload-info small {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+/* Animation pour les fichiers téléchargés */
+.alert-success {
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Effet de pulsation pour les zones de drop */
+.file-upload-container.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+  }
+}
+
+/* Styles pour les icônes de fichiers */
+.file-icon {
+  font-size: 2rem;
+  margin-right: 0.5rem;
+}
+
+.file-icon.pdf { color: #dc3545; }
+.file-icon.doc, .file-icon.docx { color: #0d6efd; }
+.file-icon.txt { color: #6c757d; }
+.file-icon.xls, .file-icon.xlsx { color: #198754; }
+
+/* Amélioration des boutons de suppression */
+.btn-outline-danger {
+  transition: all 0.2s ease;
+}
+
+.btn-outline-danger:hover {
+  transform: scale(1.05);
+}
+
+/* Responsive pour les zones de téléchargement */
+@media (max-width: 768px) {
+  .file-upload-container {
+    padding: 1.5rem;
+    min-height: 120px;
+  }
+  
+  .file-upload-info i {
+    font-size: 2.5rem;
+  }
+  
+  .file-upload-info p {
+    font-size: 1rem;
+  }
+}
+
+/* Animation de chargement pour les fichiers */
+.file-uploading {
+  position: relative;
+  overflow: hidden;
+}
+
+.file-uploading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Styles pour les messages d'erreur de fichier */
+.file-error {
+  border-color: #dc3545;
+  background-color: #f8d7da;
+}
+
+.file-error .file-upload-info i {
+  color: #dc3545;
+}
+
+/* Amélioration des alertes de succès */
+.alert-success {
+  border-left: 4px solid #198754;
+  background: linear-gradient(135deg, #d1e7dd 0%, #c3e6cb 100%);
+}
+
+/* Effet de focus pour l'accessibilité */
+.file-upload-container:focus-within {
+  outline: 2px solid #0d6efd;
+  outline-offset: 2px;
+}
+
+.row-gisement > td {
+  background-color: #f5e9da !important; /* beige/sable doux */
+}
+.row-amendement > td {
+  background-color: #e6f4ea !important; /* vert pastel doux */
+}
+
+.btn-outline-danger:hover{
+  color: white !important;
+}

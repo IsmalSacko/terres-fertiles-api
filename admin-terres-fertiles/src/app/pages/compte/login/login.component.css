@@ -1,0 +1,269 @@
+/* ================================
+   DESIGN MODERNE - LOGIN/COMPTE
+   Style équilibré avec palette variée et animations magiques
+   ================================ */
+
+/* Variables de couleurs modernes */
+:host {
+  --primary-blue: #2563eb;
+  --primary-indigo: #4f46e5;
+  --accent-orange: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --success-green: #10b981;
+  --warning-amber: #f59e0b;
+  --error-red: #ef4444;
+  --neutral-gray: #6b7280;
+  --light-gray: #f3f4f6;
+  --dark-gray: #374151;
+  --white: #ffffff;
+}
+
+/* Conteneur principal avec gradient sombre et fertile */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Graines étincelantes et pousses vertes pour la page de connexion */
+.login-container::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Graines dorées qui scintillent */
+    radial-gradient(circle at 25% 35%, rgba(255, 215, 0, 0.8) 2px, transparent 2px),
+    radial-gradient(circle at 75% 25%, rgba(255, 215, 0, 0.6) 1.5px, transparent 1.5px),
+    radial-gradient(circle at 45% 75%, rgba(255, 215, 0, 0.9) 2px, transparent 2px),
+    radial-gradient(circle at 85% 55%, rgba(255, 215, 0, 0.7) 1px, transparent 1px),
+    radial-gradient(circle at 15% 85%, rgba(255, 215, 0, 0.8) 1.5px, transparent 1.5px),
+    /* Petites pousses vertes */
+    radial-gradient(circle at 35% 85%, rgba(76, 175, 80, 0.9) 1px, transparent 1px),
+    radial-gradient(circle at 75% 95%, rgba(76, 175, 80, 0.8) 1px, transparent 1px),
+    radial-gradient(circle at 95% 75%, rgba(76, 175, 80, 0.7) 1px, transparent 1px),
+    /* Étoiles scintillantes */
+    radial-gradient(circle at 5% 5%, rgba(255, 255, 255, 0.6) 1px, transparent 1px),
+    radial-gradient(circle at 95% 15%, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+  background-size: 
+    280px 280px, 200px 200px, 380px 380px, 250px 250px, 320px 320px,
+    260px 260px, 310px 310px, 280px 280px,
+    450px 450px, 360px 360px;
+  pointer-events: none;
+  z-index: -1;
+  animation: loginNatureGrowing 10s ease-in-out infinite;
+}
+
+/* Petits arbres qui poussent en bas pour la page de connexion */
+.login-container::after {
+  content: '';
+  position: fixed;
+  bottom: -30px;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background-image: 
+    /* Sol fertile */
+    linear-gradient(to top, rgba(139, 69, 19, 0.4) 0%, transparent 30%),
+    /* Petits arbres stylisés */
+    radial-gradient(ellipse at 10% 60%, rgba(34, 139, 34, 0.6) 15px, transparent 20px),
+    radial-gradient(ellipse at 25% 55%, rgba(34, 139, 34, 0.5) 12px, transparent 17px),
+    radial-gradient(ellipse at 42% 62%, rgba(34, 139, 34, 0.7) 18px, transparent 23px),
+    radial-gradient(ellipse at 60% 58%, rgba(34, 139, 34, 0.4) 14px, transparent 19px),
+    radial-gradient(ellipse at 78% 60%, rgba(34, 139, 34, 0.6) 16px, transparent 21px),
+    radial-gradient(ellipse at 92% 56%, rgba(34, 139, 34, 0.5) 13px, transparent 18px);
+  background-size: 100% 100%, 
+    170px 50px, 150px 45px, 190px 55px, 160px 48px, 180px 52px, 140px 42px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  z-index: -1;
+  animation: loginTreesGrowing 13s ease-in-out infinite;
+}
+
+/* Animations magiques spécifiques à la page de connexion */
+@keyframes loginNatureGrowing {
+  0% {
+    transform: scale(0.9) rotate(0deg);
+    opacity: 0.5;
+    filter: brightness(1);
+  }
+  25% {
+    transform: scale(1.1) rotate(0.2deg);
+    opacity: 0.8;
+    filter: brightness(1.4);
+  }
+  50% {
+    transform: scale(1.0) rotate(-0.1deg);
+    opacity: 0.9;
+    filter: brightness(1.7);
+  }
+  75% {
+    transform: scale(1.2) rotate(0.3deg);
+    opacity: 0.7;
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: scale(0.8) rotate(0deg);
+    opacity: 0.5;
+    filter: brightness(1.1);
+  }
+}
+
+@keyframes loginTreesGrowing {
+  0% {
+    transform: translateY(16px) scaleY(0.3);
+    opacity: 0.3;
+  }
+  30% {
+    transform: translateY(8px) scaleY(0.6);
+    opacity: 0.6;
+  }
+  60% {
+    transform: translateY(0px) scaleY(1.1);
+    opacity: 0.9;
+  }
+  80% {
+    transform: translateY(-3px) scaleY(1.0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(5px) scaleY(0.7);
+    opacity: 0.4;
+  }
+}
+
+.forgot-password-link {
+  text-align: right;
+  margin-top: 12px;
+}
+
+.forgot-password-link a {
+  color: var(--primary-blue);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.forgot-password-link a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -2px;
+  left: 0;
+  background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+  transition: width 0.3s ease;
+}
+
+.forgot-password-link a:hover,
+.forgot-password-link a:focus {
+  color: var(--accent-purple);
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover::after {
+  width: 100%;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: fadeInScale 1s ease-in-out;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+mat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-blue) 0%, var(--accent-purple) 50%, var(--accent-orange) 100%);
+  border-radius: 20px 20px 0 0;
+}
+
+@keyframes fadeInScale {
+  from { 
+    opacity: 0; 
+    transform: translateY(-30px) scale(0.9); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+mat-card-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: var(--dark-gray);
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.full-width-field {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.full-width-button {
+  width: 100%;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-indigo) 100%);
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.full-width-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, var(--primary-indigo) 0%, var(--accent-purple) 100%);
+}
+
+.error-message {
+  color: var(--error-red);
+  margin: 1rem 0;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+  border-radius: 12px;
+  text-align: center;
+  opacity: 0;
+  animation: slideInError 0.4s ease-in-out forwards;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  font-weight: 500;
+}
+
+@keyframes slideInError {
+  from { 
+    opacity: 0; 
+    transform: translateY(-15px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}

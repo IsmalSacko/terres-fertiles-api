@@ -1,0 +1,86 @@
+<h2>Modifier ou créer une intervention</h2>
+
+<form (ngSubmit)="onSave()" #form="ngForm" class="planning-table">
+
+  <div class="plateforme-row" style="flex-direction: column; gap: 12px; padding: 10px;">
+    <!-- Date début -->
+    <div style="display: flex; align-items: center;">
+      <div class="corner-cell" style="width: 160px;">Date début</div>
+      <input
+        type="date"
+        [(ngModel)]="melange.date_debut"
+        name="date_debut"
+        required
+        style="flex-grow: 1; height: 36px; padding: 0 8px; font-size: 14px;"
+      />
+    </div>
+
+    <!-- Titre -->
+    <div style="display: flex; align-items: center;">
+      <div class="corner-cell" style="width: 160px;">Titre / Intervention</div>
+      <input
+        type="text"
+        [(ngModel)]="melange.titre"
+        name="titre"
+        required
+        style="flex-grow: 1; height: 36px; padding: 0 8px; font-size: 14px;"
+      />
+    </div>
+
+    <!-- Durée -->
+    <div style="display: flex; align-items: center;">
+      <div class="corner-cell" style="width: 160px;">Durée (jours)</div>
+      <input
+        type="number"
+        [(ngModel)]="melange.duree_jours"
+        name="duree_jours"
+        min="1"
+        required
+        style="flex-grow: 1; height: 36px; padding: 0 8px; font-size: 14px;"
+      />
+    </div>
+
+    <!-- Statut -->
+    <div style="display: flex; align-items: center;">
+      <div class="corner-cell" style="width: 160px;">Statut</div>
+      <select
+        [(ngModel)]="melange.statut"
+        name="statut"
+        required
+        style="flex-grow: 1; height: 36px; padding: 0 8px; font-size: 14px;"
+      >
+        <option value="planned">Planned</option>
+        <option value="active">Active</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+
+    <!-- Mélange : nom readonly -->
+    <div style="display: flex; align-items: center;">
+      <div class="corner-cell" style="width: 160px;">Mélange (Nom)</div>
+      <input
+        type="text"
+        [value]="melange.melange_nom"
+        disabled
+        style="flex-grow: 1; height: 36px; padding: 0 8px; font-size: 14px; background-color: #eee;"
+      />
+    </div>
+
+    <!-- Mélange : id caché -->
+    <input
+      type="hidden"
+      [(ngModel)]="melange.melange"
+      name="melange"
+      required
+    />
+  </div>
+
+  <div class="actions" style="display:flex; justify-content:flex-end; margin-top: 20px; gap: 12px;">
+
+    <button type="button" (click)="onCancel()">Annuler</button>
+    <button (click)="onDelete()">Supprimer</button>
+
+    <button type="submit" [disabled]="!form.form.valid">Enregistrer</button>
+  </div>
+
+</form>

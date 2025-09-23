@@ -1,0 +1,633 @@
+/* ================================
+   DASHBOARD MODERNE - TERRES FERTILES
+   Design épuré et contemporain sans catégorisation
+   ================================ */
+
+/* Variables de couleurs avec thème fertile sombre */
+:host {
+  --gradient-primary: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
+  --gradient-secondary: linear-gradient(135deg, #2e5f2e 0%, #4a7c59 100%);
+  --gradient-success: linear-gradient(135deg, #1e3c1e 0%, #58a85f 100%);
+  --gradient-warning: linear-gradient(135deg, #3a763a 0%, #7cb342 100%);
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-border: rgba(255, 255, 255, 0.2);
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-light: rgba(255, 255, 255, 0.9);
+  --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --fertile-dark: #0a0a0a;
+  --fertile-mid: #1e3c1e;
+  --fertile-light: #3a763a;
+}
+
+/* ========================================
+   ARRIÈRE-PLAN MODERNE ET FERTILE
+   ======================================== */
+
+.dashboard-component {
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
+  min-height: 100vh;
+  padding: 0.5rem 0;
+  padding-top: 60px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Couche d'étoiles-plantes qui poussent */
+.dashboard-component::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    /* Étoiles-plantes vertes qui poussent - Forme d'étoile */
+    radial-gradient(ellipse 6px 12px at 20% 30%, rgba(139, 195, 74, 0.9) 40%, transparent 60%),
+    radial-gradient(ellipse 12px 6px at 20% 30%, rgba(139, 195, 74, 0.8) 40%, transparent 60%),
+    radial-gradient(ellipse 8px 16px at 65% 15%, rgba(129, 199, 132, 0.8) 35%, transparent 65%),
+    radial-gradient(ellipse 16px 8px at 65% 15%, rgba(129, 199, 132, 0.7) 35%, transparent 65%),
+    radial-gradient(ellipse 10px 20px at 85% 70%, rgba(102, 187, 106, 0.9) 30%, transparent 70%),
+    radial-gradient(ellipse 20px 10px at 85% 70%, rgba(102, 187, 106, 0.8) 30%, transparent 70%),
+    radial-gradient(ellipse 7px 14px at 15% 80%, rgba(139, 195, 74, 0.8) 40%, transparent 60%),
+    radial-gradient(ellipse 14px 7px at 15% 80%, rgba(139, 195, 74, 0.7) 40%, transparent 60%),
+    radial-gradient(ellipse 9px 18px at 75% 50%, rgba(129, 199, 132, 0.9) 35%, transparent 65%),
+    radial-gradient(ellipse 18px 9px at 75% 50%, rgba(129, 199, 132, 0.8) 35%, transparent 65%),
+    /* Graines dorées qui scintillent */
+    radial-gradient(circle at 35% 25%, rgba(255, 215, 0, 0.8) 2px, transparent 4px),
+    radial-gradient(circle at 55% 65%, rgba(255, 215, 0, 0.9) 1.5px, transparent 3px),
+    radial-gradient(circle at 90% 45%, rgba(255, 215, 0, 0.7) 2.5px, transparent 5px),
+    /* Étoiles scintillantes blanches */
+    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.6) 1px, transparent 2px),
+    radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.5) 1px, transparent 2px);
+  background-size: 
+    200px 200px, 200px 200px, 250px 250px, 250px 250px, 300px 300px, 300px 300px,
+    180px 180px, 180px 180px, 220px 220px, 220px 220px,
+    350px 350px, 400px 400px, 320px 320px,
+    500px 500px, 420px 420px;
+  pointer-events: none;
+  z-index: -1;
+  animation: starPlantsGrowing 12s ease-in-out infinite;
+}
+
+/* Petites plantes qui poussent en bas du dashboard */
+.dashboard-component::after {
+  content: '';
+  position: fixed;
+  bottom: -30px;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background-image: 
+    /* Sol fertile sombre */
+    linear-gradient(to top, rgba(15, 15, 15, 0.6) 0%, transparent 40%),
+    /* Petites plantes stylisées qui poussent */
+    radial-gradient(ellipse at 5% 60%, rgba(58, 118, 58, 0.8) 18px, transparent 25px),
+    radial-gradient(ellipse at 15% 55%, rgba(58, 118, 58, 0.7) 15px, transparent 20px),
+    radial-gradient(ellipse at 28% 62%, rgba(46, 95, 46, 0.9) 20px, transparent 28px),
+    radial-gradient(ellipse at 42% 58%, rgba(58, 118, 58, 0.6) 16px, transparent 22px),
+    radial-gradient(ellipse at 58% 60%, rgba(46, 95, 46, 0.8) 19px, transparent 26px),
+    radial-gradient(ellipse at 72% 56%, rgba(58, 118, 58, 0.7) 17px, transparent 23px),
+    radial-gradient(ellipse at 85% 59%, rgba(46, 95, 46, 0.8) 18px, transparent 25px),
+    radial-gradient(ellipse at 95% 57%, rgba(58, 118, 58, 0.6) 14px, transparent 19px);
+  background-size: 100% 100%, 
+    180px 60px, 160px 55px, 200px 65px, 170px 58px, 190px 62px, 150px 52px, 180px 60px, 140px 48px;
+  background-repeat: repeat-x;
+  pointer-events: none;
+  z-index: -1;
+  animation: plantsGrowing 18s ease-in-out infinite;
+}
+
+/* ========================================
+   EN-TÊTE MODERNE SIMPLIFIÉ
+   ======================================== */
+
+.dashboard-header {
+  text-align: center;
+ 
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-header h2 {
+  color: var(--text-light);
+  font-size: 2.2rem;
+  margin: 0 0 0.3rem 0;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+.dashboard-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+/* ========================================
+   CONTENEUR PRINCIPAL MODERNE
+   ======================================== */
+
+.dashboard-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   GRILLE DE CARTES MODERNE
+   ======================================== */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Cartes modernes sans catégorisation */
+.modern-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 1rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  animation: cardFloat 6s ease-in-out infinite;
+}
+
+.modern-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-gradient);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow: var(--shadow-hover);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.modern-card:hover::before {
+  transform: scaleX(1);
+}
+
+.card-icon {
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 12px;
+  background: var(--card-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+  transition: all 0.3s ease;
+  animation: iconPulse 4s ease-in-out infinite;
+}
+
+.card-icon mat-icon {
+  font-size: 1.6rem;
+  color: white;
+}
+
+.modern-card:hover .card-icon {
+  transform: scale(1.15) rotate(8deg);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.3rem 0;
+  letter-spacing: -0.01em;
+}
+
+.card-description {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0 0 0.8rem 0;
+}
+
+.card-action {
+  background: var(--card-gradient);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.85rem;
+}
+
+.card-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* ========================================
+   CARTES SPÉCIALISÉES AVEC GRADIENTS FERTILES
+   ======================================== */
+
+/* Carte Chantiers */
+.card-chantiers {
+  --card-gradient: linear-gradient(135deg, var(--fertile-mid) 0%, #4a5c6a 100%);
+}
+
+/* Carte Gisements */
+.card-gisements {
+  --card-gradient: linear-gradient(135deg, var(--fertile-light) 0%, #558b2f 100%);
+}
+
+/* Carte Mélanges */
+.card-melanges {
+  --card-gradient: linear-gradient(135deg, #2e5f2e 0%, #689f38 100%);
+}
+
+/* Carte Planning */
+.card-planning {
+  --card-gradient: linear-gradient(135deg, var(--fertile-mid) 0%, #388e3c 100%);
+}
+
+/* Carte Analyses */
+.card-analyses {
+  --card-gradient: linear-gradient(135deg, #1b3d1b 0%, #4caf50 100%);
+}
+
+/* Carte Vente */
+.card-vente {
+  --card-gradient: linear-gradient(135deg, var(--fertile-light) 0%, #66bb6a 100%);
+}
+
+/* Carte Saisies de Vente */
+.card-saisies-vente {
+  --card-gradient: linear-gradient(135deg, #2e7d32 0%, #43a047 50%, #66bb6a 100%);
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.card-saisies-vente:hover {
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 12px 30px rgba(76, 175, 80, 0.2);
+}
+
+/* Carte Admin */
+.card-admin {
+  --card-gradient: linear-gradient(135deg, var(--fertile-dark) 0%, #616161 100%);
+}
+
+/* ========================================
+   SECTION STATISTIQUES RAPIDES
+   ======================================== */
+
+.stats-section {
+  margin-bottom: 1.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--card-border);
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+  animation: statCardPulse 5s ease-in-out infinite;
+}
+
+.stat-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: var(--shadow-hover);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  background: var(--stat-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.stat-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0.4rem 0 0 0;
+  font-weight: 500;
+}
+
+.stat-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 6px;
+  background: var(--stat-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.8rem;
+}
+
+.stat-icon mat-icon {
+  color: white;
+  font-size: 1rem;
+}
+
+/* Statistiques spécialisées avec thème fertile */
+.stat-primary { --stat-gradient: linear-gradient(135deg, var(--fertile-mid) 0%, #4a7c59 100%); }
+.stat-secondary { --stat-gradient: linear-gradient(135deg, #2e5f2e 0%, #689f38 100%); }
+.stat-success { --stat-gradient: linear-gradient(135deg, var(--fertile-light) 0%, #558b2f 100%); }
+.stat-warning { --stat-gradient: linear-gradient(135deg, #1b3d1b 0%, #4caf50 100%); }
+
+/* ========================================
+   ANIMATIONS NATURE DOUCE
+   ======================================== */
+
+@keyframes starPlantsGrowing {
+  0% {
+    transform: scale(0.2) rotate(0deg);
+    opacity: 0.1;
+    filter: brightness(0.8) hue-rotate(0deg);
+  }
+  15% {
+    transform: scale(0.6) rotate(15deg);
+    opacity: 0.4;
+    filter: brightness(1.2) hue-rotate(10deg);
+  }
+  35% {
+    transform: scale(1.2) rotate(45deg);
+    opacity: 0.8;
+    filter: brightness(1.6) hue-rotate(25deg);
+  }
+  55% {
+    transform: scale(1.0) rotate(90deg);
+    opacity: 0.9;
+    filter: brightness(1.8) hue-rotate(15deg);
+  }
+  75% {
+    transform: scale(1.3) rotate(135deg);
+    opacity: 0.7;
+    filter: brightness(1.4) hue-rotate(-10deg);
+  }
+  90% {
+    transform: scale(0.8) rotate(180deg);
+    opacity: 0.5;
+    filter: brightness(1.1) hue-rotate(-5deg);
+  }
+  100% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0.2;
+    filter: brightness(0.9) hue-rotate(0deg);
+  }
+}
+
+@keyframes plantsGrowing {
+  0% {
+    transform: translateY(30px) scaleY(0.1);
+    opacity: 0.2;
+  }
+  20% {
+    transform: translateY(20px) scaleY(0.4);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(5px) scaleY(0.8);
+    opacity: 0.8;
+  }
+  70% {
+    transform: translateY(0px) scaleY(1.2);
+    opacity: 1.0;
+  }
+  90% {
+    transform: translateY(-8px) scaleY(1.0);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(15px) scaleY(0.6);
+    opacity: 0.3;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Nouvelles animations attractives */
+@keyframes titleGlow {
+  0% { text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+  100% { text-shadow: 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(139, 195, 74, 0.4); }
+}
+
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 195, 74, 0.4); }
+  50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(139, 195, 74, 0); }
+}
+
+@keyframes statCardPulse {
+  0%, 100% { border-color: rgba(255, 255, 255, 0.2); }
+  50% { border-color: rgba(139, 195, 74, 0.3); }
+}
+
+/* ========================================
+   ANIMATIONS SPÉCIALES POUR TABLEAUX
+   ======================================== */
+
+/* Règle importante : Les tableaux doivent rester visibles en permanence */
+table, 
+.table,
+mat-table,
+.mat-table,
+tr,
+td,
+th,
+.table-row,
+.table-cell {
+  opacity: 1 !important;
+  animation: none !important;
+  transform: none !important;
+  visibility: visible !important;
+}
+
+/* Pour les conteneurs de tableaux - animation très douce sans masquer */
+.table-container,
+.mat-table-container {
+  animation: fadeInGently 0.8s ease-out forwards;
+}
+
+@keyframes fadeInGently {
+  from {
+    opacity: 0.3;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Délais d'animation pour les cartes - Plus rapides */
+.modern-card {
+  animation: slideInUp 0.5s ease-out forwards, cardFloat 6s ease-in-out infinite 0.5s;
+  opacity: 0;
+}
+
+.modern-card:nth-child(1) { animation-delay: 0.05s; }
+.modern-card:nth-child(2) { animation-delay: 0.1s; }
+.modern-card:nth-child(3) { animation-delay: 0.15s; }
+.modern-card:nth-child(4) { animation-delay: 0.2s; }
+.modern-card:nth-child(5) { animation-delay: 0.25s; }
+.modern-card:nth-child(6) { animation-delay: 0.3s; }
+.modern-card:nth-child(7) { animation-delay: 0.35s; }
+
+.stat-card {
+  animation: slideInUp 0.5s ease-out forwards, statCardPulse 5s ease-in-out infinite 0.5s;
+  opacity: 0;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.15s; }
+.stat-card:nth-child(3) { animation-delay: 0.2s; }
+.stat-card:nth-child(4) { animation-delay: 0.25s; }
+
+.dashboard-header {
+  animation: fadeIn 0.8s ease-out;
+  margin-bottom: -60px;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN MODERNE
+   ======================================== */
+
+@media (max-width: 768px) {
+  .dashboard-component {
+    padding: 0.3rem 0;
+    padding-top: 55px;
+  }
+
+  .dashboard-container {
+    padding: 0 0.8rem;
+  }
+
+  .dashboard-header h2 {
+    font-size: 1.9rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 0rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .modern-card {
+    padding: 0.8rem;
+  }
+
+  .stat-card {
+    padding: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-component {
+    padding: 0.2rem 0;
+    padding-top: 50px;
+  }
+  
+  .dashboard-container {
+    padding: 0 0.6rem;
+  }
+
+  .dashboard-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 0.8rem;
+    margin-bottom: -60px;
+    
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .modern-card {
+    padding: 0.8rem;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+  }
+
+  .card-icon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
+
+  .card-icon mat-icon {
+    font-size: 1.3rem;
+  }
+
+  .stat-value {
+    font-size: 1.4rem;
+  }
+}

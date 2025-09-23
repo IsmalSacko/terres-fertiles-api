@@ -1,0 +1,36 @@
+
+.plateformes-map-container {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.map-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  margin-top: 0;
+}
+
+
+#map, .leaflet-map {
+  width: 100%;
+  height: 320px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 0.5rem;
+  z-index: 1;
+}
+
+@media (max-width: 900px) {
+  #map, .leaflet-map {
+    height: 220px;
+  }
+}
+@media (max-width: 600px) {
+  #map, .leaflet-map {
+    height: 140px;
+  }
+}
