@@ -6,7 +6,11 @@ from rest_framework.authtoken.models import Token
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.core.files.storage import default_storage
+
+from .models import SaisieVente
+
 from .models import Chantier, Plateforme, SaisieVente
+
 
 from .models import DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange
 
