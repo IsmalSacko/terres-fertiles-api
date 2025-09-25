@@ -28,6 +28,9 @@ export interface MelangeIngredient {
   gisement: number;
   pourcentage: number;
   gisement_details?: Gisement;
+  // Propriétés ajoutées par l'API lors de la lecture
+  nom?: string;
+  type?: string;
 }
 
 
@@ -51,7 +54,9 @@ export interface MelangeAmendement {
   amendementOrganique?: number; // camelCase pour compatibilité Angular
   amendement_organique?: number; // snake_case pour compatibilité Django
   pourcentage: number;
-  amendement_details?: AmendementOrganique; // Ajout des détails de l'amendement
+  // Propriétés ajoutées par l'API lors de la lecture
+  nom?: string;
+  type?: string;
 }
 
 export enum MelangeEtat {
@@ -69,12 +74,12 @@ export interface Melange {
   utilisateur?: string
   nom_complet?: string
   date_creation: string;
-  producteur?: string;
   reference_produit: string;
   plateforme: number | null;
   plateforme_details?: Plateforme;
   plateforme_nom?: string;
   fournisseur: string;
+  producteur: string;
   couverture_vegetale: string | null;
   periode_melange: string;
   date_semis: string;
@@ -108,10 +113,6 @@ export interface PartialMelange {
   providedIn: 'root'
 })
 export class MelangeService {
-  async getMelangeCount(): Promise<number> {
-    const response = await axios.get<Melange[]>(this.apiUrl, this.getHeaders());
-    return response.data.length;
-  }
   private apiUrl = 'http://127.0.0.1:8000/api/melanges/';
   private ingredientsApiUrl = 'http://127.0.0.1:8000/api/melanges/';
  
@@ -316,10 +317,10 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
   getEtatLabel(etat: MelangeEtat): string {
     const labels = {
       [MelangeEtat.COMPOSITION]: 'Composition',
-      [MelangeEtat.CONFORMITE]: 'Ordre de conformité',
-      [MelangeEtat.CONSIGNE]: 'Consignes de mélange',
-      [MelangeEtat.CONTROLE_1]: 'Contrôle +1 mois',
-      [MelangeEtat.CONTROLE_2]: 'Contrôle +2 mois',
+      [MelangeEtat.CONFORMITE]: 'Ordre fabrication',
+      [MelangeEtat.CONSIGNE]: 'Consignes de brassage et stockage',
+      [MelangeEtat.CONTROLE_1]: 'Suivi des étapes de stockage et maturation (de 30 jours à 8 mois)',
+      [MelangeEtat.CONTROLE_2]: 'Établissement de fiche produit',
       [MelangeEtat.VALIDATION]: 'Validation finale'
     };
     return labels[etat] || 'Inconnu';
@@ -331,7 +332,7 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
       [MelangeEtat.CONFORMITE]: 'Veuillez renseigner un ordre de conformité.',
       [MelangeEtat.CONSIGNE]: 'Veuillez fournir les consignes de mélange.',
       [MelangeEtat.CONTROLE_1]: 'Un contrôle de réduction +1 mois est requis.',
-      [MelangeEtat.CONTROLE_2]: 'Un contrôle +2 mois est requis.',
+      [MelangeEtat.CONTROLE_2]: 'Établissement de fiche produit requis.',
       [MelangeEtat.VALIDATION]: 'Fiche technique obligatoire.'
     };
     return taches[etat] || '';
@@ -347,5 +348,10 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
       [MelangeEtat.VALIDATION]: 'success'
     };
     return colors[etat] || 'light';
+  }
+
+  async getMelangeCount(): Promise<number> {
+    const melanges = await this.getAll();
+    return melanges.length;
   }
 }

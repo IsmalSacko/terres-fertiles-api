@@ -9,7 +9,14 @@ interface Chantier {
   latitude: number;
   longitude: number;
 }
-
+export interface Plateforme {
+  id: number;
+  nom: string;
+  localisation: string;
+  latitude: number | null;
+  longitude: number | null;
+  date_creation: string | null;
+}
 interface Melange {
   id: number;
   nom: string;
@@ -19,7 +26,7 @@ interface Melange {
 
 export interface ProduitVente {
   id: number;
-  utilisateur?: string;
+  utilisateur?: string; // Ajout du champ utilisateur
   chantier_info?: {
     id: number;
     nom: string;
@@ -67,11 +74,8 @@ export interface ProduitVenteResponse {
   providedIn: 'root'
 })
 export class ProduitVenteService {
-  async getProduitVenteCount(): Promise<number> {
-    const response = await axios.get<ProduitVente[]>(this.apiUrl, this.getHeaders());
-    return response.data.length;
-  }
   private apiUrl = 'http://127.0.0.1:8000/api/produits/';
+  private plateformeUrl = 'http://127.0.0.1:8000/api/plateformes/';
 
   constructor() {}
 
@@ -145,4 +149,11 @@ export class ProduitVenteService {
       throw error;
     }
   }
-} 
+  async getProduitVenteCount(): Promise<number> {
+  const produits = await this.getAll();
+  return produits.length;
+  }
+
+
+
+}

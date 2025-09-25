@@ -7,20 +7,16 @@ export interface Chantier {
   maitre_ouvrage: string;
   entreprise_terrassement: string;
   localisation: string;
-  commune?: string;
   latitude: number;
   longitude: number;
+  commune: string;
+  is_active: boolean;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChantierService {
-  async getChantierActifs(): Promise<number> {
-    // À adapter si un champ "actif" existe sur le modèle Chantier
-    const response = await axios.get<Chantier[]>(this.apiUrl, this.getHeaders());
-    return response.data.length;
-  }
   private apiUrl = 'http://127.0.0.1:8000/api/chantiers/';
   
   // Méthode pour les token et entête
@@ -62,5 +58,10 @@ export class ChantierService {
     
     const response = await axios.get<Chantier[]>(`${this.apiUrl}user/`, this.getHeaders());
     return response.data;
+  }
+
+  async getChantierActifs(): Promise<number> {
+    const chantier = await this.getAll();
+    return chantier.filter(c => c.is_active).length;
   }
 } 

@@ -1,3 +1,4 @@
+<div class="standard-page-content">
 <div class="plateforme-detail-container" *ngIf="plateforme">
   <mat-card class="plateforme-detail-card">
     <mat-card-header>
@@ -56,9 +57,8 @@
     </mat-card-actions>
   </mat-card>
 </div>
-@if (!plateforme) {
-  <div  class="empty-message">
+<div *ngIf="!plateforme" class="empty-message">
   <mat-icon>info</mat-icon>
   Plateforme introuvable.
 </div>
-}
+</div>

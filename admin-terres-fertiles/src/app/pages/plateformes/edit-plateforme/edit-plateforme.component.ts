@@ -31,10 +31,9 @@ export class EditPlateformeComponent implements OnInit{
         this.plateformeForm = this.fb.group({
           nom: ['', Validators.required],
           localisation: ['', Validators.required],
-          entreprise_gestionnaire: ['', Validators.required],
-          latitude: [''], // Pas de Validators.required - champ optionnel
-          longitude: [''], // Pas de Validators.required - champ optionnel
-          date_creation: [new Date().toISOString().slice(0, 10), Validators.required],
+          latitude: ['', Validators.required],
+          longitude: ['', Validators.required],
+          date_creation: ['', Validators.required],
       });
 
       this.loadPlateforme();
@@ -56,14 +55,7 @@ export class EditPlateformeComponent implements OnInit{
     async onSubmit() {
       if (this.plateformeForm.invalid) return;
       this.loading = true;
-      
-      const plateformeData = { ...this.plateformeForm.value };
-      
-      // Convertir les chaînes vides en null pour les champs optionnels
-      if (plateformeData.latitude === '') plateformeData.latitude = null;
-      if (plateformeData.longitude === '') plateformeData.longitude = null;
-      
-      this.plateformeService.updatePlateforme(this.plateformId, plateformeData).then(
+      this.plateformeService.updatePlateforme(this.plateformId, this.plateformeForm.value).then(
         async () => {
           // Laisse le spinner visible 1 seconde avant de rediriger
           await new Promise(resolve => setTimeout(resolve, 1000));

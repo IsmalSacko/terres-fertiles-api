@@ -1,7 +1,6 @@
 @if (!loading) {
-
-
-  <div class="edit-plateforme-container">
+  <div class="standard-page-content">
+    <div class="edit-plateforme-container">
     <h2 class="edit-plateforme-title">
       <mat-icon>edit</mat-icon>
       Modifier la plateforme
@@ -16,22 +15,19 @@
         <input matInput formControlName="localisation" required>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Entreprise gestionnaire</mat-label>
-        <input matInput formControlName="entreprise_gestionnaire" required>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Latitude</mat-label>
-        <input matInput formControlName="latitude" >
+        <input matInput formControlName="latitude" required>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Longitude</mat-label>
-        <input matInput formControlName="longitude" >
+        <input matInput formControlName="longitude" required>
       </mat-form-field>
       <button mat-raised-button color="primary" type="submit" [disabled]="plateformeForm.invalid || loading">
         Enregistrer
       </button>
       <button mat-button type="button" (click)="goBack()">Annuler</button>
     </form>
+  </div>
   </div>
 } @else {
   <div class="edit-spinner-container">

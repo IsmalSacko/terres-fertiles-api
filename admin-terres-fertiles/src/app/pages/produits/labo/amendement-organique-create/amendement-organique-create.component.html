@@ -1,3 +1,4 @@
+<div class="standard-page-content">
 <h2 class="form-title text-white ">Ajout d'une nouvelle matière organique</h2>
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="amendement-form">
     <div class="row">
@@ -53,3 +54,4 @@
     <div *ngIf="success" class="success-message">Amendement créé avec succès !</div>
     <div *ngIf="error" class="error-message">Erreur lors de la création.</div>
   </form>
+</div>

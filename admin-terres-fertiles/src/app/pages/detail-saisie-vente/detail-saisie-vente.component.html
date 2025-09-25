@@ -281,9 +281,9 @@
 											Ingrédients ({{ saisieVente.produit.melange.ingredients.length || 0 }})
 										</div>
 															@if (saisieVente.produit.melange.ingredients && saisieVente.produit.melange.ingredients.length > 0) {
-																@for (ingredient of saisieVente.produit.melange.ingredients; track ingredient.gisement_details?.nom) {
+																@for (ingredient of saisieVente.produit.melange.ingredients; track ingredient.nom) {
 																	<div class="ingredient-item">
-																		<div class="ingredient-name">{{ ingredient.gisement_details?.nom || 'Gisement inconnu' }}</div>
+																		<div class="ingredient-name">{{ ingredient.nom }}</div>
 																		<div class="ingredient-percentage">{{ ingredient.pourcentage }}%</div>
 																	</div>
 																}
@@ -301,9 +301,9 @@
 											Amendements ({{ saisieVente.produit.melange.amendements.length || 0 }})
 										</div>
 															@if (saisieVente.produit.melange.amendements && saisieVente.produit.melange.amendements.length > 0) {
-																@for (amendement of saisieVente.produit.melange.amendements; track amendement.id) {
+																@for (amendement of saisieVente.produit.melange.amendements; track amendement.nom) {
 																	<div class="amendement-item">
-																		<div class="amendement-name">{{ amendement.amendement_details?.nom || 'Amendement #' + (amendement.amendementOrganique || amendement.amendement_organique) || 'Amendement inconnu' }}</div>
+																		<div class="amendement-name">{{ amendement.nom || 'Amendement sans nom' }}</div>
 																		<div class="amendement-percentage">{{ amendement.pourcentage }}%</div>
 																	</div>
 																}

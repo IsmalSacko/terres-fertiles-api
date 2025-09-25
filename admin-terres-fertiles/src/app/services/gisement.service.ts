@@ -40,10 +40,6 @@ export type PartialGisement = Partial<Gisement>;
   providedIn: 'root'
 })
 export class GisementService {
-  async getGisementCount(): Promise<number> {
-    const response = await axios.get<Gisement[]>(this.apiUrl, this.getHeaders());
-    return response.data.length;
-  }
   private apiUrl = 'http://127.0.0.1:8000/api/gisements/';
   private documentGisementApiUrl = 'http://127.0.0.1:8000/api/documents-gisements/'; // Add URL for documents
 
@@ -124,5 +120,10 @@ export class GisementService {
       `${this.documentGisementApiUrl}?gisement=${gisementId}`, 
       this.getHeaders());
     return response.data;
+  }
+
+  async getGisementCount(): Promise<number> {
+    const gisements = await this.getAll();
+    return gisements.filter(g => g.id).length;
   }
 }

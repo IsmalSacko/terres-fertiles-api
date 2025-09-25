@@ -6,70 +6,89 @@
       <span class="list-edit-spinner-text">Chargement en cours...</span>
     </div>
   }
-<div class="dashboard-component">
-  <!-- En-tête moderne -->
+<div class="dashboard-component full-page-background">
+  <!-- En-tête moderne avec notifications -->
   <div class="dashboard-header">
-    <h2 class="">Tableau de bord</h2>
-    <p class="dashboard-subtitle mb-5">Gestion moderne Terres Fertiles</p>
+    <div class="header-main">
+      <h1 class="dashboard-title">
+        <mat-icon class="title-icon">dashboard</mat-icon>
+        Tableau de bord
+      </h1>
+      <p class="dashboard-subtitle">Gestion moderne Terres Fertiles</p>
+    </div>
+
+    <!-- Barre de notifications statistiques -->
+    <div class="notifications-bar">
+      <div class="notification-item chantier-notification" [routerLink]="['/chantiers']">
+        <div class="notification-icon">
+          <mat-icon>construction</mat-icon>
+          <span class="notification-badge">{{ chantierActifs }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Chantiers</span>
+          <span class="notification-subtitle">actifs</span>
+        </div>
+      </div>
+
+      <div class="notification-item gisement-notification" [routerLink]="['/gisements']">
+        <div class="notification-icon">
+          <mat-icon>terrain</mat-icon>
+          <span class="notification-badge">{{ gisements }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Gisements</span>
+          <span class="notification-subtitle">disponibles</span>
+        </div>
+      </div>
+
+      <div class="notification-item melange-notification" [routerLink]="['/melanges']">
+        <div class="notification-icon">
+          <mat-icon>blender</mat-icon>
+          <span class="notification-badge">{{ melanges }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Mélanges</span>
+          <span class="notification-subtitle">créés</span>
+        </div>
+      </div>
+
+      <div class="notification-item planning-notification" [routerLink]="['/planning']">
+        <div class="notification-icon">
+          <mat-icon>schedule</mat-icon>
+          <span class="notification-badge">{{ plannings }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Plannings</span>
+          <span class="notification-subtitle">actifs</span>
+        </div>
+      </div>
+
+      <div class="notification-item produit-notification" [routerLink]="['/produits']">
+        <div class="notification-icon">
+          <mat-icon>inventory</mat-icon>
+          <span class="notification-badge">{{ produitVente }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Produits</span>
+          <span class="notification-subtitle">en vente</span>
+        </div>
+      </div>
+
+      <div class="notification-item vente-notification" [routerLink]="['/saisies-vente']">
+        <div class="notification-icon">
+          <mat-icon>receipt_long</mat-icon>
+          <span class="notification-badge">{{ saisiesVente }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Fiches</span>
+          <span class="notification-subtitle">de vente</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Conteneur principal -->
   <div class="dashboard-container py-4">
-    
-    <!-- Section statistiques rapides -->
-    <div class="stats-section">
-      <div class="stats-grid">
-        <div class="stat-card stat-primary">
-          <div class="stat-icon">
-            <mat-icon>construction</mat-icon>
-          </div>
-          <div class="stat-value">{{ chantierActifs }}</div>
-          <div class="stat-label">Chantiers actifs</div>
-        </div>
-        
-        <div class="stat-card stat-success">
-          <div class="stat-icon">
-            <mat-icon>eco</mat-icon>
-          </div>
-          <div class="stat-value">{{ gisements }}</div>
-          <div class="stat-label">Gisements disponibles</div>
-        </div>
-        
-        <div class="stat-card stat-secondary">
-          <div class="stat-icon">
-            <mat-icon>blender</mat-icon>
-          </div>
-
-          <div class="stat-value">{{ melanges }}</div>
-          <div class="stat-label">Mélanges crés</div>
-        </div>
-        
-        <div class="stat-card stat-warning">
-          <div class="stat-icon">
-            <mat-icon>schedule</mat-icon>
-          </div>
-          <div class="stat-value">{{ plannings }}</div>
-          <div class="stat-label">Tâches planifiées</div>
-        </div>
-
-                <div class="stat-card stat-secondary">
-          <div class="stat-icon">
-            <mat-icon>shopping_cart</mat-icon>
-          </div>
-
-          <div class="stat-value">{{ produitVente }}</div>
-          <div class="stat-label">Produits créés</div>
-        </div>
-        
-        <div class="stat-card stat-warning">
-          <div class="stat-icon">
-            <mat-icon>receipt_long</mat-icon>
-          </div>
-          <div class="stat-value">{{ saisiesVente }}</div>
-          <div class="stat-label">Fiches de vente</div>
-        </div>
-      </div>
-    </div>
 
     <!-- Grille des cartes principales -->
     <div class="dashboard-grid">
@@ -157,19 +176,6 @@
         </p>
         <button class="card-action">Voir les fiches</button>
       </div>
-
-      <!-- Carte Administration
-      <div class="modern-card card-admin" routerLink="/compte">
-        <div class="card-icon">
-          <mat-icon>settings</mat-icon>
-        </div>
-        <h3 class="card-title">Administration</h3>
-        <p class="card-description">
-          Paramètres du compte, utilisateurs et configuration système.
-        </p>
-        <button class="card-action">Paramètres</button>
-      </div> -->
-
     </div>
   </div>
 </div>

@@ -28,6 +28,34 @@
   overflow-x: hidden;
 }
 
+/* Styles pour le titre et la référence */
+.melange-title {
+  color: #2e7d32 !important;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.melange-reference {
+  color: #4a7c59 !important;
+  font-weight: 500;
+}
+
+/* Bouton de retour stylisé */
+.melange-btn-back {
+  background: linear-gradient(135deg, #2e7d32 0%, #4caf50 100%) !important;
+  color: white !important;
+  border: none !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.melange-btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
+  background: linear-gradient(135deg, #1b5e20 0%, #388e3c 100%) !important;
+  color: white !important;
+}
+
 /* Graines étincelantes et pousses vertes pour melange detail */
 .melange-detail-container::before,
 :host::before {

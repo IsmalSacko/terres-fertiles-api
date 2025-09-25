@@ -64,6 +64,84 @@ html, body {
   color: var(--text-primary);
 }
 
+/* Espacement global pour éviter que le contenu soit collé à la navbar */
+.container {
+  margin-top: 90px; /* Hauteur navbar (68px) + marge (22px) */
+}
+
+/* Règle globale pour tous les composants de page principaux */
+app-create-plateforme,
+app-edit-plateforme,
+app-detail-plateforme,
+app-list-plateforme,
+app-dashboard,
+app-planning,
+app-planning-form,
+app-chantier-list,
+app-chantier-detail,
+app-gisement-list,
+app-gisement-detail,
+app-gisement-create,
+app-document-gisement,
+app-produit-vente-detail,
+app-produit-vente-list,
+app-saisie-vente,
+app-create-saisie-vente,
+app-edit-saisie-vente,
+app-detail-saisie-vente,
+app-analyse-laboratoire-detail,
+app-amendement-organique-create {
+  display: block;
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Classe pour les conteneurs principaux qui ont un background personnalisé */
+.full-page-background {
+  margin-top: -90px;
+  padding-top: 90px;
+  min-height: 100vh;
+}
+
+/* Classe pour les conteneurs sans background personnalisé */
+.standard-page-content {
+  padding-top: 90px;
+  min-height: calc(100vh - 90px);
+}
+
+/* Conteneurs principaux de page */
+.create-plateforme-container,
+.edit-plateforme-container,
+.detail-plateforme-container,
+.plateformes-list-container,
+.dashboard-container,
+.melanges-container,
+.gisements-container,
+.chantiers-container,
+.planning-container,
+.produits-container,
+.saisie-vente-container,
+.add-button-container {
+  margin-top: 0 !important; /* Reset car le padding-top du composant suffit */
+}
+
+/* Responsive : ajustement pour mobile */
+@media (max-width: 768px) {
+  .container {
+    margin-top: 85px; /* Légèrement moins sur mobile */
+  }
+  
+  .full-page-background {
+    margin-top: -85px;
+    padding-top: 85px;
+  }
+  
+  .standard-page-content {
+    padding-top: 85px;
+    min-height: calc(100vh - 85px);
+  }
+}
+
 /* Couleurs des icônes par catégorie */
 .icon-location { color: var(--primary-color) !important; }
 .icon-calendar { color: var(--accent-color) !important; }

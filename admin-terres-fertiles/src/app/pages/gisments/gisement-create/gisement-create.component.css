@@ -28,7 +28,6 @@
   background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
   min-height: 100vh;
   padding: 2rem;
-  padding-top: 90px;
   position: relative;
   overflow-x: hidden;
 }
@@ -36,7 +35,7 @@
 /* Graines étincelantes et pousses vertes */
 .gisement-form::before {
   content: '';
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -68,7 +67,7 @@
 /* Petits arbres qui poussent en bas */
 .gisement-form::after {
   content: '';
-  position: fixed;
+  position: absolute;
   bottom: -30px;
   left: 0;
   right: 0;
@@ -522,7 +521,6 @@
 @media (max-width: 768px) {
   .gisement-form {
     padding: 1rem;
-    padding-top: 70px;
   }
 
   ::ng-deep mat-card {

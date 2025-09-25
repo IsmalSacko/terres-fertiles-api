@@ -1,3 +1,4 @@
+<div class="standard-page-content">
 <div class="container" *ngIf="!loading; else loadingTemplate">
   <mat-card class="product-card">
     <mat-card-header>
@@ -131,4 +132,5 @@
 </ng-template>
 <div class="error-message" *ngIf="errorMsg">
   {{ errorMsg }}
+</div>
 </div>

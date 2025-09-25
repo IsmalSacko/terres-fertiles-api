@@ -11,7 +11,6 @@ import { MatButtonModule } from '@angular/material/button';
   selector: 'app-detail-plateforme',
   standalone: true,
   imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule],
-  
   templateUrl: './detail-plateforme.component.html',
   styleUrl: './detail-plateforme.component.css'
 })
