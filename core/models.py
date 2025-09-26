@@ -300,6 +300,7 @@ class AmendementOrganique(models.Model):
         verbose_name_plural = "Émendements organiques"
         ordering = ['nom']
     
+    
     def __str__(self):
         return f"Émendent organique - {self.nom} ({self.fournisseur})"
 

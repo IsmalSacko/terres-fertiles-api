@@ -95,6 +95,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
                     subject="Bienvenue sur Terres Fertiles - Activez votre compte",
                     message="Merci de cliquer sur le lien pour activer votre compte.",
                     from_email=settings.DEFAULT_FROM_EMAIL,
+                    fail_silently=False,
                     recipient_list=[user.email],
                     html_message=f"""
                         <h3>Bienvenue {user.username} !</h3>
