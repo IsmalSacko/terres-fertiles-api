@@ -3,6 +3,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import {Router, RouterModule} from '@angular/router';
 import { CommonModule } from '@angular/common';
 import {AuthService} from '../../services/auth.service';
@@ -16,6 +17,7 @@ import {AuthService} from '../../services/auth.service';
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
+    MatDividerModule,
     RouterModule
   ],
   templateUrl: './navbar.component.html',
@@ -92,6 +94,24 @@ export class NavbarComponent {
 
   goToProfile(): void {
     this.router.navigate(['/profil']);
+    this.closeSidenav();
+  }
+
+  // Navigue vers la page de réinitialisation de mot de passe (pour utilisateur connecté)
+  goToResetPassword(): void {
+    this.router.navigate(['/reset-password']);
+    this.closeSidenav();
+  }
+
+  // Navigue vers la page mot de passe oublié (pour utilisateur non connecté)
+  goToForgotPassword(): void {
+    this.router.navigate(['/reset-password']);
+    this.closeSidenav();
+  }
+
+  // Navigue vers la page d'ajout de produit
+  goToAddProduct(): void {
+    this.router.navigate(['/produits/nouveau']);
     this.closeSidenav();
   }
 }

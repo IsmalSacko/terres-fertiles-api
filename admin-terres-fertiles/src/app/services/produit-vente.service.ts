@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { CreateProduitVente } from '../models/produit-vente.model';
 
 interface Chantier {
   id: number;
@@ -150,10 +151,28 @@ export class ProduitVenteService {
     }
   }
   async getProduitVenteCount(): Promise<number> {
-  const produits = await this.getAll();
-  return produits.length;
+    const produits = await this.getAll();
+    return produits.length;
   }
 
-
-
+  async createProduitVente(produitData: CreateProduitVente): Promise<ProduitVente> {
+    try {
+      console.log('🚀 Envoi des données vers l\'API:', produitData);
+      const response = await axios.post<ProduitVente>(
+        this.apiUrl,
+        produitData,
+        this.getHeaders()
+      );
+      console.log('✅ Réponse de l\'API:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur lors de la création du produit:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+        throw new Error(error.response?.data?.message || 'Erreur lors de la création du produit');
+      }
+      throw error;
+    }
+  }
 }

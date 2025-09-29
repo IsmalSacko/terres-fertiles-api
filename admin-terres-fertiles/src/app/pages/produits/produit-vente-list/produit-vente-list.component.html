@@ -10,6 +10,11 @@
           <p>{{ totalItems }} produits disponibles à l'achat</p>
         </div>
       </div>
+      <div class="header-actions">
+        <button mat-fab color="primary" class="add-product-btn" (click)="addNewProduct()" matTooltip="Ajouter un nouveau produit">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
       <div class="header-stats">
         <div class="stat-card disponible">
           <mat-icon>check_circle</mat-icon>

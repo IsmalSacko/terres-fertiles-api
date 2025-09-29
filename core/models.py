@@ -300,7 +300,6 @@ class AmendementOrganique(models.Model):
         verbose_name_plural = "Émendements organiques"
         ordering = ['nom']
     
-    
     def __str__(self):
         return f"Émendent organique - {self.nom} ({self.fournisseur})"
 
@@ -457,15 +456,24 @@ class ProduitVente(models.Model):
         volume_vendu = self.volume_vendu or Decimal(0)
         return volume_initial - volume_vendu
 
+    # def save(self, *args, **kwargs):
+    #     # Générer la référence produit à partir du nom du mélange en remplaçant 'MEL' par 'PRD'
+    #     if self.melange and self.melange.nom:
+    #         self.reference_produit = self.melange.nom.replace('MEL', 'PRD')
+    #     super().save(*args, **kwargs)
+
+    # def __str__(self):
+    #     return f"Produit {self.reference_produit} - {self.melange.nom} ({self.fournisseur})"
     def save(self, *args, **kwargs):
         # Générer la référence produit à partir du nom du mélange en remplaçant 'MEL' par 'PRD'
-        if self.melange and self.melange.nom:
-            self.reference_produit = self.melange.nom.replace('MEL', 'PRD')
+        if not self.reference_produit and self.melange_id:
+            try:
+                # Utiliser melange_id au lieu de self.melange pour éviter l'erreur de relation
+                melange = Melange.objects.get(id=self.melange_id)
+                self.reference_produit = melange.nom.replace('MEL', 'PRD')
+            except Melange.DoesNotExist:
+                pass
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Produit {self.reference_produit} - {self.melange.nom} ({self.fournisseur})"
-    
     class Meta:
         db_table = 'produit_vente'
         verbose_name = "Produit de vente"

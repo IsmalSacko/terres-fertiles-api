@@ -1,0 +1,218 @@
+.create-produit-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-icon {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  color: #666;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-section {
+  border-left: 4px solid #4CAF50;
+  padding-left: 16px;
+  margin: 16px 0;
+}
+
+.form-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+/* Espacement spécial pour la sélection du mélange */
+.melange-selection-section {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.melange-selection-section mat-form-field {
+  margin-bottom: 0;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.half-width {
+  flex: 1;
+  min-width: 280px;
+}
+
+.checkbox-section {
+  margin: 16px 0;
+}
+
+mat-form-field {
+  margin-bottom: 8px;
+}
+
+mat-card-actions {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  gap: 8px;
+}
+
+mat-card-actions button {
+  margin-left: 8px;
+}
+
+/* Style des boutons */
+.mat-mdc-raised-button.mat-primary {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border: none;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .create-produit-container {
+    padding: 10px;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .half-width {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  mat-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  mat-card-actions button {
+    margin: 4px 0;
+    width: 100%;
+  }
+}
+
+/* Animation pour les erreurs */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+/* Amélioration des hints */
+.mat-mdc-form-field .mat-mdc-form-field-hint-wrapper {
+  color: #666;
+  font-size: 0.875em;
+}
+
+
+
+/* Style pour le spinner dans le bouton */
+button mat-spinner {
+  margin-right: 8px;
+}
+
+/* Style pour les sections */
+.form-section {
+  background: rgba(76, 175, 80, 0.02);
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid #4CAF50;
+}
+
+/* Style pour les sections optionnelles */
+.form-section:has(h3:contains("optionnel")) {
+  background: rgba(158, 158, 158, 0.02);
+  border-left-color: #9e9e9e;
+}
+
+/* Amélioration des champs calculés */
+mat-form-field:has(input[formControlName="volume_disponible"]) {
+  position: relative;
+}
+
+mat-form-field:has(input[formControlName="volume_disponible"])::after {
+  content: "🔄";
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* Style pour les hints importants */
+.mat-mdc-form-field-hint-wrapper .mat-mdc-form-field-hint {
+  color: #666;
+  font-style: italic;
+}
+
+/* Message d'absence de mélanges */
+.no-melanges-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+.no-melanges-message mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+}
+
+.no-melanges-message h3 {
+  margin: 16px 0 8px 0;
+  color: #333;
+}
+
+.no-melanges-message p {
+  margin-bottom: 24px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+

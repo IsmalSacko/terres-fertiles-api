@@ -49,6 +49,29 @@
   font-size: 14px;
 }
 
+/* Actions de l'en-tête */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.add-product-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%) !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  transition: all 0.3s ease;
+  transform: scale(1);
+}
+
+.add-product-btn:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+.add-product-btn mat-icon {
+  font-size: 1.5rem;
+}
+
 .header-stats {
   display: flex;
   gap: 12px;

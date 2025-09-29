@@ -326,6 +326,7 @@ class PlateformeSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+
 class ProduitVenteDetailSerializer(serializers.ModelSerializer):
     # Sérialisation des relations en utilisant tes serializers déjà faits
     utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
@@ -382,6 +383,41 @@ class ProduitVenteDetailSerializer(serializers.ModelSerializer):
         if obj.date_disponibilite:
             return (obj.date_disponibilite - date.today()).days
         return None
+
+
+
+
+class ProduitVenteCreateSerializer(serializers.ModelSerializer):
+    """Serializer spécialisé pour la création de produits de vente"""
+    
+    class Meta:
+        model = ProduitVente
+        fields = [
+            'melange', 'fournisseur', 'nom_site', 'volume_initial', 
+            'date_disponibilite', 'commentaires_analyses', 'volume_vendu',
+            'acheteur', 'date_achat', 'periode_destockage', 
+            'localisation_projet', 'pret_pour_vente'
+        ]
+    
+    def validate_melange(self, value):
+        """Vérifier que le mélange existe et n'a pas déjà un produit de vente"""
+        if not value:
+            raise serializers.ValidationError("Le mélange est obligatoire")
+        
+        # Vérifier si le mélange a déjà un produit de vente
+        if ProduitVente.objects.filter(melange=value).exists():
+            raise serializers.ValidationError(
+                f"Le mélange '{value.nom}' a déjà un produit de vente associé"
+            )
+        
+        return value
+    
+    def validate_volume_initial(self, value):
+        """Vérifier que le volume initial est positif"""
+        if value <= 0:
+            raise serializers.ValidationError("Le volume initial doit être positif")
+        return value
+
 
 class DocumentProduitVenteSerializer(serializers.ModelSerializer):
     responsable = serializers.ReadOnlyField(source='produit.utilisateur.username')

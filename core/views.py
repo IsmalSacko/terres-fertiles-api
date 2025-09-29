@@ -4,7 +4,6 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
 from django.db.models import Prefetch
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
@@ -18,18 +17,19 @@ import re
 import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions, generics
 
-from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, IsEntrepriseOrSuperUser
+from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
     Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente
 )
 from .serializers import (
     AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
-    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer
 )
 
 
 
+# View pour récupérer l'utilisateur courant
 class CurrentUserView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -38,6 +38,7 @@ class CurrentUserView(generics.RetrieveUpdateDestroyAPIView):
         return self.request.user
 
 
+# Vues le modèle CustomUser (gestion des utilisateurs)
 class CustomUserViewSet(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
@@ -45,11 +46,15 @@ class CustomUserViewSet(viewsets.ModelViewSet):
   
 
 
+# Vues pour le modèle Chantier (gestion des chantiers)
+
 class ChantierViewSet(viewsets.ModelViewSet):
     queryset = Chantier.objects.all()
     serializer_class = ChantierSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
+
+# Vues pour le modèle DocumentGisement (gestion des documents liés aux gisements)   
 class DocumentGisementViewSet(viewsets.ModelViewSet):
     queryset = DocumentGisement.objects.all()
     serializer_class = DocumentGisementSerializer
@@ -57,12 +62,14 @@ class DocumentGisementViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend] # Add this line
     filterset_fields = ['gisement']
 
+# Vues pour le modèle Gisement (gestion des gisements)
 class GisementViewSet(viewsets.ModelViewSet):
     queryset = Gisement.objects.all()
     serializer_class = GisementSerializer
     permission_classes = [permissions.AllowAny]
 
 
+# Vues pour le modèle AmendementOrganique (gestion des amendements organiques)
 class AmendementOrganiqueViewSet(viewsets.ModelViewSet):
     queryset = AmendementOrganique.objects.all()
     serializer_class = AmendementOrganiqueSerializer
@@ -71,14 +78,14 @@ class AmendementOrganiqueViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(responsable=self.request.user)
 
-
+# Vues pour le modèle MelangeAmendement (gestion des amendements dans les mélanges)
 class MelangeAmendementViewSet(viewsets.ModelViewSet):
     queryset = MelangeAmendement.objects.all()
     serializer_class = MelangeAmendementSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-  
 
+# Vues pour le modèle Melange (gestion des mélanges)
 @method_decorator(csrf_exempt, name="dispatch")
 class MelangeViewSet(viewsets.ModelViewSet):
   
@@ -143,10 +150,17 @@ class MelangeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(utilisateur=self.request.user)
 
+
+# Vues pour le modéle de ProduitVente (gestion des produits de vente)
 class ProduitVenteViewSet(viewsets.ModelViewSet):
     queryset = ProduitVente.objects.all()
-    serializer_class = ProduitVenteDetailSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_serializer_class(self):
+        """Utiliser différents serializers selon l'action"""
+        if self.action == 'create':
+            return ProduitVenteCreateSerializer
+        return ProduitVenteDetailSerializer
 
     def perform_create(self, serializer):
         serializer.save(utilisateur=self.request.user)
@@ -167,6 +181,8 @@ class AnalyseLaboratoireViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     def perform_create(self, serializer):
         serializer.save(uploaded_by=self.request.user)
+
+
 
 
 class PlateformeViewSet(viewsets.ModelViewSet):
@@ -335,6 +351,9 @@ def reset_password_confirm(request):
     return Response({"detail": "Mot de passe mis à jour avec succès."})
 
 
+
+
+
 class DocumentProduitVenteViewSet(viewsets.ModelViewSet):
     queryset = DocumentProduitVente.objects.all()
     serializer_class = DocumentProduitVenteSerializer
@@ -365,6 +384,8 @@ class DocumentProduitVenteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
+
+
 class SaisieVenteViewSet(viewsets.ModelViewSet):
     queryset = SaisieVente.objects.all()
     serializer_class = SaisieVenteSerializer
@@ -393,9 +414,13 @@ class SaisieVenteViewSet(viewsets.ModelViewSet):
         serializer.save(responsable=self.request.user, produit_id=produit_id)
 
 
+
+
 class PlanningViewSet(viewsets.ModelViewSet):
     queryset = Planning.objects.select_related("melange", "melange__plateforme").all()
     serializer_class = PlanningSerializer
+
+
 
 
 class ChantierRecepteurViewSet(viewsets.ModelViewSet):

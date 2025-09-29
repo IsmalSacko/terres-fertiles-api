@@ -65,7 +65,7 @@ button:hover {
 }
 
 .container {
-  padding-top: 50px;
+  /* padding-top retiré pour utiliser standard-page-content */
   margin-top: 0;
 }
 

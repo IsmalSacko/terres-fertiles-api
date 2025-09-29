@@ -218,8 +218,146 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========================================
+   STYLES POUR LE MENU UTILISATEUR AMÉLIORÉ
+   ======================================== */
+
+/* Conteneur principal du menu utilisateur */
+::ng-deep .user-menu-custom .mat-mdc-menu-content {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(139, 195, 74, 0.2);
+  padding: 0;
+  min-width: 280px;
+}
+
+/* Section utilisateur connecté */
+.user-menu-section {
+  padding: 1rem 0;
+}
+
+.user-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem 0.8rem 1.2rem;
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.08) 0%, rgba(76, 175, 80, 0.05) 100%);
+}
+
+.user-icon {
+  font-size: 2.2rem !important;
+  width: 2.2rem !important;
+  height: 2.2rem !important;
+  color: #2e7d32;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.user-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1b5e20;
+}
+
+.user-status {
+  font-size: 0.8rem;
+  color: #4caf50;
+  font-weight: 500;
+}
+
+/* Section utilisateur non connecté */
+.auth-menu-section {
+  padding: 1rem 0;
+}
+
+.auth-menu-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem 0.8rem 1.2rem;
+  background: linear-gradient(135deg, rgba(158, 158, 158, 0.08) 0%, rgba(117, 117, 117, 0.05) 100%);
+}
+
+.auth-icon {
+  font-size: 2rem !important;
+  width: 2rem !important;
+  height: 2rem !important;
+  color: #757575;
+}
+
+.auth-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #424242;
+}
+
+/* Styles des éléments de menu */
+::ng-deep .menu-item-styled .mat-mdc-menu-item {
+  padding: 0.8rem 1.2rem !important;
+  transition: all 0.3s ease;
+  border-radius: 0;
+}
+
+::ng-deep .menu-item-styled:hover {
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.1) 0%, rgba(76, 175, 80, 0.08) 100%) !important;
+}
+
+.menu-item-styled {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.8rem !important;
+  padding: 0.8rem 1.2rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.menu-item-styled:hover {
+  background: linear-gradient(135deg, rgba(139, 195, 74, 0.1) 0%, rgba(76, 175, 80, 0.08) 100%) !important;
+}
+
+.menu-icon {
+  font-size: 1.3rem !important;
+  width: 1.3rem !important;
+  height: 1.3rem !important;
+  color: #2e7d32 !important;
+}
+
+.menu-item-styled span {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1b5e20;
+}
+
+/* Bouton de déconnexion spécial */
+.menu-item-logout {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.05) 0%, rgba(229, 57, 53, 0.03) 100%) !important;
+  border-top: 1px solid rgba(244, 67, 54, 0.1) !important;
+}
+
+.menu-item-logout .menu-icon {
+  color: #d32f2f !important;
+}
+
+.menu-item-logout span {
+  color: #d32f2f !important;
+}
+
+.menu-item-logout:hover {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(229, 57, 53, 0.08) 100%) !important;
+}
+
+/* Séparateurs */
+::ng-deep .user-menu-custom mat-divider {
+  border-color: rgba(139, 195, 74, 0.2);
+  margin: 0.5rem 0;
 }
 
 /* Responsive hamburger menu */

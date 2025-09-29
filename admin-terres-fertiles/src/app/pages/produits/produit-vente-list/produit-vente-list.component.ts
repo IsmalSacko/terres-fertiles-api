@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -79,7 +79,7 @@ export class ProduitVenteListComponent implements OnInit {
     vendu: 0
   };
 
-  constructor(private produitService: ProduitVenteService) {}
+  constructor(private produitService: ProduitVenteService, private router: Router) {}
 
   async ngOnInit(): Promise<void> {
     await this.loadProduits();
@@ -360,5 +360,10 @@ Demande générée automatiquement le ${currentDate} depuis le catalogue Terres 
   async onPageSizeChange(): Promise<void> {
     this.currentPage = 0; // Reset à la première page
     await this.loadProduits();
+  }
+
+  // Navigue vers la page de création d'un nouveau produit
+  addNewProduct(): void {
+    this.router.navigate(['/produits/nouveau']);
   }
 }

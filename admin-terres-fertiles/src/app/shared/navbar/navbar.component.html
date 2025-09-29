@@ -46,14 +46,66 @@
     <img src="https://i.pravatar.cc/40?img=3" alt="avatar" class="avatar-img"/>
     <span *ngIf="isLoggedIn && userName" class="user-name-below">{{ userName }}</span>
   </button>
-  <mat-menu #userMenu="matMenu">
-    <button mat-menu-item *ngIf="isLoggedIn" (click)="logout()">Déconnexion</button>
-    <button mat-menu-item *ngIf="isLoggedIn" (click)="goToProfile()">
-      <mat-icon>account_circle</mat-icon>
-      Profil
-    </button>
-    <button mat-menu-item *ngIf="!isLoggedIn" (click)="login()">Connexion</button>
-    <button mat-menu-item *ngIf="!isLoggedIn" (click)="register()"><mat-icon>person_add</mat-icon> Inscription</button>
+  <mat-menu #userMenu="matMenu" class="user-menu-custom">
+    <!-- Section utilisateur connecté -->
+    <div *ngIf="isLoggedIn" class="user-menu-section">
+      <div class="user-menu-header">
+        <mat-icon class="user-icon">account_circle</mat-icon>
+        <div class="user-info">
+          <span class="user-name">{{ userName }}</span>
+          <span class="user-status">Connecté</span>
+        </div>
+      </div>
+      <mat-divider></mat-divider>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="goToProfile()">
+        <mat-icon class="menu-icon">person</mat-icon>
+        <span>Mon Profil</span>
+      </button>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="goToResetPassword()">
+        <mat-icon class="menu-icon">lock_reset</mat-icon>
+        <span>Changer mot de passe</span>
+      </button>
+      
+      <mat-divider></mat-divider>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="goToAddProduct()">
+        <mat-icon class="menu-icon">add_shopping_cart</mat-icon>
+        <span>Ajouter un produit</span>
+      </button>
+      
+      <mat-divider></mat-divider>
+      
+      <button mat-menu-item class="menu-item-logout" (click)="logout()">
+        <mat-icon class="menu-icon">logout</mat-icon>
+        <span>Déconnexion</span>
+      </button>
+    </div>
+
+    <!-- Section utilisateur non connecté -->
+    <div *ngIf="!isLoggedIn" class="auth-menu-section">
+      <div class="auth-menu-header">
+        <mat-icon class="auth-icon">account_circle_off</mat-icon>
+        <span class="auth-title">Non connecté</span>
+      </div>
+      <mat-divider></mat-divider>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="login()">
+        <mat-icon class="menu-icon">login</mat-icon>
+        <span>Connexion</span>
+      </button>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="register()">
+        <mat-icon class="menu-icon">person_add</mat-icon>
+        <span>Inscription</span>
+      </button>
+      
+      <button mat-menu-item class="menu-item-styled" (click)="goToForgotPassword()">
+        <mat-icon class="menu-icon">help_outline</mat-icon>
+        <span>Mot de passe oublié ?</span>
+      </button>
+    </div>
   </mat-menu>
 </mat-toolbar>
 

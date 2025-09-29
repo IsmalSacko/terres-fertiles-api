@@ -1,0 +1,214 @@
+<div class="standard-page-content">
+  <div class="create-produit-container">
+    <mat-card class="form-card">
+      <mat-card-header>
+        <div mat-card-avatar class="header-icon">
+          <mat-icon>add_shopping_cart</mat-icon>
+        </div>
+        <mat-card-title>Créer un nouveau produit de vente</mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        @if (isLoading) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Chargement des mélanges...</p>
+          </div>
+        }
+        
+        @if (!isLoading && melanges.length === 0) {
+          <div class="no-melanges-message">
+            <mat-icon color="warn">warning</mat-icon>
+            <h3>Aucun mélange disponible</h3>
+            <p>Tous les mélanges ont déjà un produit de vente associé ou aucun mélange n'existe.</p>
+            <button mat-raised-button color="primary" routerLink="/melanges/new">
+              <mat-icon>add</mat-icon>
+              Créer un nouveau mélange
+            </button>
+          </div>
+        }
+
+        @if (!isLoading && melanges.length > 0) {
+          <form [formGroup]="produitForm" (ngSubmit)="onSubmit()">
+            <div class="form-grid">
+              <!-- Sélection du mélange -->
+              <div class="melange-selection-section mt-2">
+                <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Mélange</mat-label>
+                <mat-select formControlName="melange" required>
+                  @for (melange of melanges; track melange.id) {
+                    <mat-option [value]="melange.id">
+                      {{ melange.nom }} ({{ melange.plateforme_nom || 'Plateforme non définie' }})
+                    </mat-option>
+                  }
+                </mat-select>
+                @if (melange?.hasError('required')) {
+                  <mat-error>
+                    Le mélange est obligatoire
+                  </mat-error>
+                }
+              </mat-form-field>
+              </div>
+
+              <!-- Informations générales -->
+              <div class="form-section">
+                <h3>Informations générales</h3>
+                
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Fournisseur</mat-label>
+                  <input matInput formControlName="fournisseur" required>
+                  @if (fournisseur?.hasError('required')) {
+                    <mat-error>
+                      Le fournisseur est obligatoire
+                    </mat-error>
+                  }
+                  @if (fournisseur?.hasError('minlength')) {
+                    <mat-error>
+                      Le fournisseur doit contenir au moins 2 caractères
+                    </mat-error>
+                  }
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Nom du site (optionnel)</mat-label>
+                  <input matInput formControlName="nom_site">
+                  <mat-hint>Lieu de stockage ou de production</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <!-- Volume et dates -->
+              <div class="form-section">
+                <h3>Volume et disponibilité</h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Volume initial (m³)</mat-label>
+                    <input matInput type="number" formControlName="volume_initial" 
+                           min="0.1" step="0.1" required>
+                    @if (volume_initial?.hasError('required')) {
+                      <mat-error>
+                        Le volume initial est obligatoire
+                      </mat-error>
+                    }
+                    @if (volume_initial?.hasError('min')) {
+                      <mat-error>
+                        Le volume doit être supérieur à 0
+                      </mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Date de disponibilité</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="date_disponibilite" required>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                    @if (date_disponibilite?.hasError('required')) {
+                      <mat-error>
+                        La date de disponibilité est obligatoire
+                      </mat-error>
+                    }
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <!-- Informations de vente (optionnel) -->
+              <div class="form-section">
+                <h3>Informations de vente (optionnel)</h3>
+                
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Volume vendu (m³)</mat-label>
+                    <input matInput type="number" formControlName="volume_vendu" 
+                           min="0" step="0.1">
+                    @if (volume_vendu?.hasError('volumeVenduTropElevé')) {
+                      <mat-error>
+                        Le volume vendu ne peut pas dépasser le volume initial
+                      </mat-error>
+                    }
+                    <mat-hint>Laissez vide si pas encore vendu</mat-hint>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Acheteur</mat-label>
+                    <input matInput formControlName="acheteur">
+                    <mat-hint>Nom de l'entreprise ou personne</mat-hint>
+                  </mat-form-field>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Date d'achat</mat-label>
+                  <input matInput [matDatepicker]="pickerAchat" formControlName="date_achat">
+                  <mat-datepicker-toggle matSuffix [for]="pickerAchat"></mat-datepicker-toggle>
+                  <mat-datepicker #pickerAchat></mat-datepicker>
+                  <mat-hint>Date de la transaction</mat-hint>
+                </mat-form-field>
+              </div>
+
+              <!-- Informations complémentaires -->
+              <div class="form-section">
+                <h3>Informations complémentaires</h3>
+                
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Commentaires analyses (optionnel)</mat-label>
+                  <textarea matInput formControlName="commentaires_analyses" 
+                            rows="3" placeholder="Remarques sur les analyses effectuées..."></textarea>
+                </mat-form-field>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Période de déstockage (optionnel)</mat-label>
+                    <input matInput formControlName="periode_destockage" 
+                           placeholder="Ex: Printemps 2025">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Localisation projet (optionnel)</mat-label>
+                    <input matInput formControlName="localisation_projet" 
+                           placeholder="Ex: Zone industrielle Nord">
+                  </mat-form-field>
+                </div>
+
+                <div class="checkbox-section">
+                  <mat-checkbox formControlName="pret_pour_vente">
+                    Prêt pour la vente
+                  </mat-checkbox>
+                </div>
+              </div>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+
+      @if (!isLoading && melanges.length > 0) {
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="onCancel()" [disabled]="isCreating">
+            Annuler
+          </button>
+          <button mat-button type="button" (click)="resetForm()" [disabled]="isCreating">
+            <mat-icon>refresh</mat-icon>
+            Réinitialiser
+          </button>
+          <button mat-raised-button color="primary" 
+                  (click)="onSubmit()" 
+                  [disabled]="produitForm.invalid || isCreating || melanges.length === 0">
+            @if (!isCreating) {
+              <mat-icon>save</mat-icon>
+            }
+            @if (isCreating) {
+              <mat-spinner diameter="20" color="primary"></mat-spinner>
+            }
+            {{ isCreating ? 'Création...' : 'Créer le produit' }}
+          </button>
+        </mat-card-actions>
+      }
+      
+      @if (!isLoading && melanges.length === 0) {
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="onCancel()">
+            Retour
+          </button>
+        </mat-card-actions>
+      }
+    </mat-card>
+  </div>
+</div>

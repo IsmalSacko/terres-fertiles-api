@@ -1,0 +1,87 @@
+<div class="standard-page-content">
+<div class="container">
+  <h2>Liste des analyses de laboratoire</h2>
+  
+  <div class="actions">
+    <button mat-raised-button color="primary" (click)="addAnalyse()">
+      <mat-icon>add</mat-icon>
+      Ajouter une analyse
+    </button>
+  </div>
+
+  <div *ngIf="errorMsg" class="error-message">
+    {{ errorMsg }}
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <table mat-table [dataSource]="analyses" class="mat-elevation-z8" *ngIf="!loading && analyses.length">
+    <!-- Date d'analyse Column -->
+    <ng-container matColumnDef="date_analyse">
+      <th mat-header-cell *matHeaderCellDef>Date d'analyse</th>
+      <td mat-cell *matCellDef="let a">{{ a.date_analyse | date:'dd/MM/yyyy' }}</td>
+    </ng-container>
+
+    <!-- Produit Column -->
+    <ng-container matColumnDef="produit">
+      <th mat-header-cell *matHeaderCellDef>Produit</th>
+      <td mat-cell *matCellDef="let a">{{ getProduitNom(a) }}</td>
+    </ng-container>
+
+    <!-- Laboratoire Column -->
+    <ng-container matColumnDef="laboratoire">
+      <th mat-header-cell *matHeaderCellDef>Laboratoire</th>
+      <td mat-cell *matCellDef="let a">{{ a.laboratoire }}</td>
+    </ng-container>
+
+    <!-- Code rapport Column -->
+    <ng-container matColumnDef="code_rapport">
+      <th mat-header-cell *matHeaderCellDef>Code rapport</th>
+      <td mat-cell *matCellDef="let a">{{ a.code_rapport }}</td>
+    </ng-container>
+
+    <!-- pH eau Column -->
+    <ng-container matColumnDef="ph_eau">
+      <th mat-header-cell *matHeaderCellDef matTooltip="pH eau">pH eau</th>
+      <td mat-cell *matCellDef="let a">{{ a.ph_eau | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Matière organique Column -->
+    <ng-container matColumnDef="matiere_organique">
+      <th mat-header-cell *matHeaderCellDef matTooltip="Matière organique (%)">MO (%)</th>
+      <td mat-cell *matCellDef="let a">{{ a.matiere_organique | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Azote total Column -->
+    <ng-container matColumnDef="azote_total">
+      <th mat-header-cell *matHeaderCellDef matTooltip="Azote total (%)">N (%)</th>
+      <td mat-cell *matCellDef="let a">{{ a.azote_total | number:'1.3-3' }}</td> <!-- 1.3-3 for 1 decimal place -->
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let a">
+        <button mat-icon-button color="primary" (click)="goToDetail(a.id)" matTooltip="Voir les détails">
+          <mat-icon>visibility</mat-icon>
+        </button>
+        <button  mat-icon-button color="accent" (click)="editAnalyse(a.id)" matTooltip="Modifier">
+          <mat-icon class="icon-view">edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteAnalyse(a.id)" matTooltip="Supprimer">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <div *ngIf="!loading && !analyses.length" class="no-data">
+    Aucune analyse de laboratoire trouvée
+  </div>
+</div>
+</div>

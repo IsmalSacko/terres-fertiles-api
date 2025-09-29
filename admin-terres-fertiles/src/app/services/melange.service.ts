@@ -354,4 +354,47 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
     const melanges = await this.getAll();
     return melanges.length;
   }
+
+  async getMelangesSansProduitsVente(): Promise<Melange[]> {
+    try {
+      console.log('🔍 Récupération des mélanges disponibles (sans produits de vente)...');
+      
+      // Récupérer tous les mélanges
+      const tousMelanges = await this.getAll();
+      console.log(`📊 Total mélanges: ${tousMelanges.length}`);
+      
+      // Récupérer tous les produits de vente pour voir quels mélanges sont déjà utilisés
+      const produitsResponse = await axios.get(
+        'http://127.0.0.1:8000/api/produits/',
+        this.getHeaders()
+      );
+      
+      const produitsVente = produitsResponse.data;
+      console.log(`📦 Total produits de vente: ${produitsVente.length}`);
+      
+      // Extraire les IDs des mélanges déjà utilisés
+      const melangesUtilises = new Set(
+        produitsVente.map((produit: any) => produit.melange?.id || produit.melange).filter(Boolean)
+      );
+      
+      console.log(`🚫 Mélanges déjà utilisés: ${Array.from(melangesUtilises).join(', ')}`);
+      
+      // Filtrer les mélanges disponibles (non utilisés)
+      const melangesDisponibles = tousMelanges.filter(melange => 
+        melange.id && !melangesUtilises.has(melange.id)
+      );
+      
+      console.log(`✅ Mélanges disponibles: ${melangesDisponibles.length}`);
+      melangesDisponibles.forEach(melange => {
+        console.log(`   - ${melange.nom} (ID: ${melange.id})`);
+      });
+      
+      return melangesDisponibles;
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des mélanges sans produits de vente:', error);
+      // Fallback : récupérer tous les mélanges si l'API produits échoue
+      console.log('🔄 Fallback: récupération de tous les mélanges');
+      return this.getAll();
+    }
+  }
 }

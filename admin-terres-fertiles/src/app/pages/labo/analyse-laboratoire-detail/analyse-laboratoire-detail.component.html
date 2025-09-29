@@ -1,0 +1,259 @@
+<div class="standard-page-content">
+<div class="container">
+  <mat-card>
+    <mat-card-title>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une analyse de laboratoire</mat-card-title>
+    <mat-card-content>
+      <div *ngIf="loading" class="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <div *ngIf="errorMsg" class="error-message">
+        {{ errorMsg }}
+      </div>
+
+      <div *ngIf="successMsg" class="success-message">
+        {{ successMsg }}
+      </div>
+
+      <form *ngIf="!loading" (ngSubmit)="saveAnalyse()" #analyseForm="ngForm">
+        <!-- Champs de base -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Produit de vente</mat-label>
+          <mat-select name="produit" [(ngModel)]="analyse.produit" required>
+            <mat-option *ngFor="let produit of produitsVente" [value]="produit.id">
+              {{ produit.reference_produit }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="analyseForm.form.get('produit')?.errors?.['required']">Le produit est requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Laboratoire</mat-label>
+          <input matInput name="laboratoire" [(ngModel)]="analyse.laboratoire" required maxlength="255">
+          <mat-error *ngIf="analyseForm.form.get('laboratoire')?.errors?.['required']">Le laboratoire est requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Code rapport</mat-label>
+          <input matInput name="code_rapport" [(ngModel)]="analyse.code_rapport" required maxlength="100">
+          <mat-error *ngIf="analyseForm.form.get('code_rapport')?.errors?.['required']">Le code rapport est requis</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Date de réception</mat-label>
+          <input matInput [matDatepicker]="pickerReception" name="date_reception" [(ngModel)]="analyse.date_reception" required>
+          <mat-datepicker-toggle matSuffix [for]="pickerReception"></mat-datepicker-toggle>
+          <mat-datepicker #pickerReception></mat-datepicker>
+          <mat-error *ngIf="analyseForm.form.get('date_reception')?.errors?.['required']">La date de réception est requise</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Date d'analyse</mat-label>
+          <input matInput [matDatepicker]="pickerAnalyse" name="date_analyse" [(ngModel)]="analyse.date_analyse" required>
+          <mat-datepicker-toggle matSuffix [for]="pickerAnalyse"></mat-datepicker-toggle>
+          <mat-datepicker #pickerAnalyse></mat-datepicker>
+          <mat-error *ngIf="analyseForm.form.get('date_analyse')?.errors?.['required']">La date d'analyse est requise</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Profondeur prélèvement</mat-label>
+          <input matInput name="profondeur_prelevement" [(ngModel)]="analyse.profondeur_prelevement" maxlength="100">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Localisation échantillon</mat-label>
+          <input matInput name="localisation_echantillon" [(ngModel)]="analyse.localisation_echantillon" maxlength="255">
+        </mat-form-field>
+
+        <!-- Paramètres physico-chimiques -->
+        <h3>Paramètres physico-chimiques</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>pH eau</mat-label>
+            <input matInput type="number" step="0.01" name="ph_eau" [(ngModel)]="analyse.ph_eau">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>pH KCl</mat-label>
+            <input matInput type="number" step="0.01" name="ph_kcl" [(ngModel)]="analyse.ph_kcl">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Calcaire total (g/Kg)</mat-label>
+            <input matInput type="number" step="0.01" name="calcaire_total" [(ngModel)]="analyse.calcaire_total">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Calcaire actif (g/Kg)</mat-label>
+            <input matInput type="number" step="0.01" name="calcaire_actif" [(ngModel)]="analyse.calcaire_actif">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Conductivité (mS/cm)</mat-label>
+            <input matInput type="number" step="0.01" name="conductivite" [(ngModel)]="analyse.conductivite">
+          </mat-form-field>
+        </div>
+
+        <!-- Matière organique et azote -->
+        <h3>Matière organique et azote</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Matière organique (g/Kg)</mat-label>
+            <input matInput type="number" step="0.01" name="matiere_organique" [(ngModel)]="analyse.matiere_organique">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Azote total (g/Kg)</mat-label>
+            <input matInput type="number" step="0.001" name="azote_total" [(ngModel)]="analyse.azote_total">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>C/N</mat-label>
+            <input matInput type="number" step="0.01" name="c_n" [(ngModel)]="analyse.c_n">
+          </mat-form-field>
+        </div>
+
+        <!-- CEC et saturation -->
+        <h3>CEC et saturation</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>CEC (meq/100g)</mat-label>
+            <input matInput type="number" step="0.01" name="cec" [(ngModel)]="analyse.cec">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Taux de saturation (%)</mat-label>
+            <input matInput type="number" step="0.01" name="saturation" [(ngModel)]="analyse.saturation">
+          </mat-form-field>
+        </div>
+
+        <!-- Granulométrie -->
+        <h3>Granulométrie (%)</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Argile</mat-label>
+            <input matInput type="number" step="0.01" name="argile" [(ngModel)]="analyse.argile">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Limons fins</mat-label>
+            <input matInput type="number" step="0.01" name="limons_fins" [(ngModel)]="analyse.limons_fins">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Limons grossiers</mat-label>
+            <input matInput type="number" step="0.01" name="limons_grossiers" [(ngModel)]="analyse.limons_grossiers">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Sables fins</mat-label>
+            <input matInput type="number" step="0.01" name="sables_fins" [(ngModel)]="analyse.sables_fins">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Sables grossiers</mat-label>
+            <input matInput type="number" step="0.01" name="sables_grossiers" [(ngModel)]="analyse.sables_grossiers">
+          </mat-form-field>
+        </div>
+
+        <!-- Éléments minéraux (mg/Kg) -->
+        <h3>Éléments minéraux (mg/Kg)</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Calcium</mat-label>
+            <input matInput type="number" step="0.01" name="calcium" [(ngModel)]="analyse.calcium">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Magnesium</mat-label>
+            <input matInput type="number" step="0.01" name="magnesium" [(ngModel)]="analyse.magnesium">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Potassium</mat-label>
+            <input matInput type="number" step="0.01" name="potassium" [(ngModel)]="analyse.potassium">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Phosphore (P2O5)</mat-label>
+            <input matInput type="number" step="0.01" name="phosphore" [(ngModel)]="analyse.phosphore">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Fer</mat-label>
+            <input matInput type="number" step="0.01" name="fer" [(ngModel)]="analyse.fer">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Cuivre</mat-label>
+            <input matInput type="number" step="0.01" name="cuivre" [(ngModel)]="analyse.cuivre">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Zinc</mat-label>
+            <input matInput type="number" step="0.01" name="zinc" [(ngModel)]="analyse.zinc">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Manganese</mat-label>
+            <input matInput type="number" step="0.01" name="manganese" [(ngModel)]="analyse.manganese">
+          </mat-form-field>
+        </div>
+
+        <!-- Paramètres physiques -->
+        <h3>Paramètres physiques</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Densité apparente</mat-label>
+            <input matInput type="number" step="0.01" name="densite_apparente" [(ngModel)]="analyse.densite_apparente">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Porosité totale (%)</mat-label>
+            <input matInput type="number" step="0.01" name="porosite_totale" [(ngModel)]="analyse.porosite_totale">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Porosité drainage (%)</mat-label>
+            <input matInput type="number" step="0.01" name="porosite_drainage" [(ngModel)]="analyse.porosite_drainage">
+          </mat-form-field>
+        </div>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Eau capillaire (%)</mat-label>
+            <input matInput type="number" step="0.01" name="eau_capillaire" [(ngModel)]="analyse.eau_capillaire">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Perméabilité (cm/h)</mat-label>
+            <input matInput type="number" step="0.01" name="permeabilite" [(ngModel)]="analyse.permeabilite">
+          </mat-form-field>
+        </div>
+
+        <!-- Autres paramètres -->
+        <h3>Autres paramètres</h3>
+        <div class="form-row">
+          <mat-form-field appearance="fill">
+            <mat-label>Intensité activité microbienne</mat-label>
+            <input matInput type="number" step="0.01" name="iam" [(ngModel)]="analyse.iam">
+          </mat-form-field>
+          <mat-form-field appearance="fill">
+            <mat-label>Refus gravier (>2mm, %)</mat-label>
+            <input matInput type="number" step="0.01" name="refus_gravier_2mm" [(ngModel)]="analyse.refus_gravier_2mm">
+          </mat-form-field>
+        </div>
+
+        <!-- Fichier PDF et commentaires -->
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Commentaires</mat-label>
+          <textarea matInput name="commentaires" [(ngModel)]="analyse.commentaires" rows="4"></textarea>
+        </mat-form-field>
+
+        <!-- Champ de téléversement PDF -->
+        <div class="form-row">
+          <label for="fileInput">Fichier PDF</label>
+          <input type="file" id="fileInput" (change)="onFileSelected($event)" accept=".pdf">
+          <button mat-raised-button color="accent" type="button" (click)="uploadAndAnalyzeFile()" [disabled]="!selectedFile || loading">
+            Analyser PDF
+          </button>
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="analyseForm.invalid || loading">
+            {{ isEditMode ? 'Sauvegarder' : 'Créer' }}
+          </button>
+          <button mat-button color="warn" type="button" (click)="cancel()">Annuler</button>
+          <button mat-raised-button color="warn" type="button" *ngIf="isEditMode && analyse.id" (click)="deleteAnalyse()">Supprimer</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+</div>

@@ -13,6 +13,21 @@ export interface PlateformeInfo {
   localisation: string;
 }
 
+export interface CreateProduitVente {
+  melange: number; // ID du mélange
+  fournisseur: string;
+  nom_site?: string;
+  volume_initial: number;
+  date_disponibilite: string; // format "YYYY-MM-DD"
+  commentaires_analyses?: string;
+  volume_vendu?: number;
+  acheteur?: string;
+  date_achat?: string; // format "YYYY-MM-DD"
+  periode_destockage?: string;
+  localisation_projet?: string;
+  pret_pour_vente: boolean;
+}
+
 export interface ProduitVente {
   id: number;
   utilisateur: string; // Utilisateur sous forme de string selon l'API

@@ -5,16 +5,14 @@ import { GisementDetailComponent } from './pages/gisments/gisement-detail/giseme
 import { GisementListComponent } from './pages/gisments/gisement-list/gisement-list.component';
 import { MelangeListComponent } from './pages/melanges/melange-list/melange-list.component';
 import { MelangeDetailComponent } from './pages/melanges/melange-detail/melange-detail.component';
-import { ProduitVenteListComponent } from './pages/produits/produit-vente-list/produit-vente-list.component';
-import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-detail/produit-vente-detail.component';
-import { AnalyseLaboratoireListComponent } from './pages/produits/labo/analyse-laboratoire-list/analyse-laboratoire-list.component';
-import { AnalyseLaboratoireDetailComponent } from './pages/produits/labo/analyse-laboratoire-detail/analyse-laboratoire-detail.component';
+import { AnalyseLaboratoireListComponent } from './pages/labo/analyse-laboratoire-list/analyse-laboratoire-list.component';
+import { AnalyseLaboratoireDetailComponent } from './pages/labo/analyse-laboratoire-detail/analyse-laboratoire-detail.component';
 import { LoginComponent } from './pages/compte/login/login.component';
 import { GisementCreateComponent } from './pages/gisments/gisement-create/gisement-create.component';
 import { ChantierListComponent } from './pages/chantiers/chantier-list/chantier-list.component';
 import { ChantierDetailComponent } from './pages/chantiers/chantier-detail/chantier-detail.component';
 import { MelangeAmendementListComponent } from './pages/melanges/melange-amendement-list/melange-amendement-list.component.ts.component';
-import { AmendementOrganiqueCreateComponent } from './pages/produits/labo/amendement-organique-create/amendement-organique-create.component';
+import { AmendementOrganiqueCreateComponent } from './pages/labo/amendement-organique-create/amendement-organique-create.component';
 import { RegisterComponent } from './pages/compte/register/register.component';
 import { UserProfileComponent } from './pages/compte/user-profile/user-profile.component';
 import { ActivateComponent } from './pages/compte/activate/activate.component';
@@ -29,6 +27,8 @@ import { ListPlateformeComponent } from './pages/plateformes/list-plateforme/lis
 import { DetailPlateformeComponent } from './pages/plateformes/detai-plateforme/detail-plateforme.component';
 import { EditPlateformeComponent } from './pages/plateformes/edit-plateforme/edit-plateforme.component';
 import { CreatePlateformeComponent } from './pages/plateformes/create-plateforme/create-plateforme.component';
+import { ProduitVenteListComponent } from './pages/produits/produit-vente-list/produit-vente-list.component';
+import { CreateProduitVenteComponent } from './pages/produits/create-produit-vente/create-produit-vente.component';
 
 
 export const routes: Routes = [
@@ -51,7 +51,7 @@ export const routes: Routes = [
   { path: 'melanges/new', component: MelangeDetailComponent },
   { path: 'melanges/:id', component: MelangeDetailComponent },
   { path: 'produits', component: ProduitVenteListComponent },
-  { path: 'produits-vente/:id', component: ProduitVenteDetailComponent },
+  { path: 'produits/nouveau', component: CreateProduitVenteComponent },
 
   { path: 'saisies-vente', component: SaisieVenteComponent },
   { path: 'saisies-vente/new', component: CreateSaisieVenteComponent },
