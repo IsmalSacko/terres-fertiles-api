@@ -50,10 +50,15 @@
               <div class="form-row">
                 <mat-form-field class="full-width">
                   <mat-label>Plateforme</mat-label>
-                  <mat-select formControlName="plateforme">
+                  <mat-select formControlName="plateforme" [disabled]="isLoading || plateformes.length === 0">
                     @if (isLoading) {
                       <mat-option disabled>
                         Chargement des plateformes...
+                      </mat-option>
+                    }
+                    @if (!isLoading && plateformes.length === 0) {
+                      <mat-option disabled>
+                        Aucune plateforme avec des produits de vente disponibles
                       </mat-option>
                     }
                     @for (plateforme of plateformes; track plateforme.id) {
@@ -65,6 +70,9 @@
                   <mat-icon matSuffix>cloud</mat-icon>
                   @if (plateforme?.invalid && plateforme?.touched) {
                     <mat-error>Requis</mat-error>
+                  }
+                  @if (!isLoading && plateformes.length === 0) {
+                    <mat-hint>Aucune plateforme avec des produits de vente n'est disponible pour créer une saisie</mat-hint>
                   }
                 </mat-form-field>
               </div>
@@ -207,7 +215,8 @@
             Réinitialiser
           </button>
           
-          <button mat-raised-button color="primary" type="submit">
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="saisieVenteForm.invalid || isCreating || isSuccess || plateformes.length === 0">
             @if (!isCreating && !isSuccess) {
               <mat-icon>save</mat-icon>
             }

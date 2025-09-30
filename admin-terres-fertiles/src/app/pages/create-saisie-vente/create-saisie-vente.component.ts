@@ -73,6 +73,7 @@ export class CreateSaisieVenteComponent implements OnInit {
   }
 
   async ngOnInit() {
+    // Charger d'abord les produits, puis les plateformes (car on filtre les plateformes selon les produits)
     await this.loadProduits();
     await this.loadPlateformes();
 
@@ -110,9 +111,49 @@ export class CreateSaisieVenteComponent implements OnInit {
 
   async loadPlateformes() {
     try {
-      this.plateformes = await this.plateformeService.getPlateformes();
+      console.log('🔍 Chargement des plateformes avec produits de vente...');
+      
+      // Récupérer toutes les plateformes
+      const toutesPlateformes = await this.plateformeService.getPlateformes();
+      console.log(`📊 Total plateformes: ${toutesPlateformes.length}`);
+      
+      // Récupérer tous les produits de vente pour identifier les plateformes utilisées
+      const produits = await this.produitVenteService.getAll();
+      console.log(`📦 Total produits de vente: ${produits.length}`);
+      
+      // Extraire les IDs des plateformes qui ont des mélanges avec des produits de vente
+      const plateformesAvecProduits = new Set<number>();
+      
+      produits.forEach(produit => {
+        if (produit.melange && (produit.melange as any).plateforme) {
+          const plateformeId = (produit.melange as any).plateforme;
+          plateformesAvecProduits.add(plateformeId);
+        }
+      });
+      
+      console.log(`✅ Plateformes avec produits: ${Array.from(plateformesAvecProduits).join(', ')}`);
+      
+      // Filtrer les plateformes qui ont au moins un produit de vente
+      this.plateformes = toutesPlateformes.filter(plateforme => 
+        plateforme.id && plateformesAvecProduits.has(plateforme.id)
+      );
+      
+      console.log(`📋 Plateformes disponibles pour saisie: ${this.plateformes.length}`);
+      this.plateformes.forEach(plateforme => {
+        console.log(`   - ${plateforme.nom} (ID: ${plateforme.id})`);
+      });
+      
+      if (this.plateformes.length === 0) {
+        console.log('⚠️ Aucune plateforme avec produits de vente disponibles');
+        this.snackBar.open(
+          'Aucune plateforme avec des produits de vente disponibles',
+          'Fermer',
+          { duration: 5000, panelClass: ['warning-snackbar'] }
+        );
+      }
+      
     } catch (error) {
-      console.error('Erreur lors du chargement des plateformes:', error);
+      console.error('❌ Erreur lors du chargement des plateformes:', error);
       this.snackBar.open(
         'Erreur lors du chargement des plateformes',
         'Fermer',
