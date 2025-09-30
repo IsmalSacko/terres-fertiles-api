@@ -306,7 +306,7 @@ class AmendementOrganique(models.Model):
 class Plateforme(models.Model):
     nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, par exemple 'Plateforme de compostage de Paris'")
     localisation = models.CharField(max_length=255)
-    entreprise_gestionnaire = models.CharField(max_length=255, default='', help_text="Entreprise gestionnaire de la plateforme")
+    entreprise_gestionnaire = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='plateformes',help_text="Responsable automatiquement défini à l'utilisateur connecté."

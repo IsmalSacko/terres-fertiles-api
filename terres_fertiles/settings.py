@@ -87,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'terres_fertiles',
         'USER': 'root',  # ou ton utilisateur MySQL
-        'PASSWORD': '',  # mot de passe si défini
+        'PASSWORD': 'sacko',  # mot de passe si défini
         'HOST': 'localhost',
         'PORT': '3306',
     }
@@ -235,8 +235,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'in-v3.mailjet.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config('MAILJET_API_KEY')
-EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
+# EMAIL_HOST_USER = config('MAILJET_API_KEY')
+# EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
 DEFAULT_FROM_EMAIL = 'ismaila.sacko@terres-fertiles.com'
 PASSWORD_RESET_TIMEOUT = 900  # 900 # 15 minutes
 

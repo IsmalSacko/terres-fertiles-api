@@ -1,10 +1,10 @@
 export interface Plateforme {
   id: number;
-  responsable: string
-  nom: string;
-  localisation: string;
-  entreprise_gestionnaire: string;
-  latitude: number | null;
-  longitude: number | null;
-  date_creation: string | null;
+  responsable?: string | null;  // Optionnel (ForeignKey nullable)
+  nom?: string | null;          // Optionnel (généré automatiquement si vide)
+  localisation: string;         // OBLIGATOIRE
+  entreprise_gestionnaire: string; // OBLIGATOIRE maintenant
+  latitude?: number | null;     // Optionnel
+  longitude?: number | null;    // Optionnel
+  date_creation?: string;       // Optionnel (valeur par défaut dans le backend)
 }

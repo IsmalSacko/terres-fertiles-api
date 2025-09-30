@@ -6,10 +6,11 @@ import { Plateforme } from '../../../models/plateforme';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { MatIconModule } from "@angular/material/icon";
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-edit-plateforme',
-  imports: [ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule, MatIconModule],
+  imports: [CommonModule, ReactiveFormsModule, MatInputModule, MatProgressSpinnerModule, MatIconModule],
   templateUrl: './edit-plateforme.component.html',
   styleUrl: './edit-plateforme.component.css'
 })
@@ -29,11 +30,12 @@ export class EditPlateformeComponent implements OnInit{
     async ngOnInit() {
         this.plateformId = Number(this.route.snapshot.paramMap.get('id'));
         this.plateformeForm = this.fb.group({
-          nom: ['', Validators.required],
-          localisation: ['', Validators.required],
-          latitude: ['', Validators.required],
-          longitude: ['', Validators.required],
-          date_creation: ['', Validators.required],
+          nom: [''], // Optionnel - généré automatiquement si vide
+          localisation: ['', Validators.required], // OBLIGATOIRE
+          entreprise_gestionnaire: ['', Validators.required], // OBLIGATOIRE maintenant
+          latitude: [''], // Optionnel
+          longitude: [''], // Optionnel
+          date_creation: [''], // Lecture seule - géré par le backend
       });
 
       this.loadPlateforme();
@@ -55,7 +57,23 @@ export class EditPlateformeComponent implements OnInit{
     async onSubmit() {
       if (this.plateformeForm.invalid) return;
       this.loading = true;
-      this.plateformeService.updatePlateforme(this.plateformId, this.plateformeForm.value).then(
+      
+      const plateformeData = { ...this.plateformeForm.value };
+      
+      // Convertir les chaînes vides en null pour les champs numériques optionnels
+      if (plateformeData.latitude === '' || plateformeData.latitude === null) {
+        plateformeData.latitude = null;
+      } else {
+        plateformeData.latitude = parseFloat(plateformeData.latitude);
+      }
+      
+      if (plateformeData.longitude === '' || plateformeData.longitude === null) {
+        plateformeData.longitude = null;
+      } else {
+        plateformeData.longitude = parseFloat(plateformeData.longitude);
+      }
+      
+      this.plateformeService.updatePlateforme(this.plateformId, plateformeData).then(
         async () => {
           // Laisse le spinner visible 1 seconde avant de rediriger
           await new Promise(resolve => setTimeout(resolve, 1000));

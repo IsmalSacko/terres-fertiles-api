@@ -29,17 +29,31 @@ export class CreatePlateformeComponent {
     private router: Router
   ) {
     this.pForm = this.fb.group({
-      nom: ['', Validators?.required],
-      localisation: ['', Validators?.required],
-      latitude: ['', Validators?.required],
-      longitude: ['', Validators?.required],
-      date_creation: [new Date().toISOString().slice(0, 10), Validators.required],
-
+      nom: [''],  // Optionnel - généré automatiquement si vide
+      localisation: ['', Validators.required], // OBLIGATOIRE
+      entreprise_gestionnaire: ['', Validators.required], // OBLIGATOIRE maintenant
+      latitude: [''], // Optionnel
+      longitude: [''], // Optionnel
+      // date_creation est géré automatiquement par le backend
     });
   }
   async onSubmit() {
   if (this.pForm.valid) {
-    const plateformeData = this.pForm.value;
+    const plateformeData = { ...this.pForm.value };
+    
+    // Convertir les chaînes vides en null pour les champs numériques optionnels
+    if (plateformeData.latitude === '' || plateformeData.latitude === null) {
+      plateformeData.latitude = null;
+    } else {
+      plateformeData.latitude = parseFloat(plateformeData.latitude);
+    }
+    
+    if (plateformeData.longitude === '' || plateformeData.longitude === null) {
+      plateformeData.longitude = null;
+    } else {
+      plateformeData.longitude = parseFloat(plateformeData.longitude);
+    }
+    
     try {
       const created = await this.plateformeService.createPlateforme(plateformeData);
       this.router.navigate(['/plateformes', created.id]); // Redirige vers la page de détail

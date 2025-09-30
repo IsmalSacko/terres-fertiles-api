@@ -34,7 +34,7 @@ button[mat-button]:hover {
 /* Formulaire création plateforme - style moderne nature */
 .create-plateforme-container {
   max-width: 480px;
-  margin: 3rem auto 2rem auto;
+  margin: 2rem auto 2rem auto; /* Marge réduite car standard-page-content gère l'espacement navbar */
   padding: 2.5rem 2rem 2rem 2rem;
   background: var(--surface-color);
   border-radius: 20px;
