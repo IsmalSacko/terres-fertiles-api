@@ -15,7 +15,18 @@
   --text-secondary: #4a5568;
   --text-light: rgba(255, 255, 255, 0.9);
   --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 20px 40  .dashboard-grid {
+  --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --fertile-dark: #0a0a0a;
+  --fertile-mid: #1e3c1e;
+  --fertile-light: #3a763a;
+}
+
+/* ========================================
+   RESPONSIVE MOBILE FIRST
+   ======================================== */
+
+@media (max-width: 768px) {
+  .dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.6rem;
   }
