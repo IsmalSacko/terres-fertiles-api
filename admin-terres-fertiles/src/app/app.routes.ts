@@ -29,11 +29,19 @@ import { EditPlateformeComponent } from './pages/plateformes/edit-plateforme/edi
 import { CreatePlateformeComponent } from './pages/plateformes/create-plateforme/create-plateforme.component';
 import { ProduitVenteListComponent } from './pages/produits/produit-vente-list/produit-vente-list.component';
 import { CreateProduitVenteComponent } from './pages/produits/create-produit-vente/create-produit-vente.component';
+import { AmendementListComponent } from './pages/amendements/amendement-list/amendement-list.component';
+import { AmendementCreateComponent } from './pages/amendements/amendement-create/amendement-create.component';
+import { AmendementDetailComponent } from './pages/amendements/amendement-detail/amendement-detail.component';
+import { AmendementEditComponent } from './pages/amendements/amendement-edit/amendement-edit.component';
 
 
 export const routes: Routes = [
+  // Route par défaut
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+  // Route pour l'authentification utilisateur
   { path: 'login', component: LoginComponent },
+  // routes principales
   { path: 'dashboard', component: DashboardComponent },
   { path: 'documents-gisement', component: DocumentGisementComponent },
   { path: 'register', component: RegisterComponent },
@@ -44,15 +52,18 @@ export const routes: Routes = [
   { path: 'gisements', component: GisementListComponent },
   { path: 'gisements/new', component: GisementCreateComponent },
   { path: 'gisements/:id', component: GisementDetailComponent },
+  // Routes pour les mélanges d'amendements
   { path: 'melanges-amendements', component: MelangeAmendementListComponent },
   { path: 'amendement-organique-create', component: AmendementOrganiqueCreateComponent},
 
+  // Routes pour les mélanges
   { path: 'melanges', component: MelangeListComponent },
   { path: 'melanges/new', component: MelangeDetailComponent },
   { path: 'melanges/:id', component: MelangeDetailComponent },
+  // Routes pour les produits de vente
   { path: 'produits', component: ProduitVenteListComponent },
   { path: 'produits/nouveau', component: CreateProduitVenteComponent },
-
+  // Routes pour les saisies de vente
   { path: 'saisies-vente', component: SaisieVenteComponent },
   { path: 'saisies-vente/new', component: CreateSaisieVenteComponent },
   { path: 'saisies-vente/edit/:id', component: EditSaisieVenteComponent },
@@ -61,17 +72,23 @@ export const routes: Routes = [
   { path: 'analyses-laboratoire/:id', component: AnalyseLaboratoireDetailComponent },
 
   { path: 'activate/:uid/:token', component: ActivateComponent},
-
+  // Routes pour la réinitialisation du mot de passe
   { path: 'reset-password', component: ResetPasswordComponent},
   { path: 'reset-password-confirm/:uid/:token', component:ResetPasswordConfirmComponent},
-
+  // Routes pour la planification
   {path: 'planning', component: PlanningComponent},
 
   { path: 'detail-saisie-vente/:id', component: DetailSaisieVenteComponent },
-
+  // Routes pour les plateformes
   { path: 'plateformes/new', component: CreatePlateformeComponent },
   { path: 'plateformes', component: ListPlateformeComponent },
   { path: 'plateformes/:id', component: DetailPlateformeComponent },
   { path: 'plateformes/edit/:id', component: EditPlateformeComponent },
+
+  // Routes pour les amendements organiques
+  { path: 'amendements', component: AmendementListComponent },
+  { path: 'amendements/new', component: AmendementCreateComponent },
+  { path: 'amendements/:id', component: AmendementDetailComponent },
+  { path: 'amendements/:id/edit', component: AmendementEditComponent },
 
 ];

@@ -444,6 +444,11 @@
   --card-gradient: linear-gradient(135deg, var(--fertile-light) 0%, #558b2f 100%);
 }
 
+/* Carte Amendements Organiques */
+.card-amendements {
+  --card-gradient: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+}
+
 /* Carte Mélanges */
 .card-melanges {
   --card-gradient: linear-gradient(135deg, #2e5f2e 0%, #689f38 100%);

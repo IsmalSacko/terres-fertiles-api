@@ -1,0 +1,235 @@
+/* Conteneur principal */
+.amendement-detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* En-tête du détail */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--primary-light);
+}
+
+.header-info h1 {
+  color: var(--primary-color);
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Contenu du détail */
+.detail-content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Cartes d'information */
+.info-card {
+  border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  border: 1.5px solid var(--primary-light);
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.info-card:hover {
+  box-shadow: 0 8px 24px rgba(46,125,50,0.15);
+  transform: translateY(-2px);
+}
+
+.info-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--primary-color);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.info-card mat-card-title mat-icon {
+  background: rgba(46,125,50,0.1);
+  padding: 0.4rem;
+  border-radius: 8px;
+  color: var(--primary-color);
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Grille d'informations */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: rgba(46,125,50,0.03);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-light);
+}
+
+.info-item mat-icon {
+  color: var(--primary-color);
+  background: rgba(46,125,50,0.1);
+  padding: 0.5rem;
+  border-radius: 8px;
+  margin-top: 0.2rem;
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.info-item strong {
+  color: var(--primary-dark);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item p {
+  margin: 0.3rem 0 0 0;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+
+.info-item small {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.loading-container mat-progress-spinner {
+  margin-bottom: 1rem;
+}
+
+/* Message d'erreur */
+.error-message {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #f44336;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.1rem;
+}
+
+/* Boutons */
+button[mat-raised-button] {
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button[mat-button] {
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button mat-icon {
+  font-size: 20px !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0;
+}
+
+button[color="warn"] {
+  background: linear-gradient(90deg, var(--danger-color) 0%, #ffbdbd 100%) !important;
+  color: #fff !important;
+}
+
+button[color="warn"]:hover {
+  background: linear-gradient(90deg, #b71c1c 0%, var(--danger-color) 100%) !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .amendement-detail-container {
+    padding: 1rem;
+  }
+  
+  .detail-header {
+    flex-direction: column;
+    gap: 1.5rem;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: stretch;
+  }
+  
+  .header-actions button {
+    flex: 1;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .header-info h1 {
+    font-size: 2rem;
+  }
+  
+  .info-card mat-card-title mat-icon,
+  .info-item mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.4rem;
+  }
+}

@@ -6,18 +6,25 @@
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Chantier *</mat-label>
-          <mat-select name="chantier" [(ngModel)]="selectedChantier" required>
-            <mat-option *ngFor="let chantier of chantiers" [value]="chantier.id">
-              {{ chantier.nom }}
-            </mat-option>
+          <mat-select name="chantier" [(ngModel)]="selectedChantier" (selectionChange)="onChantierChange()" required>
+
+            @for (chantier of chantiers; track chantier.id) {
+              <mat-option [value]="chantier.id">
+                {{ chantier.nom }}
+              </mat-option>
+            }
           </mat-select>
-          <mat-error *ngIf="!selectedChantier">Le chantier est requis</mat-error>
+          @if (!selectedChantier) {
+            <mat-error>Le chantier est requis</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Commune *</mat-label>
-          <input matInput name="commune" [(ngModel)]="commune" required readonly />
-          <mat-error *ngIf="!commune">La commune est requise</mat-error>
+          <input matInput name="commune" [(ngModel)]="commune" required readonly placeholder="Rempli automatiquement depuis le chantier" />
+          @if (!commune) {
+            <mat-error>La commune est requise</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -26,15 +33,23 @@
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Période terrassement *</mat-label>
           <input matInput name="periode_terrassement" [(ngModel)]="periode_terrassement" required maxlength="100" />
-          <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['required']">La période est requise</mat-error>
-          <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['maxlength']">Maximum 100 caractères</mat-error>
+          @if (gisementForm.form.get('periode_terrassement')?.errors?.['required']) {
+            <mat-error>La période est requise</mat-error>
+          }
+          @if (gisementForm.form.get('periode_terrassement')?.errors?.['maxlength']) {
+            <mat-error>Maximum 100 caractères</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Volume terrasse (m³) *</mat-label>
           <input matInput name="volume_terrasse" [(ngModel)]="volume_terrasse" type="number" required min="0" step="0.01" />
-          <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['required']">Le volume est requis</mat-error>
-          <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['min']">Le volume doit être positif</mat-error>
+          @if (gisementForm.form.get('volume_terrasse')?.errors?.['required']) {
+            <mat-error>Le volume est requis</mat-error>
+          }
+          @if (gisementForm.form.get('volume_terrasse')?.errors?.['min']) {
+            <mat-error>Le volume doit être positif</mat-error>
+          }
         </mat-form-field>
       </div>
 
@@ -43,27 +58,36 @@
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Matériau *</mat-label>
           <input matInput name="materiau" [(ngModel)]="materiau" required maxlength="255" />
-          <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['required']">Le matériau est requis</mat-error>
-          <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
+          @if (gisementForm.form.get('materiau')?.errors?.['required']) {
+            <mat-error>Le matériau est requis</mat-error>
+          }
+          @if (gisementForm.form.get('materiau')?.errors?.['maxlength']) {
+            <mat-error>Maximum 255 caractères</mat-error>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Type de sol *</mat-label>
           <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
-            <mat-option *ngFor="let option of typeSolOptions" [value]="option.value">
-              {{ option.viewValue }}
-            </mat-option>
+            @for (option of typeSolOptions; track option.value) {
+              <mat-option [value]="option.value">
+                {{ option.viewValue }}
+              </mat-option>
+            }
           </mat-select>
-          <mat-error *ngIf="gisementForm.form.get('type_de_sol')?.errors?.['required']">Le type de sol est requis</mat-error>
+          @if (gisementForm.form.get('type_de_sol')?.errors?.['required']) {
+            <mat-error>Le type de sol est requis</mat-error>
+          }
         </mat-form-field>
       </div>
 
       <!-- Ligne 4: Localisation (pleine largeur) -->
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Localisation *</mat-label>
-        <input matInput name="localisation" [(ngModel)]="localisation" required maxlength="255" />
-        <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['required']">La localisation est requise</mat-error>
-        <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
+        <input matInput name="localisation" [(ngModel)]="localisation" required readonly placeholder="Remplie automatiquement depuis le chantier sélectionné" />
+        @if (gisementForm.form.get('localisation')?.errors?.['required']) {
+          <mat-error>La localisation est requise</mat-error>
+        }
       </mat-form-field>
 
       <!-- Ligne 5: Coordonnées GPS -->
@@ -79,9 +103,11 @@
         </mat-form-field>
       </div>
 
-      <div class="error-message" *ngIf="errorMsg">
-        {{ errorMsg }}
-      </div>
+      @if (errorMsg) {
+        <div class="error-message">
+          {{ errorMsg }}
+        </div>
+      }
 
       <div class="actions">
         <button mat-raised-button color="primary" type="submit" [disabled]="loading || !gisementForm.form.valid">

@@ -1,0 +1,98 @@
+<div class="standard-page-content">
+  <div class="create-amendement-container">
+    <h2>Créer un amendement organique</h2>
+    <form (ngSubmit)="createAmendement()" #amendementForm="ngForm">
+      
+      <!-- Ligne 1: Plateforme + Fournisseur -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Plateforme</mat-label>
+          <mat-select name="plateforme" [(ngModel)]="selectedPlateforme">
+            <mat-option [value]="null">Aucune plateforme</mat-option>
+            @for (plateforme of plateformes; track plateforme.id) {
+              <mat-option [value]="plateforme.id">
+                {{ plateforme.nom }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Fournisseur *</mat-label>
+          <input matInput name="fournisseur" [(ngModel)]="fournisseur" required />
+          @if (!fournisseur) {
+            <mat-error>Le fournisseur est requis</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Ligne 2: Date réception + Commune -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Date de réception *</mat-label>
+          <input matInput [matDatepicker]="receptionPicker" name="date_reception" [(ngModel)]="date_reception" required>
+          <mat-datepicker-toggle matIconSuffix [for]="receptionPicker"></mat-datepicker-toggle>
+          <mat-datepicker #receptionPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Commune *</mat-label>
+          <input matInput name="commune" [(ngModel)]="commune" required />
+          @if (!commune) {
+            <mat-error>La commune est requise</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Ligne 3: Date semis + Volume -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Date de semis *</mat-label>
+          <input matInput [matDatepicker]="semisPicker" name="date_semis" [(ngModel)]="date_semis" required>
+          <mat-datepicker-toggle matIconSuffix [for]="semisPicker"></mat-datepicker-toggle>
+          <mat-datepicker #semisPicker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Volume disponible (m³) *</mat-label>
+          <input matInput name="volume_disponible" [(ngModel)]="volume_disponible" type="number" required min="0" step="0.01" />
+          @if (volume_disponible <= 0) {
+            <mat-error>Le volume doit être supérieur à 0</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <!-- Ligne 4: Localisation (pleine largeur) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Localisation</mat-label>
+        <input matInput name="localisation" [(ngModel)]="localisation" placeholder="Adresse ou description de la localisation" />
+      </mat-form-field>
+
+      <!-- Ligne 5: Coordonnées GPS -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Latitude</mat-label>
+          <input matInput name="latitude" [(ngModel)]="latitude" type="number" step="0.000001" placeholder="Coordonnée latitude (optionnelle)" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Longitude</mat-label>
+          <input matInput name="longitude" [(ngModel)]="longitude" type="number" step="0.000001" placeholder="Coordonnée longitude (optionnelle)" />
+        </mat-form-field>
+      </div>
+
+      @if (errorMsg) {
+        <div class="error-message">
+          {{ errorMsg }}
+        </div>
+      }
+
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || !amendementForm.form.valid">
+          {{ loading ? 'Création...' : 'Créer' }}
+        </button>
+        <button mat-button type="button" (click)="goToAmendements()">Annuler</button>
+      </div>
+    </form>
+  </div>
+</div>

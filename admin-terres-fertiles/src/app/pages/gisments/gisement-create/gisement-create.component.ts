@@ -30,6 +30,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './gisement-create.component.css'
 })
 export class GisementCreateComponent implements OnInit {
+[x: string]: any;
   chantiers: Chantier[] = [];
   selectedChantier: number | null = null;
   
@@ -64,16 +65,13 @@ export class GisementCreateComponent implements OnInit {
       this.chantiers = await this.chantierService.getAll();
       // Récupération du chantierId depuis les paramètres de l'URL
       const chantierId = this.route.snapshot.queryParams['chantier'];
-      console.log('chantierId reçu:', chantierId); // Debug
+    
       if (chantierId) {
         // Pré-sélection du chantier correspondant
         const chantierFound = this.chantiers.find(chantier => chantier.id === parseInt(chantierId));
-        console.log('chantier trouvé:', chantierFound); // Debug
         if (chantierFound) {
           this.selectedChantier = chantierFound.id;
-          
-          this.commune = chantierFound.commune || '';
-          console.log('selectedChantier défini à:', this.selectedChantier); // Debug
+          this.updateFieldsFromChantier(chantierFound);
           // Force la détection des changements pour s'assurer que le template se met à jour
           this.cdr.detectChanges();
         }
@@ -81,6 +79,26 @@ export class GisementCreateComponent implements OnInit {
     } catch (err) {
       this.errorMsg = 'Erreur lors du chargement des chantiers.';
     }
+  }
+
+  // Méthode pour remplir automatiquement les champs à partir du chantier sélectionné
+  onChantierChange() {
+    if (this.selectedChantier) {
+      const chantier = this.chantiers.find(c => c.id === this.selectedChantier);
+      if (chantier) {
+        this.updateFieldsFromChantier(chantier);
+      }
+    } else {
+      // Vider les champs si aucun chantier n'est sélectionné
+      this.commune = '';
+      this.localisation = '';
+    }
+  }
+
+  // Méthode utilitaire pour mettre à jour les champs à partir d'un chantier
+  private updateFieldsFromChantier(chantier: Chantier) {
+    this.commune = chantier.commune || '';
+    this.localisation = chantier.localisation || '';
   }
 
   async createGisement() {

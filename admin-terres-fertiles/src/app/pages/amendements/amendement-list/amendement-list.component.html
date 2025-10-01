@@ -1,0 +1,99 @@
+<div class="standard-page-content">
+  <div class="amendements-list-container">
+    <div class="list-header">
+      <h2 class="list-title">
+        <mat-icon>eco</mat-icon>
+        Amendements organiques
+      </h2>
+      <button mat-raised-button color="primary" [routerLink]="['/amendements/new']" class="btn-add">
+        <mat-icon>add</mat-icon>
+        Nouveau amendement
+      </button>
+    </div>
+
+    @if (loading) {
+      <div class="loading-container">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        <p>Chargement des amendements...</p>
+      </div>
+    }
+
+    @if (errorMsg) {
+      <div class="error-message">
+        <mat-icon>error</mat-icon>
+        {{ errorMsg }}
+      </div>
+    }
+
+    @if (!loading && amendements.length === 0) {
+      <div class="empty-message">
+        <mat-icon>eco</mat-icon>
+        <h3>Aucun amendement organique</h3>
+        <p>Commencez par créer votre premier amendement organique</p>
+        <button mat-raised-button color="primary" [routerLink]="['/amendements/new']">
+          <mat-icon>add</mat-icon>
+          Créer un amendement
+        </button>
+      </div>
+    }
+
+    @if (!loading && amendements.length > 0) {
+      <div class="amendements-grid">
+        @for (amendement of amendements; track amendement.id) {
+          <mat-card class="amendement-card">
+            <mat-card-header>
+              <mat-card-title>{{ amendement.nom }}</mat-card-title>
+              <mat-card-subtitle>{{ amendement.fournisseur }}</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <div class="amendement-info">
+                <mat-icon>business</mat-icon>
+                <span>{{ getPlateformeNom(amendement.plateforme) }}</span>
+              </div>
+              
+              <div class="amendement-info">
+                <mat-icon>location_city</mat-icon>
+                <span>{{ amendement.commune }}</span>
+              </div>
+              
+              <div class="amendement-info">
+                <mat-icon>event</mat-icon>
+                <span>Réception: {{ formatDate(amendement.date_reception) }}</span>
+              </div>
+              
+              <div class="amendement-info">
+                <mat-icon>agriculture</mat-icon>
+                <span>Semis: {{ formatDate(amendement.date_semis) }}</span>
+              </div>
+              
+              <div class="amendement-info">
+                <mat-icon>inventory</mat-icon>
+                <span>Volume: {{ amendement.volume_disponible }} m³</span>
+              </div>
+              
+              @if (amendement.localisation) {
+                <div class="amendement-info">
+                  <mat-icon>place</mat-icon>
+                  <span>{{ amendement.localisation }}</span>
+                </div>
+              }
+            </mat-card-content>
+            
+            <mat-card-actions class="amendement-actions">
+              <button mat-icon-button [routerLink]="['/amendements', amendement.id]" class="btn-view" matTooltip="Voir les détails">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button [routerLink]="['/amendements', amendement.id, 'edit']" class="btn-edit" matTooltip="Modifier">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deleteAmendement(amendement.id!, amendement.nom)" class="btn-delete" matTooltip="Supprimer">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+</div>

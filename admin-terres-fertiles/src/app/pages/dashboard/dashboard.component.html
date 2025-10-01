@@ -41,6 +41,17 @@
         </div>
       </div>
 
+      <div class="notification-item amendement-notification" [routerLink]="['/amendements']">
+        <div class="notification-icon">
+          <mat-icon>eco</mat-icon>
+          <span class="notification-badge">{{ amendements }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">MAO</span>
+          <span class="notification-subtitle">disponibles</span>
+        </div>
+      </div>
+
       <div class="notification-item melange-notification" [routerLink]="['/melanges']">
         <div class="notification-icon">
           <mat-icon>blender</mat-icon>
@@ -115,6 +126,18 @@
           Explorez et gérez vos sources de matières premières organiques disponibles.
         </p>
         <button class="card-action">Voir les gisements</button>
+      </div>
+
+      <!-- Carte MAO -->
+      <div class="modern-card card-amendements" routerLink="/amendements">
+        <div class="card-icon">
+          <mat-icon>eco</mat-icon>
+        </div>
+        <h3 class="card-title">MAO</h3>
+        <p class="card-description">
+          Gérez vos amendements organiques avec nomenclature automatique MAO.
+        </p>
+        <button class="card-action">Gérer les MAO</button>
       </div>
 
       <!-- Carte Mélanges -->

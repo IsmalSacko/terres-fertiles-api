@@ -1,0 +1,163 @@
+<div class="standard-page-content">
+  <div class="amendement-detail-container">
+    @if (loading) {
+      <div class="loading-container">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+        <p>Chargement des détails...</p>
+      </div>
+    }
+
+    @if (errorMsg) {
+      <div class="error-message">
+        <mat-icon>error</mat-icon>
+        {{ errorMsg }}
+      </div>
+    }
+
+    @if (!loading && amendement) {
+      <div class="detail-header">
+        <div class="header-info">
+          <h1>{{ amendement.nom }}</h1>
+          <p class="subtitle">Amendement organique</p>
+        </div>
+        <div class="header-actions">
+          <button mat-raised-button color="primary" [routerLink]="['/amendements', amendement.id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Modifier
+          </button>
+          <button mat-button color="warn" (click)="deleteAmendement()">
+            <mat-icon>delete</mat-icon>
+            Supprimer
+          </button>
+          <button mat-button (click)="goBack()">
+            <mat-icon>arrow_back</mat-icon>
+            Retour
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-content">
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>info</mat-icon>
+              Informations générales
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <mat-icon>business</mat-icon>
+                <div>
+                  <strong>Fournisseur</strong>
+                  <p>{{ amendement.fournisseur }}</p>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>location_city</mat-icon>
+                <div>
+                  <strong>Commune</strong>
+                  <p>{{ amendement.commune }}</p>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>inventory</mat-icon>
+                <div>
+                  <strong>Volume disponible</strong>
+                  <p>{{ amendement.volume_disponible }} m³</p>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="info-card">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>event</mat-icon>
+              Dates importantes
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <mat-icon>download</mat-icon>
+                <div>
+                  <strong>Date de réception</strong>
+                  <p>{{ formatDate(amendement.date_reception) }}</p>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <mat-icon>agriculture</mat-icon>
+                <div>
+                  <strong>Date de semis</strong>
+                  <p>{{ formatDate(amendement.date_semis) }}</p>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        @if (plateforme) {
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>factory</mat-icon>
+                Plateforme associée
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-item">
+                <mat-icon>business</mat-icon>
+                <div>
+                  <strong>{{ plateforme.nom }}</strong>
+                  <p>{{ plateforme.localisation }}</p>
+                  @if (plateforme.entreprise_gestionnaire) {
+                    <p><small>Gérée par: {{ plateforme.entreprise_gestionnaire }}</small></p>
+                  }
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+
+        @if (amendement.localisation || amendement.latitude || amendement.longitude) {
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>place</mat-icon>
+                Localisation
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                @if (amendement.localisation) {
+                  <div class="info-item">
+                    <mat-icon>location_on</mat-icon>
+                    <div>
+                      <strong>Adresse</strong>
+                      <p>{{ amendement.localisation }}</p>
+                    </div>
+                  </div>
+                }
+
+                @if (amendement.latitude && amendement.longitude) {
+                  <div class="info-item">
+                    <mat-icon>gps_fixed</mat-icon>
+                    <div>
+                      <strong>Coordonnées GPS</strong>
+                      <p>{{ amendement.latitude }}, {{ amendement.longitude }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    }
+  </div>
+</div>

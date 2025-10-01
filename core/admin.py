@@ -114,8 +114,10 @@ class GisementAdmin(admin.ModelAdmin):
     list_per_page = 10
 
 @admin.register(AmendementOrganique)
-class EmendentOrganique(admin.ModelAdmin):
-    list_display = ('fournisseur', 'date_reception', 'volume_disponible')
+class AmendementOrganiqueAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'date_reception', 'volume_disponible')
+    readonly_fields = ('responsable',)
+  
 
 
 

@@ -18,6 +18,7 @@
     <a (click)="navigateAndClose('/chantiers')"><mat-icon>location_city</mat-icon> Chantiers</a>
     <a (click)="navigateAndClose('/gisements')"><mat-icon>landscape</mat-icon> Gisements</a>
     <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> Plateforme</a>
+    <a (click)="navigateAndClose('/amendements')"><mat-icon>eco</mat-icon> MAO</a>
     <div class="mobile-menu-divider"></div>
     <button *ngIf="isLoggedIn" (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
     <button *ngIf="!isLoggedIn" (click)="login()"><mat-icon>login</mat-icon> Connexion</button>
@@ -38,6 +39,7 @@
     <a mat-button routerLink="/chantiers" routerLinkActive="active-link"><mat-icon>location_city</mat-icon> Chantiers</a>
     <a mat-button routerLink="/gisements" routerLinkActive="active-link"><mat-icon>landscape</mat-icon> Gisements</a>
     <a mat-button routerLink="/plateformes" routerLinkActive="active-link"><mat-icon>home_work</mat-icon> Plateforme</a>
+    <a mat-button routerLink="/amendements" routerLinkActive="active-link"><mat-icon>eco</mat-icon> MAO</a>
   </nav>
   <button mat-icon-button class="mobile-menu-btn" (click)="openSidenav()">
     <mat-icon>menu</mat-icon>

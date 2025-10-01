@@ -1,15 +1,13 @@
 from decimal import Decimal
-import uuid
 import re
 
-from django.forms import ValidationError
 from django.utils.text import slugify
-from datetime import date, datetime
+from datetime import date
 from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.db import models
-from django.db import transaction
+from django.db import models, transaction
+
 # models.py
 from datetime import date
 def today():
@@ -69,17 +67,45 @@ class Chantier(models.Model):
             # ➡️ Cas CREATION
             regenerer = True
         else:
-            # ➡️ Cas MODIFICATION
+            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
             if not re.match(pattern, self.nom or ""):
                 regenerer = True
             else:
+                # Récupérer l'instance originale pour comparer les changements
+                try:
+                    original = Chantier.objects.get(pk=self.pk)
+                    
+                    # Vérifier si les champs utilisés pour générer le nom ont changé
+                    annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+                    annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
+                    
+                    terrassier_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.entreprise_terrassement).upper())[:3]
+                    terrassier_original = re.sub(r'[^A-Z0-9]', '', slugify(original.entreprise_terrassement).upper())[:3]
+                    
+                    commune_actuelle = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+                    commune_originale = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
+                    
+                    # Si l'un des composants du nom a changé, régénérer
+                    if (annee_actuelle != annee_originale or 
+                        terrassier_actuel != terrassier_original or 
+                        commune_actuelle != commune_originale):
+                        regenerer = True
+                        
+                except Chantier.DoesNotExist:
+                    regenerer = True
+                
                 # Si nom déjà utilisé par un autre chantier → régénérer
                 if Chantier.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                     regenerer = True
 
         if regenerer:
             with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
-                self.nom = self._generate_nom(reindex=True)
+                if self.pk:
+                    # Pour une modification, conserver le numéro séquentiel existant
+                    self.nom = self._generate_nom_with_existing_suffix()
+                else:
+                    # Pour une création, générer un nouveau numéro
+                    self.nom = self._generate_nom(reindex=True)
 
         super().save(*args, **kwargs)
         
@@ -118,7 +144,33 @@ class Chantier(models.Model):
         unique_nom = f"{base_nom_prefix}{terrassier}-{commune}-{suffix:03d}"
         return unique_nom
 
+    def _generate_nom_with_existing_suffix(self):
+        """Génère un nom en conservant le numéro séquentiel existant lors d'une modification"""
+        # Extraire le suffixe existant du nom actuel
+        current_suffix = "001"  # valeur par défaut
+        if self.nom:
+            match = re.search(r"-(\d{3})$", self.nom)
+            if match:
+                current_suffix = match.group(1)
+        
+        # Prendre les 2 derniers chiffres de l'année
+        annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
 
+        # Code terrassement : 3 premiers caractères
+        terrassier = re.sub(r'[^A-Z0-9]', '', slugify(self.entreprise_terrassement).upper())[:3]
+
+        # Code commune : 3 premiers caractères
+        commune = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+
+        # Générer le nouveau nom avec l'ancien suffixe
+        new_nom = f"CHA-{annee}-{terrassier}-{commune}-{current_suffix}"
+        
+        # Vérifier que ce nouveau nom n'existe pas déjà (avec un autre chantier)
+        if Chantier.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
+            # Si conflit, utiliser la méthode normale pour générer un nouveau suffixe
+            return self._generate_nom(reindex=True)
+        
+        return new_nom
 
     def __str__(self):
         return f"{self.nom}"
@@ -176,18 +228,41 @@ class Gisement(models.Model):
             # Création
             regenerer = True
         else:
-            # Modification : vérifier si nom est correct
+            # Modification : vérifier si les champs clés ont changé
             pattern = r"^GIS-\d{2}-[A-Z0-9]{2,6}-[A-Z0-9]{2,6}-\d{3}$"
             if not re.match(pattern, self.nom or ""):
                 regenerer = True
             else:
+                # Récupérer l'instance originale pour comparer les changements
+                try:
+                    original = Gisement.objects.get(pk=self.pk)
+                    
+                    # Vérifier si les champs utilisés pour générer le nom ont changé
+                    annee_actuelle = str(self.date_creation.year)[-2:]
+                    annee_originale = str(original.date_creation.year)[-2:]
+                    
+                    # Comparer les chantiers associés
+                    chantier_change = self.chantier != original.chantier
+                    
+                    # Si l'un des composants du nom a changé, régénérer
+                    if (annee_actuelle != annee_originale or chantier_change):
+                        regenerer = True
+                        
+                except Gisement.DoesNotExist:
+                    regenerer = True
+                
                 # Vérifier unicité
                 if Gisement.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                     regenerer = True
 
         if regenerer and self.chantier:
             with transaction.atomic():
-                self.nom = self._generate_nom(reindex=True)
+                if self.pk:
+                    # Pour une modification, conserver le numéro séquentiel existant
+                    self.nom = self._generate_nom_with_existing_suffix()
+                else:
+                    # Pour une création, générer un nouveau numéro
+                    self.nom = self._generate_nom(reindex=True)
 
         # Normalisation
         if self.commune:
@@ -240,7 +315,31 @@ class Gisement(models.Model):
         unique_nom = f"{base_nom_prefix}-{suffix:03d}"
         return unique_nom
 
+    def _generate_nom_with_existing_suffix(self):
+        """Génère un nom en conservant le numéro séquentiel existant lors d'une modification"""
+        # Extraire le suffixe existant du nom actuel
+        current_suffix = "001"  # valeur par défaut
+        if self.nom:
+            match = re.search(r"-(\d{3})$", self.nom)
+            if match:
+                current_suffix = match.group(1)
+        
+        annee = str(self.date_creation.year)[-2:]
 
+        # Codes chantier
+        chantier_parts = self.chantier.nom.split('-')
+        terrassier_code = slugify(chantier_parts[2]).replace('-', '').upper() if len(chantier_parts) > 2 else "UNK"
+        commune_code = slugify(chantier_parts[3]).replace('-', '').upper() if len(chantier_parts) > 3 else "UNK"
+
+        # Générer le nouveau nom avec l'ancien suffixe
+        new_nom = f"GIS-{annee}-{terrassier_code}-{commune_code}-{current_suffix}"
+        
+        # Vérifier que ce nouveau nom n'existe pas déjà (avec un autre gisement)
+        if Gisement.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
+            # Si conflit, utiliser la méthode normale pour générer un nouveau suffixe
+            return self._generate_nom(reindex=True)
+        
+        return new_nom
 
     class Meta:
         db_table = 'gisement'
@@ -283,28 +382,163 @@ class MelangeAmendement(models.Model):
 
 
 class AmendementOrganique(models.Model):
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='amendements_organique', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
-    nom = models.CharField(max_length=255, unique=True, help_text="Nom de l'émendent organique, par exemple 'Fumier de cheval'")
+
+
+    nom = models.CharField(max_length=255, unique=True, default="", help_text="Nom de l'émendent organique, généré automatiquement si vide.", editable=False)
+    numero_sequence = models.IntegerField(default=1, help_text="Numéro séquentiel pour le tri", editable=False)
+    plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True, related_name='emendements', help_text="Plateforme de compostage ou d'émendement associée.")
     fournisseur = models.CharField(max_length=255, help_text="Fournisseur de l'émendent organique")
     date_reception = models.DateField(default=timezone.now)
+    commune = models.CharField(max_length=100, help_text="Commune de provenance de l'émendent organique", default="LYON")
     date_semis = models.DateField(default=timezone.now, help_text="Date de semis de l'émendent organique")
-    plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True, related_name='emendements', help_text="Plateforme de compostage ou d'émendement associée.")
     volume_disponible = models.DecimalField(max_digits=10, decimal_places=2, help_text="Volume disponible de l'émendent organique")
     localisation = models.CharField(max_length=255, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     responsable = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='emendements', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+
+    def save(self, *args, **kwargs):
+        pattern = r"^MAO-\d{2}-[A-Z0-9]{2,6}-[A-Z0-9]{2,6}-\d{3}$"
+        
+        # Normalisation
+        if self.fournisseur:
+            self.fournisseur = self.fournisseur.upper()
+        if self.commune:
+            self.commune = self.commune.upper()
+
+        regenerer = False
+
+        if not self.pk:
+            # ➡️ Cas CREATION
+            regenerer = True
+        else:
+            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
+            if not re.match(pattern, self.nom or ""):
+                regenerer = True
+            else:
+                # Récupérer l'instance originale pour comparer les changements
+                try:
+                    original = AmendementOrganique.objects.get(pk=self.pk)
+                    
+                    # Vérifier si les champs utilisés pour générer le nom ont changé
+                    annee_actuelle = str(self.date_reception.year if self.date_reception else date.today().year)[-2:]
+                    annee_originale = str(original.date_reception.year if original.date_reception else date.today().year)[-2:]
+                    
+                    fournisseur_code_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.fournisseur).upper())[:3] if self.fournisseur else "XXX"
+                    fournisseur_code_original = re.sub(r'[^A-Z0-9]', '', slugify(original.fournisseur).upper())[:3] if original.fournisseur else "XXX"
+                    
+                    commune_code_actuel = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+                    commune_code_original = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
+                    
+                    # Si l'un des composants du nom a changé, régénérer
+                    if (annee_actuelle != annee_originale or 
+                        fournisseur_code_actuel != fournisseur_code_original or 
+                        commune_code_actuel != commune_code_original):
+                        regenerer = True
+                        
+                except AmendementOrganique.DoesNotExist:
+                    regenerer = True
+                
+                # Si nom déjà utilisé par un autre amendement → régénérer
+                if AmendementOrganique.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                    regenerer = True
+
+        if regenerer:
+            with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
+                if self.pk:
+                    # Pour une modification, conserver le numéro séquentiel existant
+                    self.nom = self._generate_nom_with_existing_suffix()
+                else:
+                    # Pour une création, générer un nouveau numéro
+                    self.nom = self._generate_nom(reindex=True)
+
+        super().save(*args, **kwargs)
+
+    def _generate_nom(self, reindex=False):
+        """Génère un nom unique pour la plateforme et réindexe tous les suffixes si demandé"""
+        # Prendre les 2 derniers chiffres de l'année
+        annee = str(self.date_reception.year if self.date_reception else date.today().year)[-2:]
+
+        # Code fournisseur : 3 premiers caractères
+        fournisseur_code = re.sub(r'[^A-Z0-9]', '', slugify(self.fournisseur).upper())[:3] if self.fournisseur else "XXX"
+
+        # Code commune : 3 premiers caractères
+        commune_code = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+
+        base_nom_prefix = f"MAO-{annee}-{fournisseur_code}-{commune_code}"
+
+        # Récupère tous les amendements de la MÊME PLATEFORME, triés par numéro de séquence
+        existing_amendements = list(
+            AmendementOrganique.objects.exclude(pk=self.pk)
+            .filter(plateforme=self.plateforme)
+            .order_by('numero_sequence')
+        )
+
+        # Réindexe tous les suffixes existants pour cette plateforme
+        if reindex and existing_amendements:
+            for index, amendement in enumerate(existing_amendements, start=1):
+                match = re.match(r"(MAO-\d{2}-[A-Z0-9]{2,6}-[A-Z0-9]{2,6})-\d{3}", amendement.nom)
+                if match:
+                    new_nom = f"{match.group(1)}-{index:03d}"
+                    if amendement.nom != new_nom:
+                        amendement.nom = new_nom
+                        amendement.numero_sequence = index
+                        amendement.save(update_fields=['nom', 'numero_sequence'])
+
+        # Nouveau suffixe = nombre d'amendements existants dans cette plateforme + 1
+        suffix = len(existing_amendements) + 1
+        self.numero_sequence = suffix
+        unique_nom = f"{base_nom_prefix}-{suffix:03d}"
+        return unique_nom
+
+    def _generate_nom_with_existing_suffix(self):
+        """Génère un nom en conservant le numéro séquentiel existant lors d'une modification"""
+        # Extraire le suffixe existant du nom actuel
+        current_suffix = "001"  # valeur par défaut
+        current_sequence = 1
+        if self.nom:
+            match = re.search(r"-(\d{3})$", self.nom)
+            if match:
+                current_suffix = match.group(1)
+                current_sequence = int(match.group(1))
+        
+        # Conserver le numéro de séquence existant
+        self.numero_sequence = current_sequence
+        
+        # Prendre les 2 derniers chiffres de l'année
+        annee = str(self.date_reception.year if self.date_reception else date.today().year)[-2:]
+
+        # Code fournisseur : 3 premiers caractères
+        fournisseur_code = re.sub(r'[^A-Z0-9]', '', slugify(self.fournisseur).upper())[:3] if self.fournisseur else "XXX"
+
+        # Code commune : 3 premiers caractères
+        commune_code = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+
+        # Générer le nouveau nom avec l'ancien suffixe
+        new_nom = f"MAO-{annee}-{fournisseur_code}-{commune_code}-{current_suffix}"
+        
+        # Vérifier que ce nouveau nom n'existe pas déjà (avec un autre amendement)
+        if AmendementOrganique.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
+            # Si conflit, utiliser la méthode normale pour générer un nouveau suffixe
+            return self._generate_nom(reindex=True)
+        
+        return new_nom
+
     class Meta:
         db_table = 'AmendementOrganique'
-        verbose_name = "Émendent organique"
-        verbose_name_plural = "Émendements organiques"
-        ordering = ['nom']
-    
+        verbose_name = "Amendement organique"
+        verbose_name_plural = "Amendements organiques"
+        ordering = ['plateforme', 'numero_sequence']
+
     def __str__(self):
-        return f"Émendent organique - {self.nom} ({self.fournisseur})"
+        return f"Amendement organique - {self.nom} ({self.fournisseur})"
+
+
+
 
 class Plateforme(models.Model):
-    nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, par exemple 'Plateforme de compostage de Paris'")
+    nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, généré automatiquement si vide.", editable=False, unique=True)
+    numero_sequence = models.IntegerField(default=1, help_text="Numéro séquentiel pour le tri", editable=False)
     localisation = models.CharField(max_length=255)
     entreprise_gestionnaire = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
@@ -314,12 +548,131 @@ class Plateforme(models.Model):
     date_creation = models.DateField(default=timezone.now,)  # Date de création de la plateforme
     
     def save(self, *args, **kwargs):
-        # Générer un nom seulement si aucun n'est fourni
-        if not self.nom and self.localisation and self.entreprise_gestionnaire:
-            loc = str(self.localisation).strip().upper()[:3]
-            ent = str(self.entreprise_gestionnaire).strip().upper()[:3]
-            self.nom = f"PTF-{loc}-{ent}"
+        pattern = r"^PTF-[A-Z0-9]{2,6}-[A-Z0-9]{2,6}-\d{3}$"
+        
+        # Normalisation
+        if self.localisation:
+            self.localisation = self.localisation.upper()
+        if self.entreprise_gestionnaire:
+            self.entreprise_gestionnaire = self.entreprise_gestionnaire.upper()
+
+        regenerer = False
+
+        if not self.pk:
+            # ➡️ Cas CREATION
+            regenerer = True
+        else:
+            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
+            if not re.match(pattern, self.nom or ""):
+                regenerer = True
+            else:
+                # Récupérer l'instance originale pour comparer les changements
+                try:
+                    original = Plateforme.objects.get(pk=self.pk)
+                    
+                    # Vérifier si les champs utilisés pour générer le nom ont changé
+                    annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+                    annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
+                    
+                    loc_actuelle = str(self.localisation).strip().upper()[:3]
+                    loc_originale = str(original.localisation).strip().upper()[:3]
+                    
+                    ent_actuelle = str(self.entreprise_gestionnaire).strip().upper()[:3]
+                    ent_originale = str(original.entreprise_gestionnaire).strip().upper()[:3]
+                    
+                    # Si l'un des composants du nom a changé, régénérer
+                    if (annee_actuelle != annee_originale or 
+                        loc_actuelle != loc_originale or 
+                        ent_actuelle != ent_originale):
+                        regenerer = True
+                        
+                except Plateforme.DoesNotExist:
+                    regenerer = True
+                
+                # Si nom déjà utilisé par une autre plateforme → régénérer
+                if Plateforme.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                    regenerer = True
+
+        if regenerer:
+            with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
+                if self.pk:
+                    # Pour une modification, conserver le numéro séquentiel existant
+                    self.nom = self._generate_nom_with_existing_suffix()
+                else:
+                    # Pour une création, générer un nouveau numéro
+                    self.nom = self._generate_nom(reindex=True)
+
         super().save(*args, **kwargs)
+
+    def _generate_nom(self, reindex=False):
+        """Génère un nom unique pour l'année et réindexe tous les suffixes si demandé"""
+        # Prendre les 2 derniers chiffres de l'année
+        annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+
+        # Code localisation : 3 premiers caractères
+        loc_code = str(self.localisation).strip().upper()[:3]
+
+        # Code entreprise : 3 premiers caractères
+        ent_code = str(self.entreprise_gestionnaire).strip().upper()[:3]
+
+        base_nom_prefix = f"PTF-{annee}-{loc_code}-{ent_code}"
+
+        # Récupère toutes les plateformes de l'année, triées par numéro de séquence
+        existing_plateformes = list(
+            Plateforme.objects.exclude(pk=self.pk)
+            .filter(nom__startswith=f"PTF-{annee}-")
+            .order_by('numero_sequence')
+        )
+
+        # Réindexe tous les suffixes existants
+        if reindex and existing_plateformes:
+            for index, plateforme in enumerate(existing_plateformes, start=1):
+                match = re.match(r"(PTF-\d{2}-[A-Z0-9]{2,6}-[A-Z0-9]{2,6})-\d{3}", plateforme.nom)
+                if match:
+                    new_nom = f"{match.group(1)}-{index:03d}"
+                    if plateforme.nom != new_nom:
+                        plateforme.nom = new_nom
+                        plateforme.numero_sequence = index
+                        plateforme.save(update_fields=['nom', 'numero_sequence'])
+
+        # Nouveau suffixe = nombre de plateformes existantes + 1
+        suffix = len(existing_plateformes) + 1
+        self.numero_sequence = suffix
+        unique_nom = f"{base_nom_prefix}-{suffix:03d}"
+        return unique_nom
+
+    def _generate_nom_with_existing_suffix(self):
+        """Génère un nom en conservant le numéro séquentiel existant lors d'une modification"""
+        # Extraire le suffixe existant du nom actuel
+        current_suffix = "001"  # valeur par défaut
+        current_sequence = 1
+        if self.nom:
+            match = re.search(r"-(\d{3})$", self.nom)
+            if match:
+                current_suffix = match.group(1)
+                current_sequence = int(match.group(1))
+        
+        # Conserver le numéro de séquence existant
+        self.numero_sequence = current_sequence
+        
+        # Prendre les 2 derniers chiffres de l'année
+        annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+
+        # Code localisation : 3 premiers caractères
+        loc_code = str(self.localisation).strip().upper()[:3]
+
+        # Code entreprise : 3 premiers caractères
+        ent_code = str(self.entreprise_gestionnaire).strip().upper()[:3]
+
+        # Générer le nouveau nom avec l'ancien suffixe
+        new_nom = f"PTF-{annee}-{loc_code}-{ent_code}-{current_suffix}"
+        
+        # Vérifier que ce nouveau nom n'existe pas déjà (avec une autre plateforme)
+        if Plateforme.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
+            # Si conflit, utiliser la méthode normale pour générer un nouveau suffixe
+            return self._generate_nom(reindex=True)
+        
+        return new_nom
 
     def __str__(self):
         return f"Plateforme - {self.nom or 'Sans nom'}"
@@ -328,7 +681,7 @@ class Plateforme(models.Model):
         db_table = 'plateforme'
         verbose_name = "Plateforme"
         verbose_name_plural = "Plateformes"
-        ordering = ['nom']
+        ordering = ['numero_sequence']
 
 
 
@@ -365,31 +718,101 @@ class Melange(models.Model):
 
 
     def save(self, *args, **kwargs):
-        if not self.nom:
-            prefix = "MEL"
-            annee = self.date_creation.year % 100
-            fournisseur_code = (self.fournisseur or self.producteur)[:3].upper()
-            plateforme_code = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
-            # Base du nom pour la plateforme et l'année seulement (incrément global pour la plateforme)
-            base_nom = f"{prefix}-{annee}-"
+        regenerer = False
+        
+        if not self.pk:
+            # Création
+            regenerer = True
+        else:
+            # Modification : vérifier si les champs clés ont changé
+            if not self.nom:
+                regenerer = True
+            else:
+                # Récupérer l'instance originale pour comparer les changements
+                try:
+                    original = Melange.objects.get(pk=self.pk)
+                    
+                    # Vérifier si les champs utilisés pour générer le nom ont changé
+                    annee_actuelle = self.date_creation.year % 100
+                    annee_originale = original.date_creation.year % 100
+                    
+                    fournisseur_code_actuel = (self.fournisseur or self.producteur)[:3].upper()
+                    fournisseur_code_original = (original.fournisseur or original.producteur)[:3].upper()
+                    
+                    plateforme_code_actuel = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+                    plateforme_code_original = original.plateforme.nom[:3].upper() if original.plateforme else "XXX"
+                    
+                    # Si l'un des composants du nom a changé, régénérer
+                    if (annee_actuelle != annee_originale or 
+                        fournisseur_code_actuel != fournisseur_code_original or 
+                        plateforme_code_actuel != plateforme_code_original):
+                        regenerer = True
+                        
+                except Melange.DoesNotExist:
+                    regenerer = True
+        
+        if regenerer:
             with transaction.atomic():
-                # Récupérer tous les mélanges existants pour la même plateforme et année
-                existing = Melange.objects.filter(
-                    nom__startswith=base_nom,
-                    plateforme=self.plateforme
-                ).values_list('nom', flat=True)
-                nums = []
-                for n in existing:
-                    match = re.search(r'M(\d+)$', n)
-                    if match:
-                        nums.append(int(match.group(1)))
-                next_num = max(nums) + 1 if nums else 1
-                numero_str = f"M{next_num:02d}"
-                # Nom final incluant fournisseur pour lecture claire
-                self.nom = f"{prefix}-{annee}-{fournisseur_code}-{plateforme_code}-{numero_str}"
-                self.reference_produit = self.nom
+                if self.pk:
+                    # Pour une modification, conserver le numéro séquentiel existant
+                    self.nom, self.reference_produit = self._generate_nom_with_existing_suffix()
+                else:
+                    # Pour une création, générer un nouveau numéro
+                    self.nom, self.reference_produit = self._generate_nom_new()
+        
         super().save(*args, **kwargs)
 
+
+    def _generate_nom_new(self):
+        """Génère un nouveau nom pour un mélange"""
+        prefix = "MEL"
+        annee = self.date_creation.year % 100
+        fournisseur_code = (self.fournisseur or self.producteur)[:3].upper()
+        plateforme_code = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+        
+        # Base du nom pour la plateforme et l'année seulement (incrément global pour la plateforme)
+        base_nom = f"{prefix}-{annee}-"
+        
+        # Récupérer tous les mélanges existants pour la même plateforme et année
+        existing = Melange.objects.filter(
+            nom__startswith=base_nom,
+            plateforme=self.plateforme
+        ).values_list('nom', flat=True)
+        nums = []
+        for n in existing:
+            match = re.search(r'M(\d+)$', n)
+            if match:
+                nums.append(int(match.group(1)))
+        next_num = max(nums) + 1 if nums else 1
+        numero_str = f"M{next_num:02d}"
+        
+        # Nom final incluant fournisseur pour lecture claire
+        nom = f"{prefix}-{annee}-{fournisseur_code}-{plateforme_code}-{numero_str}"
+        return nom, nom
+    
+    def _generate_nom_with_existing_suffix(self):
+        """Génère un nom en conservant le numéro séquentiel existant lors d'une modification"""
+        # Extraire le suffixe existant du nom actuel
+        current_suffix = "M01"  # valeur par défaut
+        if self.nom:
+            match = re.search(r"-(M\d+)$", self.nom)
+            if match:
+                current_suffix = match.group(1)
+        
+        prefix = "MEL"
+        annee = self.date_creation.year % 100
+        fournisseur_code = (self.fournisseur or self.producteur)[:3].upper()
+        plateforme_code = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+        
+        # Générer le nouveau nom avec l'ancien suffixe
+        new_nom = f"{prefix}-{annee}-{fournisseur_code}-{plateforme_code}-{current_suffix}"
+        
+        # Vérifier que ce nouveau nom n'existe pas déjà (avec un autre mélange)
+        if Melange.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
+            # Si conflit, utiliser la méthode normale pour générer un nouveau suffixe
+            return self._generate_nom_new()
+        
+        return new_nom, new_nom
 
     def __str__(self):
         return f"Mélange {self.nom}"
