@@ -263,6 +263,7 @@
 
 .chantier-notification { --notification-gradient: linear-gradient(135deg, #1e3c1e 0%, #4a7c59 100%); }
 .gisement-notification { --notification-gradient: linear-gradient(135deg, #3a763a 0%, #558b2f 100%); }
+.amendement-notification { --notification-gradient: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); }
 .melange-notification { --notification-gradient: linear-gradient(135deg, #2e5f2e 0%, #689f38 100%); }
 .planning-notification { --notification-gradient: linear-gradient(135deg, #1b3d1b 0%, #4caf50 100%); }
 .produit-notification { --notification-gradient: linear-gradient(135deg, #2e7d32 0%, #43a047 100%); }

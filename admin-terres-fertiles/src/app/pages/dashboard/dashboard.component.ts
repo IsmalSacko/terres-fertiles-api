@@ -11,6 +11,7 @@ import { PlanningService } from '../../services/planning/planning.service';
 import { MelangeService } from '../../services/melange.service';
 import { SaisieventeService } from '../../services/saisievente.service';
 import { ProduitVenteService } from '../../services/produit-vente.service';
+import { AmendementOrganiqueService } from '../../services/amendement-organique.service';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
@@ -28,6 +29,7 @@ export class DashboardComponent implements OnInit {
     private melangeService: MelangeService,
     private produitVenteService: ProduitVenteService,
     private saisiesVenteService: SaisieventeService,
+    private amendementService: AmendementOrganiqueService,
     private router: Router
   ) {}
 
@@ -35,6 +37,7 @@ chantierActifs: number = 0;
 gisements: number = 0;
 plannings: number = 0;
 melanges: number = 0;
+amendements: number = 0;
 produitVente: number = 0;
 saisiesVente: number = 0;
 loading: boolean = true;
@@ -54,6 +57,7 @@ async loadAllData() {
       this.loadGisementCount(),
       this.loadPlanningCount(),
       this.loadMelangeCount(),
+      this.loadAmendementCount(),
       this.loadProduitVenteCount(),
       this.loadSaisiesVenteCount()
       
@@ -98,8 +102,18 @@ async loadSaisiesVenteCount() {
   this.animateCounter('saisiesVente', result);
 }
 
+async loadAmendementCount() {
+  try {
+    const amendements = await this.amendementService.getAll();
+    this.animateCounter('amendements', amendements.length);
+  } catch (error) {
+    console.error('Erreur lors du chargement des amendements:', error);
+    this.animateCounter('amendements', 0);
+  }
+}
+
 // Animation du compteur pour rendre les statistiques attractives
-private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'fichesVente' | 'produitVente' | 'saisiesVente', targetValue: number) {
+private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente', targetValue: number) {
   const duration = 1500; // 1.5 secondes
   const startTime = Date.now();
   const startValue = 0;
