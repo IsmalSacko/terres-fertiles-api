@@ -73,7 +73,7 @@
   overflow-x: hidden;
 }
 
-/* Couche d'étoiles-plantes qui poussent */
+/* Élément de fond pour couvrir toute la page */
 .dashboard-component::before {
   content: '';
   position: fixed;
@@ -81,62 +81,20 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    /* Étoiles-plantes vertes qui poussent - Forme d'étoile */
-    radial-gradient(ellipse 6px 12px at 20% 30%, rgba(139, 195, 74, 0.9) 40%, transparent 60%),
-    radial-gradient(ellipse 12px 6px at 20% 30%, rgba(139, 195, 74, 0.8) 40%, transparent 60%),
-    radial-gradient(ellipse 8px 16px at 65% 15%, rgba(129, 199, 132, 0.8) 35%, transparent 65%),
-    radial-gradient(ellipse 16px 8px at 65% 15%, rgba(129, 199, 132, 0.7) 35%, transparent 65%),
-    radial-gradient(ellipse 10px 20px at 85% 70%, rgba(102, 187, 106, 0.9) 30%, transparent 70%),
-    radial-gradient(ellipse 20px 10px at 85% 70%, rgba(102, 187, 106, 0.8) 30%, transparent 70%),
-    radial-gradient(ellipse 7px 14px at 15% 80%, rgba(139, 195, 74, 0.8) 40%, transparent 60%),
-    radial-gradient(ellipse 14px 7px at 15% 80%, rgba(139, 195, 74, 0.7) 40%, transparent 60%),
-    radial-gradient(ellipse 9px 18px at 75% 50%, rgba(129, 199, 132, 0.9) 35%, transparent 65%),
-    radial-gradient(ellipse 18px 9px at 75% 50%, rgba(129, 199, 132, 0.8) 35%, transparent 65%),
-    /* Graines dorées qui scintillent */
-    radial-gradient(circle at 35% 25%, rgba(255, 215, 0, 0.8) 2px, transparent 4px),
-    radial-gradient(circle at 55% 65%, rgba(255, 215, 0, 0.9) 1.5px, transparent 3px),
-    radial-gradient(circle at 90% 45%, rgba(255, 215, 0, 0.7) 2.5px, transparent 5px),
-    /* Étoiles scintillantes blanches */
-    radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.6) 1px, transparent 2px),
-    radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.5) 1px, transparent 2px);
-  background-size: 
-    200px 200px, 200px 200px, 250px 250px, 250px 250px, 300px 300px, 300px 300px,
-    180px 180px, 180px 180px, 220px 220px, 220px 220px,
-    350px 350px, 400px 400px, 320px 320px,
-    500px 500px, 420px 420px;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);
+  z-index: -10;
   pointer-events: none;
-  z-index: -1;
-  animation: starPlantsGrowing 12s ease-in-out infinite;
 }
 
-/* Petites plantes qui poussent en bas du dashboard */
+/* Force l'absence d'autres éléments pseudo */
 .dashboard-component::after {
-  content: '';
-  position: fixed;
-  bottom: -30px;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background-image: 
-    /* Sol fertile sombre */
-    linear-gradient(to top, rgba(15, 15, 15, 0.6) 0%, transparent 40%),
-    /* Petites plantes stylisées qui poussent */
-    radial-gradient(ellipse at 5% 60%, rgba(58, 118, 58, 0.8) 18px, transparent 25px),
-    radial-gradient(ellipse at 15% 55%, rgba(58, 118, 58, 0.7) 15px, transparent 20px),
-    radial-gradient(ellipse at 28% 62%, rgba(46, 95, 46, 0.9) 20px, transparent 28px),
-    radial-gradient(ellipse at 42% 58%, rgba(58, 118, 58, 0.6) 16px, transparent 22px),
-    radial-gradient(ellipse at 58% 60%, rgba(46, 95, 46, 0.8) 19px, transparent 26px),
-    radial-gradient(ellipse at 72% 56%, rgba(58, 118, 58, 0.7) 17px, transparent 23px),
-    radial-gradient(ellipse at 85% 59%, rgba(46, 95, 46, 0.8) 18px, transparent 25px),
-    radial-gradient(ellipse at 95% 57%, rgba(58, 118, 58, 0.6) 14px, transparent 19px);
-  background-size: 100% 100%, 
-    180px 60px, 160px 55px, 200px 65px, 170px 58px, 190px 62px, 150px 52px, 180px 60px, 140px 48px;
-  background-repeat: repeat-x;
-  pointer-events: none;
-  z-index: -1;
-  animation: plantsGrowing 18s ease-in-out infinite;
+  display: none !important;
+  content: none !important;
 }
+
+
+
+
 
 /* ========================================
    EN-TÊTE MODERNE AVEC NOTIFICATIONS

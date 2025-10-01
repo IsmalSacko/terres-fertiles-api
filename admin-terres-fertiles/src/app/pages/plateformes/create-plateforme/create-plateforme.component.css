@@ -41,7 +41,6 @@ button[mat-button]:hover {
   box-shadow: var(--card-shadow);
   border: 1.5px solid var(--primary-light);
   color: var(--text-primary);
-  animation: cardEntrance 0.7s cubic-bezier(0.4,0,0.2,1);
 }
 
 .create-plateforme-container h2 {

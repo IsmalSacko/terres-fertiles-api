@@ -1,128 +1,94 @@
-<div class="gisement-form full-page-background">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>add_location</mat-icon>
-        Créer un nouveau gisement
-      </mat-card-title>
-    </mat-card-header>
+<div class="standard-page-content">
+  <div class="create-gisement-container">
+    <h2>Créer un nouveau gisement</h2>
+    <form (ngSubmit)="createGisement()" #gisementForm="ngForm">
+      <!-- Ligne 1: Chantier + Commune -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Chantier *</mat-label>
+          <mat-select name="chantier" [(ngModel)]="selectedChantier" required>
+            <mat-option *ngFor="let chantier of chantiers" [value]="chantier.id">
+              {{ chantier.nom }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="!selectedChantier">Le chantier est requis</mat-error>
+        </mat-form-field>
 
-    <mat-card-content>
-      <form (ngSubmit)="createGisement()" #gisementForm="ngForm" class="form-transition">
-        <!-- Section Informations générales -->
-        <div class="form-section">
-          <h2><mat-icon>info</mat-icon>Informations générales</h2>
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="required-field">
-              <mat-label>Chantier</mat-label>
-              <mat-select name="chantier" [(ngModel)]="selectedChantier" required>
-                <mat-option *ngFor="let chantier of chantiers" [value]="chantier.id">
-                  {{ chantier.nom }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="!selectedChantier">Le chantier est requis</mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Commune *</mat-label>
+          <input matInput name="commune" [(ngModel)]="commune" required readonly />
+          <mat-error *ngIf="!commune">La commune est requise</mat-error>
+        </mat-form-field>
+      </div>
 
-           <mat-form-field appearance="outline" class="required-field">
-            <mat-label>Commune</mat-label>
-            <input matInput name="commune" [(ngModel)]="commune" required readonly />
-            <mat-error *ngIf="!commune">La commune est requise</mat-error>
-          </mat-form-field>
-          </div>
-        </div>
+      <!-- Ligne 2: Période terrassement + Volume terrasse -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Période terrassement *</mat-label>
+          <input matInput name="periode_terrassement" [(ngModel)]="periode_terrassement" required maxlength="100" />
+          <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['required']">La période est requise</mat-error>
+          <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['maxlength']">Maximum 100 caractères</mat-error>
+        </mat-form-field>
 
-        <!-- Section Caractéristiques -->
-        <div class="form-section">
-          <h2><mat-icon>terrain</mat-icon>Caractéristiques</h2>
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="required-field">
-              <mat-label>Période terrassement</mat-label>
-              <input matInput name="periode_terrassement" [(ngModel)]="periode_terrassement" required maxlength="100" />
-              <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['required']">La période est requise</mat-error>
-              <mat-error *ngIf="gisementForm.form.get('periode_terrassement')?.errors?.['maxlength']">Maximum 100 caractères</mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Volume terrasse (m³) *</mat-label>
+          <input matInput name="volume_terrasse" [(ngModel)]="volume_terrasse" type="number" required min="0" step="0.01" />
+          <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['required']">Le volume est requis</mat-error>
+          <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['min']">Le volume doit être positif</mat-error>
+        </mat-form-field>
+      </div>
 
-            <mat-form-field appearance="outline" class="required-field number-field">
-              <mat-label>Volume terrasse (m³)</mat-label>
-              <input matInput name="volume_terrasse" [(ngModel)]="volume_terrasse" type="number" required min="0" step="0.01" />
-              <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['required']">Le volume est requis</mat-error>
-              <mat-error *ngIf="gisementForm.form.get('volume_terrasse')?.errors?.['min']">Le volume doit être positif</mat-error>
-            </mat-form-field>
-          </div>
+      <!-- Ligne 3: Matériau + Type de sol -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Matériau *</mat-label>
+          <input matInput name="materiau" [(ngModel)]="materiau" required maxlength="255" />
+          <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['required']">Le matériau est requis</mat-error>
+          <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
+        </mat-form-field>
 
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="required-field">
-              <mat-label>Matériau</mat-label>
-              <input matInput name="materiau" [(ngModel)]="materiau" required maxlength="255" />
-              <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['required']">Le matériau est requis</mat-error>
-              <mat-error *ngIf="gisementForm.form.get('materiau')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
-            </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Type de sol *</mat-label>
+          <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
+            <mat-option *ngFor="let option of typeSolOptions" [value]="option.value">
+              {{ option.viewValue }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="gisementForm.form.get('type_de_sol')?.errors?.['required']">Le type de sol est requis</mat-error>
+        </mat-form-field>
+      </div>
 
-            <mat-form-field appearance="outline" class="required-field select-field">
-              <mat-label>Type de sol</mat-label>
-              <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
-                <mat-option *ngFor="let option of typeSolOptions" [value]="option.value">
-                  {{ option.viewValue }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngIf="gisementForm.form.get('type_de_sol')?.errors?.['required']">Le type de sol est requis</mat-error>
-            </mat-form-field>
-          </div>
-        </div>
+      <!-- Ligne 4: Localisation (pleine largeur) -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Localisation *</mat-label>
+        <input matInput name="localisation" [(ngModel)]="localisation" required maxlength="255" />
+        <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['required']">La localisation est requise</mat-error>
+        <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
+      </mat-form-field>
 
-        <!-- Section Localisation -->
-        <div class="form-section">
-          <h2><mat-icon>location_on</mat-icon>Localisation</h2>
-          <div class="form-row">
-            <mat-form-field appearance="outline" class="required-field">
-              <mat-label>Localisation</mat-label>
-              <input matInput name="localisation" [(ngModel)]="localisation" required maxlength="255" />
-              <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['required']">La localisation est requise</mat-error>
-              <mat-error *ngIf="gisementForm.form.get('localisation')?.errors?.['maxlength']">Maximum 255 caractères</mat-error>
-            </mat-form-field>
-          </div>
+      <!-- Ligne 5: Coordonnées GPS -->
+      <div class="form-row">
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Latitude</mat-label>
+          <input matInput name="latitude" [(ngModel)]="latitude" type="number" step="0.000001" placeholder="Coordonnée latitude (optionnelle)" />
+        </mat-form-field>
 
-          <div class="field-group">
-            <div class="field-group-title">Coordonnées GPS</div>
-            <div class="form-row">
-              <mat-form-field appearance="outline" class="number-field">
-                <mat-label>Latitude</mat-label>
-                <input matInput name="latitude" [(ngModel)]="latitude" type="number" step="0.000001" />
-                <mat-hint>Format: 48.8566</mat-hint>
-              </mat-form-field>
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Longitude</mat-label>
+          <input matInput name="longitude" [(ngModel)]="longitude" type="number" step="0.000001" placeholder="Coordonnée longitude (optionnelle)" />
+        </mat-form-field>
+      </div>
 
-              <mat-form-field appearance="outline" class="number-field">
-                <mat-label>Longitude</mat-label>
-                <input matInput name="longitude" [(ngModel)]="longitude" type="number" step="0.000001" />
-                <mat-hint>Format: 2.3522</mat-hint>
-              </mat-form-field>
-            </div>
-          </div>
+      <div class="error-message" *ngIf="errorMsg">
+        {{ errorMsg }}
+      </div>
 
-          <!-- La carte sera ajoutée ici si nécessaire -->
-          <div class="map-container" *ngIf="latitude && longitude">
-            <!-- Intégration de la carte à faire -->
-          </div>
-        </div>
-
-        <!-- Messages d'erreur -->
-        <div class="form-message error" *ngIf="errorMsg">
-          <mat-icon>error</mat-icon>
-          {{ errorMsg }}
-        </div>
-
-        <!-- Boutons d'action -->
-        <div class="action-buttons">
-          <button mat-raised-button color="warn" type="button" [routerLink]="['/gisements']">
-            <mat-icon>cancel</mat-icon>
-            Annuler
-          </button>
-          <button mat-raised-button color="primary" type="submit" [disabled]="loading || !gisementForm.form.valid">
-            <mat-icon>{{ loading ? 'hourglass_empty' : 'save' }}</mat-icon>
-            {{ loading ? 'Création...' : 'Créer' }}
-          </button>
-        </div>
-      </form>
-    </mat-card-content>
-  </mat-card>
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading || !gisementForm.form.valid">
+          {{ loading ? 'Création...' : 'Créer' }}
+        </button>
+        <button mat-button type="button" [routerLink]="['/gisements']">Annuler</button>
+      </div>
+    </form>
+  </div>
 </div>

@@ -1012,26 +1012,3 @@
   }
 }
 
-/* Animations */
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.vente-card {
-  animation: slideInUp 0.6s ease-out;
-}
-
-.vente-card:nth-child(odd) {
-  animation-delay: 0.1s;
-}
-
-.vente-card:nth-child(even) {
-  animation-delay: 0.2s;
-}

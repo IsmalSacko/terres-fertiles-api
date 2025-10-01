@@ -15,7 +15,6 @@
   display: flex;
   align-items: center;
   padding: 0 20px;
-  animation: fadeIn 0.7s;
   overflow-x: hidden;
 }
 
@@ -217,10 +216,7 @@
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+
 
 /* ========================================
    STYLES POUR LE MENU UTILISATEUR AMÉLIORÉ
@@ -389,23 +385,14 @@
   z-index: 3000;
   display: flex;
   flex-direction: column;
-  animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
   border-top-right-radius: 20px;
   border-bottom-right-radius: 20px;
   overflow-y: auto;
 }
 
-@keyframes slideInLeft {
-  from { 
-    transform: translateX(-100%); 
-    opacity: 0; 
-  }
-  to { 
-    transform: translateX(0); 
-    opacity: 1; 
-  }
-}
+
 
 /* En-tête du menu mobile */
 .mobile-menu-header {
@@ -504,8 +491,5 @@
   animation: fadeInBackdrop 0.3s ease;
 }
 
-@keyframes fadeInBackdrop {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+
 
