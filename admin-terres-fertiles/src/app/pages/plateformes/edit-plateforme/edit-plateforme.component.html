@@ -11,14 +11,14 @@
         <input matInput formControlName="nom" placeholder="Laissez vide pour génération automatique">
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Localisation *</mat-label>
-        <input matInput formControlName="localisation" required>
-        <mat-error *ngIf="plateformeForm.get('localisation')?.hasError('required')">La localisation est obligatoire</mat-error>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="full-width">
         <mat-label>Entreprise gestionnaire *</mat-label>
         <input matInput formControlName="entreprise_gestionnaire" required placeholder="Entreprise gestionnaire de la plateforme">
         <mat-error *ngIf="plateformeForm.get('entreprise_gestionnaire')?.hasError('required')">L'entreprise gestionnaire est obligatoire</mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Localisation *</mat-label>
+        <input matInput formControlName="localisation" required>
+        <mat-error *ngIf="plateformeForm.get('localisation')?.hasError('required')">La localisation est obligatoire</mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Latitude</mat-label>

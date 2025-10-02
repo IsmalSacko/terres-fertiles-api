@@ -84,6 +84,10 @@ export class ProduitVenteDetailComponent implements OnInit {
     try {
       this.produit = await this.produitService.getProduitById(id);
       console.log('Produit chargé:', this.produit);
+      console.log('Propriétés disponibles:', Object.keys(this.produit || {}));
+      console.log('Volume initial:', this.produit?.volume_initial);
+      console.log('Volume vendu:', this.produit?.volume_vendu);
+      console.log('Volume calculé:', this.getVolumeDisponibleCalcule());
       
       if (this.produit?.chantier_info?.latitude && this.produit?.chantier_info?.longitude) {
         const latLng: L.LatLngExpression = [this.produit.chantier_info.latitude, this.produit.chantier_info.longitude];
@@ -162,5 +166,28 @@ export class ProduitVenteDetailComponent implements OnInit {
       default:
         return '#4caf50';
     }
+  }
+
+  getVolumeDisponibleCalcule(): number {
+    if (!this.produit) return 0;
+    const volumeInitial = parseFloat(this.produit.volume_initial || '0');
+    const volumeVendu = parseFloat(this.produit.volume_vendu || '0');
+    return Math.max(0, volumeInitial - volumeVendu);
+  }
+
+  getTempsPlateformeCalcule(): number {
+    if (!this.produit?.melange?.date_creation) return 0;
+    const dateCreation = new Date(this.produit.melange.date_creation);
+    const maintenant = new Date();
+    const diffTime = Math.abs(maintenant.getTime() - dateCreation.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  }
+
+  getDelaiDisponibiliteCalcule(): number {
+    if (!this.produit?.date_disponibilite) return 0;
+    const dateDisponibilite = new Date(this.produit.date_disponibilite);
+    const maintenant = new Date();
+    const diffTime = dateDisponibilite.getTime() - maintenant.getTime();
+    return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
   }
 }

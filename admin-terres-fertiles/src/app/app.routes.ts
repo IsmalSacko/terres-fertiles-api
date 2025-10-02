@@ -33,6 +33,7 @@ import { AmendementListComponent } from './pages/amendements/amendement-list/ame
 import { AmendementCreateComponent } from './pages/amendements/amendement-create/amendement-create.component';
 import { AmendementDetailComponent } from './pages/amendements/amendement-detail/amendement-detail.component';
 import { AmendementEditComponent } from './pages/amendements/amendement-edit/amendement-edit.component';
+import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-detail/produit-vente-detail.component';
 
 
 export const routes: Routes = [
@@ -62,6 +63,7 @@ export const routes: Routes = [
   { path: 'melanges/:id', component: MelangeDetailComponent },
   // Routes pour les produits de vente
   { path: 'produits', component: ProduitVenteListComponent },
+  { path: 'produits/:id', component: ProduitVenteDetailComponent },
   { path: 'produits/nouveau', component: CreateProduitVenteComponent },
   // Routes pour les saisies de vente
   { path: 'saisies-vente', component: SaisieVenteComponent },

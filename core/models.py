@@ -574,16 +574,16 @@ class Plateforme(models.Model):
                     annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
                     annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
                     
-                    loc_actuelle = str(self.localisation).strip().upper()[:3]
-                    loc_originale = str(original.localisation).strip().upper()[:3]
-                    
                     ent_actuelle = str(self.entreprise_gestionnaire).strip().upper()[:3]
                     ent_originale = str(original.entreprise_gestionnaire).strip().upper()[:3]
                     
+                    loc_actuelle = str(self.localisation).strip().upper()[:3]
+                    loc_originale = str(original.localisation).strip().upper()[:3]
+                    
                     # Si l'un des composants du nom a changé, régénérer
                     if (annee_actuelle != annee_originale or 
-                        loc_actuelle != loc_originale or 
-                        ent_actuelle != ent_originale):
+                        ent_actuelle != ent_originale or 
+                        loc_actuelle != loc_originale):
                         regenerer = True
                         
                 except Plateforme.DoesNotExist:
@@ -609,13 +609,13 @@ class Plateforme(models.Model):
         # Prendre les 2 derniers chiffres de l'année
         annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
 
-        # Code localisation : 3 premiers caractères
-        loc_code = str(self.localisation).strip().upper()[:3]
-
         # Code entreprise : 3 premiers caractères
         ent_code = str(self.entreprise_gestionnaire).strip().upper()[:3]
 
-        base_nom_prefix = f"PTF-{annee}-{loc_code}-{ent_code}"
+        # Code localisation : 3 premiers caractères
+        loc_code = str(self.localisation).strip().upper()[:3]
+
+        base_nom_prefix = f"PTF-{annee}-{ent_code}-{loc_code}"
 
         # Récupère toutes les plateformes de l'année, triées par numéro de séquence
         existing_plateformes = list(
@@ -658,14 +658,14 @@ class Plateforme(models.Model):
         # Prendre les 2 derniers chiffres de l'année
         annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
 
-        # Code localisation : 3 premiers caractères
-        loc_code = str(self.localisation).strip().upper()[:3]
-
         # Code entreprise : 3 premiers caractères
         ent_code = str(self.entreprise_gestionnaire).strip().upper()[:3]
 
+        # Code localisation : 3 premiers caractères
+        loc_code = str(self.localisation).strip().upper()[:3]
+
         # Générer le nouveau nom avec l'ancien suffixe
-        new_nom = f"PTF-{annee}-{loc_code}-{ent_code}-{current_suffix}"
+        new_nom = f"PTF-{annee}-{ent_code}-{loc_code}-{current_suffix}"
         
         # Vérifier que ce nouveau nom n'existe pas déjà (avec une autre plateforme)
         if Plateforme.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():

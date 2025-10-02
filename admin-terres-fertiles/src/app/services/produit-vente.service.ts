@@ -113,11 +113,20 @@ export class ProduitVenteService {
   }
 
   async getProduitById(id: number): Promise<ProduitVente> {
-    const response = await axios.get<ProduitVente>(
-      `${this.apiUrl}${id}/`,
-      this.getHeaders()
-    );
-    return response.data;
+    console.log('Récupération du produit ID:', id);
+    console.log('URL API:', `${this.apiUrl}${id}/`);
+    
+    try {
+      const response = await axios.get<ProduitVente>(
+        `${this.apiUrl}${id}/`,
+        this.getHeaders()
+      );
+      console.log('Réponse API produit:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de la récupération du produit:', error);
+      throw error;
+    }
   }
 
   async searchProduits(query: string): Promise<ProduitVenteResponse> {

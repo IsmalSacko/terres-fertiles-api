@@ -16,7 +16,7 @@
     <mat-card-content>
       <div class="big-info">
         <mat-icon>inventory_2</mat-icon>
-        <span class="big-volume">{{ produit?.volume_disponible | number:'1.0-2'  }} m³</span>
+        <span class="big-volume">{{ getVolumeDisponibleCalcule() | number:'1.0-2'  }} m³</span>
         <span class="label">disponibles</span>
       </div>
       <mat-divider></mat-divider>
@@ -25,23 +25,23 @@
         <div class="trace-grid">
           <div>
             <mat-icon>engineering</mat-icon>
-            <strong>Origine :</strong> {{ produit?.chantier_info?.nom || '' }} ({{ produit?.chantier_info?.localisation || '' }})
+            <strong>Origine :</strong> {{ produit?.chantier_info?.nom || '—' }} ({{ produit?.chantier_info?.localisation || '—' }})
           </div>
           <div>
             <mat-icon>factory</mat-icon>
-            <strong>Plateforme :</strong> {{ produit?.plateforme?.nom || '' }} ({{ produit?.plateforme?.localisation || '' }})
+            <strong>Plateforme :</strong> {{ produit?.plateforme?.nom || '—' }} ({{ produit?.plateforme?.localisation || '—' }})
           </div>
           <div>
             <mat-icon>login</mat-icon>
-            <strong>Arrivé sur plateforme :</strong> {{ produit?.melange?.date_creation | date:'dd/MM/yyyy' }}
+            <strong>Arrivé sur plateforme :</strong> {{ produit?.melange?.date_creation ? (produit?.melange?.date_creation | date:'dd/MM/yyyy') : '—' }}
           </div>
           <div>
             <mat-icon>hourglass_bottom</mat-icon>
-            <strong>Temps sur plateforme :</strong> {{ produit?.temps_sur_plateforme }} jours
+            <strong>Temps sur plateforme :</strong> {{ getTempsPlateformeCalcule() }} jours
           </div>
           <div>
             <mat-icon>schedule</mat-icon>
-            <strong>Disponible dans :</strong> {{ produit?.delai_avant_disponibilite }} jours
+            <strong>Disponible dans :</strong> {{ getDelaiDisponibiliteCalcule() }} jours
           </div>
         </div>
       </section>
@@ -87,11 +87,11 @@
           </div>
           <div class="info-item">
             <span class="label">Volume disponible</span>
-            <span class="value">{{ produit?.volume_disponible ? (produit?.volume_disponible | number:'1.0-2') : '—' }} m³</span>
+            <span class="value">{{ getVolumeDisponibleCalcule() | number:'1.0-2' }} m³</span>
           </div>
           <div class="info-item">
             <span class="label">Volume vendu</span>
-            <span class="value">{{ produit?.volume_vendu ? (produit?.volume_vendu | number:'1.0-2') : '—' }} m³</span>
+            <span class="value">{{ produit?.volume_vendu ? (produit?.volume_vendu | number:'1.0-2') : '0.00' }} m³</span>
           </div>
           <div class="info-item">
             <span class="label">Acheteur</span>
