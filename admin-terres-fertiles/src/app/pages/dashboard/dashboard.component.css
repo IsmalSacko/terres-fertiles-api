@@ -278,6 +278,7 @@
 .melange-notification { --notification-gradient: linear-gradient(135deg, #2e5f2e 0%, #689f38 100%); }
 .planning-notification { --notification-gradient: linear-gradient(135deg, #1b3d1b 0%, #4caf50 100%); }
 .produit-notification { --notification-gradient: linear-gradient(135deg, #2e7d32 0%, #43a047 100%); }
+.suivistock-notification { --notification-gradient: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #8d6e63 100%); }
 .vente-notification { --notification-gradient: linear-gradient(135deg, #1b5e20 0%, #388e3c 50%, #66bb6a 100%); }
 
 /* ========================================
@@ -479,6 +480,17 @@
 /* Carte Vente */
 .card-vente {
   --card-gradient: linear-gradient(135deg, var(--fertile-light) 0%, #66bb6a 100%);
+}
+
+/* Carte Suivi de Stock */
+.card-suivistock {
+  --card-gradient: linear-gradient(135deg, #3e2723 0%, #5d4037 50%, #8d6e63 100%);
+  border: 1px solid rgba(141, 110, 99, 0.2);
+}
+
+.card-suivistock:hover {
+  border-color: rgba(141, 110, 99, 0.4);
+  box-shadow: 0 12px 30px rgba(141, 110, 99, 0.2);
 }
 
 /* Carte Saisies de Vente */

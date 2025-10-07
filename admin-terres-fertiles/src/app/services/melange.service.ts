@@ -154,8 +154,18 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
 }
 
   async getAll(): Promise<Melange[]> {
-    const response = await axios.get<Melange[]>(this.apiUrl, this.getHeaders());
-    return response.data;
+    try {
+      console.log('🌐 Appel API mélanges:', this.apiUrl);
+      const response = await axios.get<Melange[]>(this.apiUrl, this.getHeaders());
+      console.log('✅ Réponse API mélanges:', response.status, response.data.length, 'mélanges');
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erreur API mélanges:', error);
+      if (error.response) {
+        console.error('📄 Détails erreur:', error.response.status, error.response.data);
+      }
+      throw error;
+    }
   }
 
   async getById(id: number): Promise<Melange> {
@@ -393,6 +403,49 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
     } catch (error) {
       console.error('❌ Erreur lors de la récupération des mélanges sans produits de vente:', error);
       // Fallback : récupérer tous les mélanges si l'API produits échoue
+      console.log('🔄 Fallback: récupération de tous les mélanges');
+      return this.getAll();
+    }
+  }
+
+  async getMelangesSansStock(): Promise<Melange[]> {
+    try {
+      console.log('🔍 Récupération des mélanges disponibles (sans suivi de stock)...');
+      
+      // Récupérer tous les mélanges
+      const tousMelanges = await this.getAll();
+      console.log(`📊 Total mélanges: ${tousMelanges.length}`);
+      
+      // Récupérer tous les suivis de stock pour voir quels mélanges sont déjà utilisés
+      const stockResponse = await axios.get(
+        'http://127.0.0.1:8000/api/suivi-stock-plateforme/',
+        this.getHeaders()
+      );
+      
+      const suivis = stockResponse.data.results || stockResponse.data;
+      console.log(`📦 Total suivis de stock: ${suivis.length}`);
+      
+      // Extraire les IDs des mélanges déjà utilisés dans les suivis de stock
+      const melangesUtilises = new Set(
+        suivis.map((suivi: any) => suivi.melange?.id || suivi.melange).filter(Boolean)
+      );
+      
+      console.log(`🚫 Mélanges déjà utilisés dans le stock: ${Array.from(melangesUtilises).join(', ')}`);
+      
+      // Filtrer les mélanges disponibles (non utilisés dans le stock)
+      const melangesDisponibles = tousMelanges.filter(melange => 
+        melange.id && !melangesUtilises.has(melange.id)
+      );
+      
+      console.log(`✅ Mélanges disponibles pour le stock: ${melangesDisponibles.length}`);
+      melangesDisponibles.forEach(melange => {
+        console.log(`   - ${melange.nom} (ID: ${melange.id})`);
+      });
+      
+      return melangesDisponibles;
+    } catch (error) {
+      console.error('❌ Erreur lors de la récupération des mélanges sans stock:', error);
+      // Fallback : récupérer tous les mélanges si l'API stock échoue
       console.log('🔄 Fallback: récupération de tous les mélanges');
       return this.getAll();
     }

@@ -13,11 +13,12 @@
     </button>
   </div>
   <nav class="mobile-nav-links">
-    <a (click)="navigateAndClose('/dashboard')"><mat-icon>dashboard</mat-icon> </a>
-    <a (click)="navigateAndClose('/produits')"><mat-icon>shopping_cart</mat-icon> Produits</a>
-    <a (click)="navigateAndClose('/chantiers')"><mat-icon>location_city</mat-icon> Chantiers</a>
-    <a (click)="navigateAndClose('/gisements')"><mat-icon>landscape</mat-icon> Gisements</a>
-    <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> Plateforme</a>
+    <a (click)="navigateAndClose('/dashboard')"><mat-icon>dashboard</mat-icon> TDB</a>
+    <a (click)="navigateAndClose('/produits')"><mat-icon>shopping_cart</mat-icon> PROD</a>
+    <a (click)="navigateAndClose('/chantiers')"><mat-icon>location_city</mat-icon> CHT</a>
+    <a (click)="navigateAndClose('/gisements')"><mat-icon>landscape</mat-icon> GIS</a>
+    <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> PTF</a>
+    <a (click)="navigateAndClose('/suivistock')"><mat-icon>inventory_2</mat-icon> STOCK</a>
     <a (click)="navigateAndClose('/amendements')"><mat-icon>eco</mat-icon> MAO</a>
     <div class="mobile-menu-divider"></div>
     <button *ngIf="isLoggedIn" (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
@@ -34,11 +35,12 @@
   </span>
   <span class="spacer"></span>
   <nav class="nav-links">
-    <a mat-button routerLink="/dashboard" routerLinkActive="active-link"><mat-icon>dashboard</mat-icon></a>
-    <a mat-button routerLink="/produits" routerLinkActive="active-link"><mat-icon>shopping_cart</mat-icon> Produits</a>
-    <a mat-button routerLink="/chantiers" routerLinkActive="active-link"><mat-icon>location_city</mat-icon> Chantiers</a>
-    <a mat-button routerLink="/gisements" routerLinkActive="active-link"><mat-icon>landscape</mat-icon> Gisements</a>
-    <a mat-button routerLink="/plateformes" routerLinkActive="active-link"><mat-icon>home_work</mat-icon> Plateforme</a>
+    <a mat-button routerLink="/dashboard" routerLinkActive="active-link"><mat-icon>dashboard</mat-icon> TDB</a>
+    <a mat-button routerLink="/produits" routerLinkActive="active-link"><mat-icon>shopping_cart</mat-icon> PROD</a>
+    <a mat-button routerLink="/chantiers" routerLinkActive="active-link"><mat-icon>location_city</mat-icon> CHT</a>
+    <a mat-button routerLink="/gisements" routerLinkActive="active-link"><mat-icon>landscape</mat-icon> GIS</a>
+    <a mat-button routerLink="/plateformes" routerLinkActive="active-link"><mat-icon>home_work</mat-icon> PTF</a>
+    <a mat-button routerLink="/suivistock" routerLinkActive="active-link"><mat-icon>inventory_2</mat-icon> STOCK</a>
     <a mat-button routerLink="/amendements" routerLinkActive="active-link"><mat-icon>eco</mat-icon> MAO</a>
   </nav>
   <button mat-icon-button class="mobile-menu-btn" (click)="openSidenav()">

@@ -35,6 +35,9 @@ import { AmendementDetailComponent } from './pages/amendements/amendement-detail
 import { AmendementEditComponent } from './pages/amendements/amendement-edit/amendement-edit.component';
 import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-detail/produit-vente-detail.component';
 
+// Import des routes du module de suivi de stock
+import { SUIVISTOCK_ROUTES } from './pages/suivistock';
+
 
 export const routes: Routes = [
   // Route par défaut
@@ -63,8 +66,8 @@ export const routes: Routes = [
   { path: 'melanges/:id', component: MelangeDetailComponent },
   // Routes pour les produits de vente
   { path: 'produits', component: ProduitVenteListComponent },
-  { path: 'produits/:id', component: ProduitVenteDetailComponent },
   { path: 'produits/nouveau', component: CreateProduitVenteComponent },
+  { path: 'produits/:id', component: ProduitVenteDetailComponent },
   // Routes pour les saisies de vente
   { path: 'saisies-vente', component: SaisieVenteComponent },
   { path: 'saisies-vente/new', component: CreateSaisieVenteComponent },
@@ -92,5 +95,12 @@ export const routes: Routes = [
   { path: 'amendements/new', component: AmendementCreateComponent },
   { path: 'amendements/:id', component: AmendementDetailComponent },
   { path: 'amendements/:id/edit', component: AmendementEditComponent },
+
+  // Routes pour le module de suivi de stock
+  {
+    path: 'suivistock',
+    children: SUIVISTOCK_ROUTES,
+    title: 'Suivi des Stocks'
+  },
 
 ];

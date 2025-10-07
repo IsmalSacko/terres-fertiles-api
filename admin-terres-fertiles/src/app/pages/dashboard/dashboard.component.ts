@@ -12,6 +12,7 @@ import { MelangeService } from '../../services/melange.service';
 import { SaisieventeService } from '../../services/saisievente.service';
 import { ProduitVenteService } from '../../services/produit-vente.service';
 import { AmendementOrganiqueService } from '../../services/amendement-organique.service';
+import { SuiviStockPlateformeService } from '../../services/suivi-stock-plateforme.service';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
@@ -30,6 +31,7 @@ export class DashboardComponent implements OnInit {
     private produitVenteService: ProduitVenteService,
     private saisiesVenteService: SaisieventeService,
     private amendementService: AmendementOrganiqueService,
+    private suiviStockService: SuiviStockPlateformeService,
     private router: Router
   ) {}
 
@@ -40,6 +42,7 @@ melanges: number = 0;
 amendements: number = 0;
 produitVente: number = 0;
 saisiesVente: number = 0;
+suiviStock: number = 0;
 loading: boolean = true;
 loadingGlobal: boolean = false;
 
@@ -59,7 +62,8 @@ async loadAllData() {
       this.loadMelangeCount(),
       this.loadAmendementCount(),
       this.loadProduitVenteCount(),
-      this.loadSaisiesVenteCount()
+      this.loadSaisiesVenteCount(),
+      this.loadSuiviStockCount()
       
 
     ]);
@@ -112,8 +116,18 @@ async loadAmendementCount() {
   }
 }
 
+async loadSuiviStockCount() {
+  try {
+    const suiviStocks = await this.suiviStockService.getAll();
+    this.animateCounter('suiviStock', suiviStocks.length);
+  } catch (error) {
+    console.error('Erreur lors du chargement des suivis de stock:', error);
+    this.animateCounter('suiviStock', 0);
+  }
+}
+
 // Animation du compteur pour rendre les statistiques attractives
-private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente', targetValue: number) {
+private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente' | 'suiviStock', targetValue: number) {
   const duration = 1500; // 1.5 secondes
   const startTime = Date.now();
   const startValue = 0;

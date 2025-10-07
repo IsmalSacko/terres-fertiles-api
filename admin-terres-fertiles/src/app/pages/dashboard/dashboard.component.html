@@ -85,6 +85,17 @@
         </div>
       </div>
 
+      <div class="notification-item suivistock-notification" [routerLink]="['/suivistock']">
+        <div class="notification-icon">
+          <mat-icon>inventory_2</mat-icon>
+          <span class="notification-badge">{{ suiviStock }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Suivi Stock</span>
+          <span class="notification-subtitle">plateformes</span>
+        </div>
+      </div>
+
       <div class="notification-item vente-notification" [routerLink]="['/saisies-vente']">
         <div class="notification-icon">
           <mat-icon>receipt_long</mat-icon>
@@ -174,6 +185,18 @@
           Gérez votre catalogue de produits et suivez vos ventes.
         </p>
         <button class="card-action">Accéder aux produits</button>
+      </div>
+
+      <!-- Carte Suivi de Stock -->
+      <div class="modern-card card-suivistock" routerLink="/suivistock">
+        <div class="card-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <h3 class="card-title">Suivi de Stock</h3>
+        <p class="card-description">
+          Suivez les stocks de vos plateformes en temps réel. Gestion des andains et volumes.
+        </p>
+        <button class="card-action">Gérer le stock</button>
       </div>
 
       <!-- Carte Saisies de Vente -->

@@ -4,7 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q, F, Case, When
+from django.db import models
+from django.utils import timezone
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework import status   
@@ -20,11 +22,11 @@ from rest_framework import viewsets, permissions, generics
 from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
-    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente
+    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente, SuiviStockPlateforme
 )
 from .serializers import (
     AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
-    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer, SuiviStockPlateformeSerializer, SuiviStockPlateformeCreateSerializer
 )
 
 
@@ -434,3 +436,304 @@ class ChantierRecepteurViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(responsable=self.request.user)
+
+
+class SuiviStockPlateformeViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet pour le suivi de stock des plateformes
+    Inclut des actions personnalisées pour les opérations spécifiques
+    """
+    queryset = SuiviStockPlateforme.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['plateforme', 'melange', 'statut', 'utilisateur']
+    
+    def get_serializer_class(self):
+        """Utiliser différents serializers selon l'action"""
+        if self.action == 'create':
+            return SuiviStockPlateformeCreateSerializer
+        return SuiviStockPlateformeSerializer
+    
+    def get_queryset(self):
+        """Optimiser les requêtes avec select_related et prefetch_related"""
+        queryset = SuiviStockPlateforme.objects.select_related(
+            'plateforme', 'melange', 'produit_vente', 'utilisateur'
+        ).order_by('-date_creation')
+        
+        # Filtres personnalisés
+        plateforme_id = self.request.query_params.get('plateforme', None)
+        melange_id = self.request.query_params.get('melange', None)
+        statut = self.request.query_params.get('statut', None)
+        date_debut = self.request.query_params.get('date_debut', None)
+        date_fin = self.request.query_params.get('date_fin', None)
+        search = self.request.query_params.get('search', None)
+        
+        if plateforme_id:
+            try:
+                plateforme_id = int(plateforme_id)
+                queryset = queryset.filter(plateforme_id=plateforme_id)
+            except ValueError:
+                pass  # Ignorer les valeurs non-entières
+        
+        if melange_id:
+            try:
+                melange_id = int(melange_id)
+                queryset = queryset.filter(melange_id=melange_id)
+            except ValueError:
+                pass  # Ignorer les valeurs non-entières
+        
+        if statut:
+            queryset = queryset.filter(statut=statut)
+        
+        if date_debut:
+            queryset = queryset.filter(date_mise_en_andains__gte=date_debut)
+        
+        if date_fin:
+            queryset = queryset.filter(date_mise_en_andains__lte=date_fin)
+        
+        if search:
+            queryset = queryset.filter(
+                Q(reference_suivi__icontains=search) |
+                Q(plateforme__nom__icontains=search) |
+                Q(melange__nom__icontains=search) |
+                Q(recette__icontains=search) |
+                Q(remarques__icontains=search)
+            )
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        """Associer l'utilisateur connecté lors de la création"""
+        serializer.save(utilisateur=self.request.user)
+    
+    @action(detail=False, methods=['post'], url_path='marquer-ecoule')
+    def marquer_ecoule(self, request):
+        """
+        Action pour marquer des andains comme écoulés (en lot)
+        Body: {"ids": [1, 2, 3]}
+        """
+        ids = request.data.get('ids', [])
+        if not ids:
+            return Response(
+                {'error': 'Aucun ID fourni'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Récupérer les objets existants
+        suivis = self.get_queryset().filter(id__in=ids)
+        count = 0
+        
+        for suivi in suivis:
+            if suivi.statut != 'ecoule':
+                suivi.statut = 'ecoule'
+                suivi.volume_restant_m3 = 0
+                suivi.date_ecoulement = timezone.now().date()
+                suivi.save()
+                count += 1
+        
+        return Response({
+            'message': f'{count} andain(s) marqué(s) comme écoulé(s)',
+            'count': count
+        })
+    
+    @action(detail=False, methods=['post'], url_path='marquer-pret-vente')
+    def marquer_pret_vente(self, request):
+        """
+        Action pour marquer des andains comme prêts pour vente (en lot)
+        Body: {"ids": [1, 2, 3]}
+        """
+        ids = request.data.get('ids', [])
+        if not ids:
+            return Response(
+                {'error': 'Aucun ID fourni'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        count = self.get_queryset().filter(
+            id__in=ids, 
+            statut__in=['en_cours', 'en_culture']
+        ).update(statut='pret_vente')
+        
+        return Response({
+            'message': f'{count} andain(s) marqué(s) comme prêt pour vente',
+            'count': count
+        })
+    
+    @action(detail=False, methods=['post'], url_path='exporter-csv')
+    def exporter_csv(self, request):
+        """
+        Exporter les suivis de stock en CSV
+        Body optionnel: {"ids": [1, 2, 3]} pour export sélectif
+        """
+        import csv
+        from django.http import HttpResponse
+        
+        ids = request.data.get('ids', [])
+        
+        if ids:
+            queryset = self.get_queryset().filter(id__in=ids)
+        else:
+            queryset = self.get_queryset()
+        
+        response = HttpResponse(content_type='text/csv; charset=utf-8')
+        response['Content-Disposition'] = 'attachment; filename="suivi_stock_plateforme.csv"'
+        
+        # BOM pour Excel
+        response.write('\ufeff'.encode('utf8'))
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Andain', 'Référence', 'Plateforme', 'Mélange', 
+            'Volume initial (m³)', 'Volume restant (m³)', 'Volume écoulé (m³)',
+            'Taux écoulement (%)', 'Statut', 'Date mise en andains',
+            'Date mise en culture', 'Date prév. vente', 'Date écoulement',
+            'Recette', 'Remarques', 'Responsable', 'Date création'
+        ])
+        
+        for obj in queryset:
+            writer.writerow([
+                obj.andain_numero,
+                obj.reference_suivi,
+                obj.plateforme.nom if obj.plateforme else '',
+                obj.melange.nom if obj.melange else '',
+                obj.volume_initial_m3,
+                obj.volume_restant_m3,
+                obj.volume_ecoule_m3 or 0,
+                obj.taux_ecoulement_percent or 0,
+                obj.get_statut_display(),
+                obj.date_mise_en_andains or '',
+                obj.date_mise_en_culture or '',
+                obj.date_previsionnelle_vente or '',
+                obj.date_ecoulement or '',
+                obj.recette or '',
+                obj.remarques or '',
+                obj.utilisateur.username if obj.utilisateur else '',
+                obj.date_creation.strftime('%Y-%m-%d %H:%M') if obj.date_creation else ''
+            ])
+        
+        return response
+    
+    @action(detail=False, methods=['get'], url_path='verifier-andain')
+    def verifier_andain(self, request):
+        """
+        Vérifier si un numéro d'andain est disponible sur une plateforme
+        Query params: plateforme, andain_numero, exclude_id (optionnel)
+        """
+        plateforme_id = request.query_params.get('plateforme')
+        andain_numero = request.query_params.get('andain_numero')
+        exclude_id = request.query_params.get('exclude_id')
+        
+        if not plateforme_id or not andain_numero:
+            return Response(
+                {'error': 'Les paramètres plateforme et andain_numero sont requis'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            plateforme_id = int(plateforme_id)
+            andain_numero = int(andain_numero)
+        except ValueError:
+            return Response(
+                {'error': 'Les paramètres doivent être des entiers'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        queryset = SuiviStockPlateforme.objects.filter(
+            plateforme_id=plateforme_id,
+            andain_numero=andain_numero
+        )
+        
+        if exclude_id:
+            try:
+                exclude_id = int(exclude_id)
+                queryset = queryset.exclude(id=exclude_id)
+            except ValueError:
+                pass
+        
+        existing = queryset.first()
+        
+        if existing:
+            return Response({
+                'disponible': False,
+                'message': f'Un andain avec le numéro {andain_numero} existe déjà sur cette plateforme',
+                'existant': {
+                    'id': existing.id,
+                    'reference_suivi': existing.reference_suivi,
+                    'melange_nom': existing.melange.nom if existing.melange else None,
+                    'statut': existing.get_statut_display()
+                }
+            })
+        
+        return Response({
+            'disponible': True,
+            'message': f'Le numéro d\'andain {andain_numero} est disponible sur cette plateforme'
+        })
+    
+    @action(detail=False, methods=['get'], url_path='statistiques')
+    def statistiques(self, request):
+        """
+        Obtenir des statistiques sur les suivis de stock
+        Query param optionnel: plateforme
+        """
+        from django.db.models import Sum, Avg, Count, Case, When, IntegerField
+        
+        plateforme_id = request.query_params.get('plateforme')
+        queryset = self.get_queryset()
+        
+        if plateforme_id:
+            try:
+                plateforme_id = int(plateforme_id)
+                queryset = queryset.filter(plateforme_id=plateforme_id)
+            except ValueError:
+                pass  # Ignorer les valeurs non-entières
+        
+        # Statistiques générales
+        stats = queryset.aggregate(
+            total_andains=Count('id'),
+            volume_total_initial=Sum('volume_initial_m3'),
+            volume_total_restant=Sum('volume_restant_m3'),
+            taux_ecoulement_moyen=Avg(
+                Case(
+                    When(volume_initial_m3__gt=0, 
+                         then=((F('volume_initial_m3') - F('volume_restant_m3')) * 100.0 / F('volume_initial_m3'))),
+                    default=0,
+                    output_field=models.FloatField()
+                )
+            )
+        )
+        
+        # Répartition par statut
+        repartition_statuts = {}
+        for statut_value, statut_label in SuiviStockPlateforme.STATUT_CHOICES:
+            count = queryset.filter(statut=statut_value).count()
+            repartition_statuts[statut_value] = count
+        
+        # Évolution par mois (derniers 12 mois)
+        from datetime import datetime, timedelta
+        from django.db.models.functions import TruncMonth
+        
+        date_limite = datetime.now().date() - timedelta(days=365)
+        
+        andains_par_mois = (
+            queryset.filter(date_mise_en_andains__gte=date_limite)
+            .annotate(mois=TruncMonth('date_mise_en_andains'))
+            .values('mois')
+            .annotate(count=Count('id'))
+            .order_by('mois')
+        )
+        
+        # Formater les données par mois
+        mois_data = {}
+        for item in andains_par_mois:
+            if item['mois']:
+                mois_key = item['mois'].strftime('%Y-%m')
+                mois_data[mois_key] = item['count']
+        
+        return Response({
+            'total_andains': stats['total_andains'] or 0,
+            'volume_total_initial': float(stats['volume_total_initial'] or 0),
+            'volume_total_restant': float(stats['volume_total_restant'] or 0),
+            'taux_ecoulement_moyen': round(float(stats['taux_ecoulement_moyen'] or 0), 2),
+            'repartition_statuts': repartition_statuts,
+            'andains_par_mois': mois_data
+        })

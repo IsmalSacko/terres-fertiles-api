@@ -19,6 +19,7 @@ from .views import (
     PlateformeViewSet,
     SaisieVenteViewSet,
     ChantierRecepteurViewSet,
+    SuiviStockPlateformeViewSet,
     custom_reset_password,
     reset_password_confirm
     
@@ -40,6 +41,7 @@ router.register(r'plateformes', PlateformeViewSet)
 router.register(r'plannings', PlanningViewSet)
 router.register(r'saisies-vente', SaisieVenteViewSet)
 router.register(r'chantiers-recepteurs', ChantierRecepteurViewSet)
+router.register(r'suivi-stock-plateforme', SuiviStockPlateformeViewSet)
 
 
 urlpatterns = [

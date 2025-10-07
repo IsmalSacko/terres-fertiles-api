@@ -89,11 +89,13 @@ app-saisie-vente,
 app-create-saisie-vente,
 app-edit-saisie-vente,
 app-detail-saisie-vente,
-app-analyse-laboratoire-detail,
-app-amendement-organique-create {
-  display: block;
-  position: relative;
-  min-height: 100vh;
+app-analyse-laboratoire-detail
+
+ {
+  display: block !important;
+  position: relative !important;
+  min-height: 100vh !important;
+ 
 }
 
 /* Classe pour les conteneurs principaux qui ont un background personnalisé */

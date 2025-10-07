@@ -1,0 +1,349 @@
+<div class="suivistock-detail-container">
+  <!-- Loading spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Chargement des détails...</p>
+  </div>
+
+  <!-- Contenu principal -->
+  <div class="detail-content" *ngIf="!loading && suiviStock">
+    
+    <!-- En-tête avec actions -->
+    <div class="header-section">
+      <div class="title-section">
+        <h1>
+          <mat-icon>inventory</mat-icon>
+          Andain N° {{suiviStock.andain_numero}}
+        </h1>
+        <p class="subtitle">{{suiviStock.reference_suivi}}</p>
+      </div>
+      
+      <div class="action-buttons">
+        <button mat-stroked-button routerLink="/suivistock">
+          <mat-icon>arrow_back</mat-icon>
+          Retour à la liste
+        </button>
+        <button mat-raised-button color="primary" (click)="editSuiviStock()">
+          <mat-icon>edit</mat-icon>
+          Modifier
+        </button>
+        <button mat-raised-button color="warn" (click)="deleteSuiviStock()">
+          <mat-icon>delete</mat-icon>
+          Supprimer
+        </button>
+      </div>
+    </div>
+
+    <!-- Statut et métriques rapides -->
+    <div class="metrics-cards">
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-content">
+            <div class="metric-icon">
+              <mat-icon>straighten</mat-icon>
+            </div>
+            <div class="metric-info">
+              <h3>{{suiviStock.volume_initial_m3}} m³</h3>
+              <p>Volume Initial</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-content">
+            <div class="metric-icon">
+              <mat-icon>inventory_2</mat-icon>
+            </div>
+            <div class="metric-info">
+              <h3>{{suiviStock.volume_restant_m3}} m³</h3>
+              <p>Volume Restant</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-content">
+            <div class="metric-icon">
+              <mat-icon>trending_down</mat-icon>
+            </div>
+            <div class="metric-info">
+              <h3>{{getVolumeEcoule()}} m³</h3>
+              <p>Volume Écoulé</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metric-card">
+        <mat-card-content>
+          <div class="metric-content">
+            <div class="metric-icon">
+              <mat-icon>percent</mat-icon>
+            </div>
+            <div class="metric-info">
+              <h3 [style.color]="getTauxEcoulement() >= 50 ? 'orange' : 'green'">
+                {{getTauxEcoulement()}}%
+              </h3>
+              <p>Taux Écoulement</p>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Onglets de détails -->
+    <mat-tab-group class="detail-tabs">
+      
+      <!-- Onglet Informations Générales -->
+      <mat-tab label="Informations Générales">
+        <div class="tab-content">
+          
+          <!-- Identification -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>badge</mat-icon>
+                Identification
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item>
+                  <mat-icon matListItemIcon>tag</mat-icon>
+                  <div matListItemTitle>Référence</div>
+                  <div matListItemLine>{{suiviStock.reference_suivi}}</div>
+                </mat-list-item>
+                
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>numbers</mat-icon>
+                  <div matListItemTitle>Numéro d'andain</div>
+                  <div matListItemLine>{{suiviStock.andain_numero}}</div>
+                </mat-list-item>
+                
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>business</mat-icon>
+                  <div matListItemTitle>Plateforme</div>
+                  <div matListItemLine>
+                    {{suiviStock.plateforme_details?.nom}} - {{suiviStock.plateforme_details?.localisation}}
+                  </div>
+                </mat-list-item>
+                
+                <mat-divider *ngIf="suiviStock.melange_details"></mat-divider>
+                
+                <mat-list-item *ngIf="suiviStock.melange_details">
+                  <mat-icon matListItemIcon>science</mat-icon>
+                  <div matListItemTitle>Mélange</div>
+                  <div matListItemLine>
+                    {{suiviStock.melange_details.nom}} ({{suiviStock.melange_details.etat_display}})
+                  </div>
+                </mat-list-item>
+                
+                <mat-divider></mat-divider>
+                
+                <mat-list-item>
+                  <mat-icon matListItemIcon>flag</mat-icon>
+                  <div matListItemTitle>Statut</div>
+                  <div matListItemLine>
+                    <mat-chip [style.background-color]="getStatutColor()" 
+                             [style.color]="'white'" class="statut-chip">
+                      {{suiviStock.statut_display}}
+                    </mat-chip>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Volumes -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>straighten</mat-icon>
+                Volumes et Écoulement
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="volume-grid">
+                <div class="volume-item">
+                  <div class="volume-label">Volume Initial</div>
+                  <div class="volume-value primary">{{suiviStock.volume_initial_m3}} m³</div>
+                </div>
+                <div class="volume-item">
+                  <div class="volume-label">Volume Restant</div>
+                  <div class="volume-value secondary">{{suiviStock.volume_restant_m3}} m³</div>
+                </div>
+                <div class="volume-item">
+                  <div class="volume-label">Volume Écoulé</div>
+                  <div class="volume-value accent">{{getVolumeEcoule()}} m³</div>
+                </div>
+                <div class="volume-item">
+                  <div class="volume-label">Taux d'Écoulement</div>
+                  <div class="volume-value" [style.color]="getTauxEcoulement() >= 50 ? 'orange' : 'green'">
+                    {{getTauxEcoulement()}}%
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Onglet Dates et Planning -->
+      <mat-tab label="Dates et Planning">
+        <div class="tab-content">
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>event</mat-icon>
+                Chronologie
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="timeline">
+                
+                <div class="timeline-item" *ngIf="suiviStock.date_mise_en_andains">
+                  <div class="timeline-icon">
+                    <mat-icon>play_arrow</mat-icon>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Mise en andains</h4>
+                    <p>{{suiviStock.date_mise_en_andains | date:'dd/MM/yyyy'}}</p>
+                  </div>
+                </div>
+
+                <div class="timeline-item" *ngIf="suiviStock.date_mise_en_culture">
+                  <div class="timeline-icon">
+                    <mat-icon>eco</mat-icon>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Mise en culture</h4>
+                    <p>{{suiviStock.date_mise_en_culture | date:'dd/MM/yyyy'}}</p>
+                  </div>
+                </div>
+
+                <div class="timeline-item" *ngIf="suiviStock.date_previsionnelle_vente">
+                  <div class="timeline-icon">
+                    <mat-icon>schedule</mat-icon>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Date prévisionnelle vente</h4>
+                    <p>{{suiviStock.date_previsionnelle_vente | date:'dd/MM/yyyy'}}</p>
+                  </div>
+                </div>
+
+                <div class="timeline-item" *ngIf="suiviStock.date_ecoulement">
+                  <div class="timeline-icon completed">
+                    <mat-icon>check_circle</mat-icon>
+                  </div>
+                  <div class="timeline-content">
+                    <h4>Écoulement complet</h4>
+                    <p>{{suiviStock.date_ecoulement | date:'dd/MM/yyyy'}}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Durée de stockage -->
+              <div class="storage-duration" *ngIf="getDureeStockage()">
+                <mat-icon>hourglass_empty</mat-icon>
+                <div>
+                  <strong>Durée de stockage</strong>
+                  <span>{{getDureeStockage()}} jours</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Onglet Informations Techniques -->
+      <mat-tab label="Informations Techniques">
+        <div class="tab-content">
+          
+          <!-- Recette -->
+          <mat-card class="info-card" *ngIf="suiviStock.recette">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>science</mat-icon>
+                Recette
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="text-content">
+                {{suiviStock.recette}}
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Remarques -->
+          <mat-card class="info-card" *ngIf="suiviStock.remarques">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>note</mat-icon>
+                Remarques
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="text-content">
+                {{suiviStock.remarques}}
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Métadonnées -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>info</mat-icon>
+                Métadonnées
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-list>
+                <mat-list-item *ngIf="suiviStock.utilisateur_details">
+                  <mat-icon matListItemIcon>person</mat-icon>
+                  <div matListItemTitle>Créé par</div>
+                  <div matListItemLine>{{suiviStock.utilisateur_details.username}}</div>
+                </mat-list-item>
+                
+                <mat-divider *ngIf="suiviStock.utilisateur_details"></mat-divider>
+                
+                <mat-list-item *ngIf="suiviStock.date_creation">
+                  <mat-icon matListItemIcon>schedule</mat-icon>
+                  <div matListItemTitle>Date de création</div>
+                  <div matListItemLine>{{suiviStock.date_creation | date:'dd/MM/yyyy HH:mm'}}</div>
+                </mat-list-item>
+                
+                <mat-divider *ngIf="suiviStock.date_modification"></mat-divider>
+                
+                <mat-list-item *ngIf="suiviStock.date_modification">
+                  <mat-icon matListItemIcon>update</mat-icon>
+                  <div matListItemTitle>Dernière modification</div>
+                  <div matListItemLine>{{suiviStock.date_modification | date:'dd/MM/yyyy HH:mm'}}</div>
+                </mat-list-item>
+              </mat-list>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+
+  <!-- Message si aucune donnée -->
+  <div class="no-data-message" *ngIf="!loading && !suiviStock">
+    <mat-icon>error</mat-icon>
+    <h3>Suivi de stock non trouvé</h3>
+    <p>Le suivi de stock demandé n'existe pas ou n'est plus disponible.</p>
+    <button mat-raised-button color="primary" routerLink="/suivistock">
+      <mat-icon>arrow_back</mat-icon>
+      Retour à la liste
+    </button>
+  </div>
+</div>

@@ -3,160 +3,314 @@ from django.contrib import messages as messages
 from django.shortcuts import redirect
 from django.utils.html import format_html  
 from django.urls import path
-
+from django.http import HttpResponse
 from django.contrib import admin
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.csrf import csrf_protect
-
-
+from django.core.exceptions import ValidationError
 from .models import (
-    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, Planning, Plateforme,
-    Melange, ProduitVente, DocumentTechnique, AnalyseLaboratoire, MelangeIngredient, SaisieVente
+    CustomUser, Gisement, Chantier, Melange, AmendementOrganique, Plateforme, 
+    ProduitVente, SuiviStockPlateforme, MelangeIngredient, MelangeAmendement,
+    DocumentProduitVente, SaisieVente, ChantierRecepteur, Planning
 )
 
-# ───────────── Inlines ─────────────
-class MelangeIngredientInline(admin.TabularInline):
-    model = MelangeIngredient
-    extra = 1
-    autocomplete_fields = ['gisement']
-    min_num = 1
-    verbose_name = "Gisement utilisé"
-    verbose_name_plural = "Composition du mélange"
 
-
-
-csrf_protect_m = method_decorator(csrf_protect)
-
-@admin.register(Melange)
-class MelangeAdmin(admin.ModelAdmin):
-    list_display = (
-        'reference_produit',
-        'ingredients_affiches',
-        'nom',
-        'etat_display',
-        'tache_display',
-        'avancer_button',
-    )
-    readonly_fields = ['ingredients_affiches', 'tache_actuelle_display']
-    inlines = [MelangeIngredientInline]
-
-   
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                '<int:melange_id>/avancer/',
-                self.admin_site.admin_view(self.avancer_view),
-                name='core_melange_avancer',
-            ),
-        ]
-        return custom_urls + urls
-
-    @csrf_protect_m
-    def avancer_view(self, request, melange_id):
-        melange = Melange.objects.get(pk=melange_id)
-        if melange.etat < Melange.Etat.VALIDATION:
-            melange.etat += 1
-            melange.save()
-            messages.success(request, f"Le mélange {melange.reference_produit} a été avancé à l’étape suivante.")
-            if melange.tache_actuelle():
-                messages.info(request, f"Tâche à effectuer : {melange.tache_actuelle()}")
-        else:
-            messages.warning(request, "Ce mélange est déjà validé.")
-        return redirect(f'/admin/core/melange/')
-
-    def etat_display(self, obj):
-        return obj.get_etat_display()
+class SuiviStockPlateformeForm(forms.ModelForm):
+    class Meta:
+        model = SuiviStockPlateforme
+        fields = '__all__'
     
-    def tache_display(self, obj):
-        return obj.tache_actuelle() or "-"
-    tache_display.short_description = "Tâche à faire"
-
-    def tache_actuelle_display(self, obj):
-        return format_html('<span id="id_tache_actuelle">{}</span>', obj.tache_actuelle() or "-")
-    tache_actuelle_display.short_description = "Tâche actuelle"
-
-    def avancer_button(self, obj):
-        if obj.etat < obj.Etat.VALIDATION:
-            return format_html(
-                '<a class="button" style="color:white; background-color:#28a745; padding:4px 8px; border-radius:4px;" href="{}">Avancer</a>',
-                f'/admin/core/melange/{obj.pk}/avancer/'
+    def clean(self):
+        cleaned_data = super().clean()
+        plateforme = cleaned_data.get('plateforme')
+        andain_numero = cleaned_data.get('andain_numero')
+        
+        if plateforme and andain_numero:
+            # Vérifier si cette combinaison existe déjà (sauf pour l'instance actuelle en cas de modification)
+            existing = SuiviStockPlateforme.objects.filter(
+                plateforme=plateforme, 
+                andain_numero=andain_numero
             )
-        return "✅ Validé"
-    avancer_button.short_description = 'Avancer l’état'
+            
+            if self.instance.pk:
+                existing = existing.exclude(pk=self.instance.pk)
+                
+            if existing.exists():
+                existing_record = existing.first()
+                raise ValidationError(
+                    f"Un andain avec le numéro {andain_numero} existe déjà sur la plateforme {plateforme}. "
+                    f"Il est associé au mélange '{existing_record.melange}' avec un statut '{existing_record.get_statut_display()}'. "
+                    f"Veuillez choisir un autre numéro d'andain."
+                )
+        
+        return cleaned_data
 
-    def ingredients_affiches(self, obj):
-        return format_html("<br>".join([
-            f"{ingredient.gisement.nom} ({ingredient.pourcentage}%)"
-            for ingredient in obj.ingredients.all()
-        ]))
-    ingredients_affiches.short_description = "Composition du mélange"
 
+# Register your models here.
 
-# ───────────── Admins ─────────────
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'company_name', 'role', 'email', 'is_active', 'date_joined', 'is_staff', 'is_superuser')
+    list_display = ('username', 'role', 'company_name', 'phone_number')
     list_filter = ('role',)
+    search_fields = ('username', 'company_name', 'phone_number')
 
-@admin.register(Chantier)
-class ChantierAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'maitre_ouvrage', 'entreprise_terrassement')
 
 @admin.register(Gisement)
 class GisementAdmin(admin.ModelAdmin):
-    list_display = ('id','commune', 'nom', 'periode_terrassement', 'volume_terrasse')
-    list_filter = ('type_de_sol','commune', 'periode_terrassement')
-    search_fields = ('nom', 'commune', 'chantier__nom')
+    list_display = ('nom', 'localisation', 'date_creation')
+    search_fields = ('nom', 'localisation')
 
-    list_per_page = 10
+
+@admin.register(Chantier)
+class ChantierAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'localisation', 'maitre_ouvrage', 'date_creation', 'is_active')
+    list_filter = ('is_active', 'date_creation')
+    search_fields = ('nom', 'localisation', 'maitre_ouvrage')
+
+
+@admin.register(Melange)
+class MelangeAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'date_creation')
+    search_fields = ('nom',)
+
 
 @admin.register(AmendementOrganique)
 class AmendementOrganiqueAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'date_reception', 'volume_disponible')
-    readonly_fields = ('responsable',)
-  
-
-
+    list_display = ('nom', 'numero_sequence', 'plateforme', 'fournisseur', 'date_reception')
+    list_filter = ('plateforme', 'fournisseur', 'date_reception')
+    search_fields = ('nom', 'plateforme__nom', 'fournisseur')
+    readonly_fields = ('numero_sequence',)
+    ordering = ['numero_sequence']
 
 
 @admin.register(ProduitVente)
 class ProduitVenteAdmin(admin.ModelAdmin):
-    list_display = ('reference_produit', 'volume_disponible', 'volume_vendu')
+    list_display = ('reference_produit', 'melange', 'pret_pour_vente', 'date_creation')
+    list_filter = ('pret_pour_vente', 'date_creation')
+    search_fields = ('reference_produit', 'melange__nom')
 
-    readonly_fields = ('utilisateur',)
-
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:
-            obj.utilisateur = request.user
-        super().save_model(request, obj, form, change)
-    
-
-@admin.register(DocumentTechnique)
-class DocumentTechniqueAdmin(admin.ModelAdmin):
-    list_display = ('type_document', 'produit', 'date_ajout')
-
-@admin.register(DocumentGisement)
-class DocumentGisementAdmin(admin.ModelAdmin):
-    list_display = ('gisement', 'nom_fichier', 'date_ajout')
-    search_fields = ('gisement__commune', 'nom_fichier')
-    list_filter = ('gisement__commune', 'date_ajout')
-    ordering = ('-date_ajout',)
-
-@admin.register(AnalyseLaboratoire)
-class AnalyseLaboratoireAdmin(admin.ModelAdmin):
-    list_display = ('produit', 'laboratoire', 'date_analyse', 'ph_eau')
 
 @admin.register(Plateforme)
 class PlateformeAdmin(admin.ModelAdmin):
-    list_display = ('nom', 'localisation', 'latitude','longitude', 'responsable')
-    search_fields = ('nom', 'localisation', 'responsable__username')
-    list_filter = ('responsable__role',)
-    readonly_fields = ('responsable',)
+    list_display = ('nom', 'localisation', 'latitude','longitude')
+    search_fields = ('nom', 'localisation')
 
 
+@admin.register(SuiviStockPlateforme)
+class SuiviStockPlateformeAdmin(admin.ModelAdmin):
+    form = SuiviStockPlateformeForm
+    list_display = (
+        'andain_numero',
+        'reference_suivi', 
+        'plateforme_nom',
+        'melange_nom',
+        'volume_initial_m3',
+        'volume_restant_m3',
+        'volume_ecoule_display',
+        'taux_ecoulement_display',
+        'statut_display',
+        'date_mise_en_culture',
+        'date_previsionnelle_vente'
+    )
+    
+    list_filter = (
+        'statut',
+        'plateforme',
+        'melange',
+        'date_mise_en_andains',
+        'date_mise_en_culture'
+    )
+    
+    search_fields = (
+        'reference_suivi',
+        'plateforme__nom',
+        'melange__nom',
+        'recette',
+        'remarques'
+    )
+    
+    readonly_fields = (
+        'reference_suivi',
+        'volume_ecoule_display',
+        'taux_ecoulement_display',
+        'duree_stockage_display',
+        'utilisateur',
+        'date_creation',
+        'date_modification'
+    )
+    
+    fieldsets = (
+        ('Identification', {
+            'fields': ('andain_numero', 'reference_suivi', 'plateforme', 'melange', 'produit_vente')
+        }),
+        ('Volumes et Statut', {
+            'fields': ('volume_initial_m3', 'volume_restant_m3', 'statut', 'volume_ecoule_display', 'taux_ecoulement_display')
+        }),
+        ('Dates importantes', {
+            'fields': ('date_mise_en_andains', 'date_mise_en_culture', 'date_previsionnelle_vente', 'date_ecoulement')
+        }),
+        ('Informations techniques', {
+            'fields': ('recette', 'remarques')
+        }),
+        ('Métadonnées', {
+            'fields': ('utilisateur', 'duree_stockage_display', 'date_creation', 'date_modification'),
+            'classes': ('collapse',)
+        })
+    )
+    
+    ordering = ['plateforme', 'andain_numero']
+    list_per_page = 20
+    actions = ['marquer_ecoule', 'marquer_pret_vente', 'exporter_csv']
+    
+    def plateforme_nom(self, obj):
+        return obj.plateforme.nom if obj.plateforme else '-'
+    plateforme_nom.short_description = 'Plateforme'
+    plateforme_nom.admin_order_field = 'plateforme__nom'
+    
+    def melange_nom(self, obj):
+        return obj.melange.nom if obj.melange else '-'
+    melange_nom.short_description = 'Mélange'
+    melange_nom.admin_order_field = 'melange__nom'
+    
+    def volume_ecoule_display(self, obj):
+        volume = obj.volume_ecoule_m3
+        if volume is not None:
+            return f"{volume} m³"
+        return "-"
+    volume_ecoule_display.short_description = 'Volume écoulé'
+    
+    def taux_ecoulement_display(self, obj):
+        taux = obj.taux_ecoulement_percent
+        if taux is None or (obj.volume_initial_m3 is None):
+            return "-"
+        
+        if taux >= 100:
+            color = 'green'
+        elif taux >= 50:
+            color = 'orange'
+        else:
+            color = 'red'
+        return format_html(
+            '<span style="color: {}; font-weight: bold;">{} %</span>',
+            color, taux
+        )
+    taux_ecoulement_display.short_description = 'Taux écoulement'
+    
+    def statut_display(self, obj):
+        statut_colors = {
+            'en_cours': '#ffc107',
+            'en_culture': '#17a2b8',
+            'pret_vente': '#28a745',
+            'ecoule': '#6c757d',
+            'suspendu': '#dc3545'
+        }
+        color = statut_colors.get(obj.statut, '#6c757d')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px;">{}</span>',
+            color, obj.get_statut_display()
+        )
+    statut_display.short_description = 'Statut'
+    
+    def duree_stockage_display(self, obj):
+        duree = obj.duree_stockage_jours
+        if duree is not None:
+            return f"{duree} jours"
+        return '-'
+    duree_stockage_display.short_description = 'Durée stockage'
+    
+    def marquer_ecoule(self, request, queryset):
+        count = 0
+        for obj in queryset:
+            if obj.statut != 'ecoule':
+                obj.statut = 'ecoule'
+                obj.volume_restant_m3 = 0
+                obj.save()
+                count += 1
+        
+        self.message_user(
+            request,
+            f"{count} andain(s) marqué(s) comme écoulé(s).",
+            messages.SUCCESS
+        )
+    marquer_ecoule.short_description = "Marquer comme écoulé"
+    
+    def marquer_pret_vente(self, request, queryset):
+        count = queryset.filter(statut__in=['en_cours', 'en_culture']).update(statut='pret_vente')
+        self.message_user(
+            request,
+            f"{count} andain(s) marqué(s) comme prêt pour vente.",
+            messages.SUCCESS
+        )
+    marquer_pret_vente.short_description = "Marquer comme prêt pour vente"
+    
+    def exporter_csv(self, request, queryset):
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="suivi_stock_plateforme.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow([
+            'Andain', 'Référence', 'Plateforme', 'Mélange', 'Volume initial (m³)',
+            'Volume restant (m³)', 'Statut', 'Date mise en culture', 'Date prév. vente', 'Recette'
+        ])
+        
+        for obj in queryset:
+            writer.writerow([
+                obj.andain_numero,
+                obj.reference_suivi,
+                obj.plateforme.nom if obj.plateforme else '',
+                obj.melange.nom if obj.melange else '',
+                obj.volume_initial_m3,
+                obj.volume_restant_m3,
+                obj.get_statut_display(),
+                obj.date_mise_en_culture or '',
+                obj.date_previsionnelle_vente or '',
+                obj.recette or ''
+            ])
+        
+        return response
+    exporter_csv.short_description = "Exporter en CSV"
+    
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.utilisateur = request.user
+        
+        try:
+            super().save_model(request, obj, form, change)
+        except Exception as e:
+            if "unique constraint" in str(e).lower() or "unique_together" in str(e).lower():
+                self.message_user(
+                    request,
+                    f"Erreur : Un andain avec le numéro {obj.andain_numero} existe déjà sur la plateforme {obj.plateforme}. Veuillez choisir un autre numéro d'andain.",
+                    messages.ERROR
+                )
+            else:
+                self.message_user(
+                    request,
+                    f"Erreur lors de la sauvegarde : {str(e)}",
+                    messages.ERROR
+                )
+            raise
+    
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'plateforme', 'melange', 'produit_vente', 'utilisateur'
+        )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # Ajouter une aide pour le numéro d'andain
+        if 'andain_numero' in form.base_fields:
+            help_text = "Numéro unique de l'andain sur cette plateforme."
+            if not obj:  # Nouveau formulaire
+                help_text += " Conseil : Vérifiez les numéros existants pour éviter les doublons."
+            form.base_fields['andain_numero'].help_text = help_text
+            
+        return form
+
+
+# Enregistrements simples pour les autres modèles
 @admin.register(MelangeIngredient)
 class MelangeIngredientAdmin(admin.ModelAdmin):
     list_display = ('melange', 'gisement', 'pourcentage')
@@ -165,77 +319,18 @@ class MelangeIngredientAdmin(admin.ModelAdmin):
 class MelangeAmendementAdmin(admin.ModelAdmin):
     list_display = ('melange', 'amendementOrganique', 'pourcentage')
 
-class DocumentProduitVenteAdminForm(forms.ModelForm):
-    class Meta:
-        model = DocumentProduitVente
-        fields = ['produit', 'type_document', 'fichier', 'remarque']
-       
-
 @admin.register(DocumentProduitVente)
 class DocumentProduitVenteAdmin(admin.ModelAdmin):
     list_display = ('produit', 'fichier', 'date_ajout')
-    search_fields = ('produit__reference_produit', 'fichier')
-    list_filter = ('produit__reference_produit', 'date_ajout')
-    ordering = ('-date_ajout',)
-
-    form = DocumentProduitVenteAdminForm
-
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        # on ajoute l'attribut 'multiple' manuellement sur le champ fichier
-        form.base_fields['fichier'].widget.attrs.update({'multiple': True})
-        return form
-
-    def save_model(self, request, obj, form, change):
-        fichiers = request.FILES.getlist('fichier')
-        for fichier in fichiers:
-            DocumentProduitVente.objects.create(
-                produit=form.cleaned_data['produit'],
-                type_document=form.cleaned_data['type_document'],
-                fichier=fichier,
-                remarque=form.cleaned_data['remarque']
-        )
 
 @admin.register(SaisieVente)
 class SaisieVenteAdmin(admin.ModelAdmin):
-    list_display = ('produit', 'responsable', 'date_achat', 'volume_tonne')
-    search_fields = ('produit__reference_produit', 'responsable__username')
-    list_filter = ('responsable__role',)
-    ordering = ('-date_achat',)
-
-    readonly_fields = ('responsable',)
-
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:
-            obj.responsable = request.user
-        super().save_model(request, obj, form, change)
-
+    list_display = ('produit', 'date_achat', 'volume_tonne')
 
 @admin.register(ChantierRecepteur)
 class ChantierRecepteurAdmin(admin.ModelAdmin):
-    list_display = (
-        'nom',
-        'adresse',
-        'date_creation',
-    
-    )
-
-    search_fields = ('nom', 'adresse', 'date_creation')
-    list_filter = ('nom', 'adresse', 'date_creation')
-
+    list_display = ('nom', 'adresse', 'date_creation')
 
 @admin.register(Planning)
 class PlanningAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'date_debut', 'duree_jours', 'statut', 'melange_nom')
-    search_fields = ('titre', 'melange__nom')
-    list_filter = ('statut', 'date_debut')
-    readonly_fields = ('melange_nom',)
-
-    def melange_nom(self, obj):
-        return obj.melange.nom if obj.melange else "N/A"
-    melange_nom.short_description = "Mélange associé"
-
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:
-            obj.responsable = request.user
-        super().save_model(request, obj, form, change)
+    list_display = ('titre', 'date_debut', 'duree_jours', 'statut')

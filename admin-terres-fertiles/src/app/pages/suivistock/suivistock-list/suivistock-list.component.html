@@ -1,0 +1,331 @@
+<div class="suivistock-list-container">
+  <!-- En-tête avec titre et actions -->
+  <div class="header-section">
+    <div class="title-section">
+      <h1>
+        <mat-icon>inventory_2</mat-icon>
+        Suivi des Stocks Plateforme
+      </h1>
+      <p class="subtitle">Gestion et suivi des andains sur les plateformes de compostage</p>
+    </div>
+    
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" routerLink="/suivistock/create">
+        <mat-icon>add</mat-icon>
+        Nouveau Suivi
+      </button>
+      <button mat-raised-button routerLink="/suivistock/dashboard">
+        <mat-icon>dashboard</mat-icon>
+        Tableau de Bord
+      </button>
+    </div>
+  </div>
+
+  <!-- Section des filtres -->
+  <mat-card class="filters-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Filtres de recherche
+      </mat-card-title>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="filters-grid-horizontal">
+        <!-- Ligne 1: Recherche, Plateforme, Mélange -->
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Recherche</mat-label>
+            <input matInput [(ngModel)]="filters.search" 
+                   placeholder="Référence, remarques..."
+                   (keyup.enter)="applyFilters()">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Plateforme</mat-label>
+            <mat-select [(ngModel)]="filters.plateforme">
+              <mat-option value="">Toutes les plateformes</mat-option>
+              <mat-option *ngFor="let plateforme of plateformes" [value]="plateforme.id">
+                {{plateforme.nom}} - {{plateforme.localisation}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Mélange</mat-label>
+            <mat-select [(ngModel)]="filters.melange">
+              <mat-option value="">Tous les mélanges</mat-option>
+              <mat-option *ngFor="let melange of melanges" [value]="melange.id">
+                {{melange.nom}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Ligne 2: Statut, Date début, Date fin -->
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="filters.statut">
+              <mat-option value="">Tous les statuts</mat-option>
+              <mat-option *ngFor="let statut of statutChoices" [value]="statut.value">
+                {{statut.label}}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Date début</mat-label>
+            <input matInput [matDatepicker]="pickerDebut" [(ngModel)]="filters.date_debut">
+            <mat-datepicker-toggle matSuffix [for]="pickerDebut"></mat-datepicker-toggle>
+            <mat-datepicker #pickerDebut></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Date fin</mat-label>
+            <input matInput [matDatepicker]="pickerFin" [(ngModel)]="filters.date_fin">
+            <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="applyFilters()">
+          <mat-icon>search</mat-icon>
+          Appliquer
+        </button>
+        <button mat-button (click)="clearFilters()">
+          <mat-icon>clear</mat-icon>
+          Réinitialiser
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Actions en lot -->
+  <div class="bulk-actions" *ngIf="selection.selected.length > 0">
+    <mat-card>
+      <mat-card-content>
+        <div class="bulk-actions-content">
+          <span class="selection-info">
+            {{selection.selected.length}} élément(s) sélectionné(s)
+          </span>
+          
+          <div class="bulk-buttons">
+            <button mat-raised-button color="accent" (click)="marquerPretVente()">
+              <mat-icon>check_circle</mat-icon>
+              Marquer Prêt Vente
+            </button>
+            <button mat-raised-button color="warn" (click)="marquerEcoule()">
+              <mat-icon>done_all</mat-icon>
+              Marquer Écoulé
+            </button>
+            <button mat-raised-button (click)="exporterCSV()">
+              <mat-icon>download</mat-icon>
+              Exporter CSV
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Tableau des données -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      <!-- Barre d'actions du tableau -->
+      <div class="table-toolbar">
+        <div class="table-info">
+          <span>{{totalItems}} résultat(s)</span>
+        </div>
+        <div class="table-actions">
+          <button mat-icon-button (click)="loadSuivisStock()" [disabled]="loading">
+            <mat-icon>refresh</mat-icon>
+          </button>
+          <button mat-icon-button (click)="exporterCSV()">
+            <mat-icon>download</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading spinner -->
+      <div class="loading-container" *ngIf="loading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Chargement des données...</p>
+      </div>
+
+      <!-- Tableau -->
+      <div class="table-container" *ngIf="!loading">
+        <table mat-table [dataSource]="dataSource" matSort class="suivistock-table">
+          
+          <!-- Colonne sélection -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                          [checked]="selection.hasValue() && isAllSelected()"
+                          [indeterminate]="selection.hasValue() && !isAllSelected()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                          (change)="$event ? selection.toggle(row) : null"
+                          [checked]="selection.isSelected(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Andain -->
+          <ng-container matColumnDef="andain_numero">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Andain N°</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span class="andain-number">{{suiviStock.andain_numero}}</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Référence -->
+          <ng-container matColumnDef="reference_suivi">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Référence</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <code class="reference-code">{{suiviStock.reference_suivi}}</code>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Plateforme -->
+          <ng-container matColumnDef="plateforme">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Plateforme</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <div class="plateforme-info">
+                <strong>{{suiviStock.plateforme_details?.nom}}</strong>
+                <small>{{suiviStock.plateforme_details?.localisation}}</small>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Mélange -->
+          <ng-container matColumnDef="melange">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Mélange</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <div class="melange-info" *ngIf="suiviStock.melange_details">
+                <strong>{{suiviStock.melange_details.nom}}</strong>
+                <small>{{suiviStock.melange_details.reference_produit}}</small>
+              </div>
+              <span *ngIf="!suiviStock.melange_details" class="no-data">-</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Volume Initial -->
+          <ng-container matColumnDef="volume_initial_m3">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Vol. Initial</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span class="volume-value">{{suiviStock.volume_initial_m3}} m³</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Volume Restant -->
+          <ng-container matColumnDef="volume_restant_m3">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Vol. Restant</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span class="volume-value">{{suiviStock.volume_restant_m3}} m³</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Volume Écoulé -->
+          <ng-container matColumnDef="volume_ecoule">
+            <th mat-header-cell *matHeaderCellDef>Vol. Écoulé</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span class="volume-value">{{calculerVolumeEcoule(suiviStock)}} m³</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Taux Écoulement -->
+          <ng-container matColumnDef="taux_ecoulement">
+            <th mat-header-cell *matHeaderCellDef>Taux Écoulement</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span class="taux-ecoulement" 
+                    [style.color]="getTauxEcoulementColor(calculerTauxEcoulement(suiviStock))">
+                <strong>{{calculerTauxEcoulement(suiviStock)}}%</strong>
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Statut -->
+          <ng-container matColumnDef="statut">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <mat-chip [style.background-color]="getStatutColor(suiviStock.statut)"
+                       [style.color]="'white'"
+                       class="statut-chip">
+                {{getStatutLabel(suiviStock.statut)}}
+              </mat-chip>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Date Mise en Culture -->
+          <ng-container matColumnDef="date_mise_en_culture">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Mise en Culture</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <span *ngIf="suiviStock.date_mise_en_culture">
+                {{suiviStock.date_mise_en_culture | date:'dd/MM/yyyy'}}
+              </span>
+              <span *ngIf="!suiviStock.date_mise_en_culture" class="no-data">-</span>
+            </td>
+          </ng-container>
+
+          <!-- Colonne Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let suiviStock">
+              <div class="action-buttons-cell">
+                <button mat-icon-button 
+                        [routerLink]="['/suivistock/detail', suiviStock.id]"
+                        matTooltip="Voir détails"
+                        color="primary">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button 
+                        [routerLink]="['/suivistock/edit', suiviStock.id]"
+                        matTooltip="Modifier"
+                        color="accent">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button 
+                        (click)="deleteSuiviStock(suiviStock.id!)"
+                        matTooltip="Supprimer"
+                        color="warn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              (click)="selection.toggle(row)"
+              [class.selected]="selection.isSelected(row)">
+          </tr>
+        </table>
+
+        <!-- Message si aucune donnée -->
+        <div class="no-data-message" *ngIf="dataSource.data.length === 0">
+          <mat-icon>inventory_2</mat-icon>
+          <h3>Aucun suivi de stock trouvé</h3>
+          <p>Aucun suivi de stock ne correspond à vos critères de recherche.</p>
+          <button mat-raised-button color="primary" routerLink="/suivistock/create">
+            <mat-icon>add</mat-icon>
+            Créer le premier suivi
+          </button>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator [length]="totalItems"
+                     [pageSize]="pageSize"
+                     [pageSizeOptions]="[5, 10, 25, 50, 100]"
+                     (page)="loadSuivisStock()"
+                     showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

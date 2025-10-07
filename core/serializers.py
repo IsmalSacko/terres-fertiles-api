@@ -12,7 +12,7 @@ from rest_framework import serializers
 
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
-    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire
+    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SuiviStockPlateforme
 )
 # ...existing code...
 
@@ -463,4 +463,166 @@ class PlanningSerializer(serializers.ModelSerializer):
      # faire en sorte que l'utilisateur connecté soit automatiquement le responsable
     def create(self, validated_data):
         validated_data['responsable'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class SuiviStockPlateformeSerializer(serializers.ModelSerializer):
+    """Serializer pour le suivi de stock des plateformes avec détails des relations"""
+    
+    # Champs en lecture seule pour les détails des relations
+    plateforme_details = serializers.SerializerMethodField()
+    melange_details = serializers.SerializerMethodField()
+    produit_vente_details = serializers.SerializerMethodField()
+    utilisateur_details = serializers.SerializerMethodField()
+    
+    # Champs calculés (propriétés du modèle)
+    volume_ecoule_m3 = serializers.ReadOnlyField()
+    taux_ecoulement_percent = serializers.ReadOnlyField()
+    duree_stockage_jours = serializers.ReadOnlyField()
+    
+    # Champs d'affichage
+    statut_display = serializers.CharField(source='get_statut_display', read_only=True)
+    
+    class Meta:
+        model = SuiviStockPlateforme
+        fields = [
+            'id', 'andain_numero', 'reference_suivi',
+            'plateforme', 'plateforme_details',
+            'melange', 'melange_details', 
+            'produit_vente', 'produit_vente_details',
+            'volume_initial_m3', 'volume_restant_m3', 'volume_ecoule_m3',
+            'taux_ecoulement_percent', 'statut', 'statut_display',
+            'date_mise_en_andains', 'date_mise_en_culture', 
+            'date_previsionnelle_vente', 'date_ecoulement',
+            'recette', 'remarques', 'duree_stockage_jours',
+            'utilisateur', 'utilisateur_details',
+            'date_creation', 'date_modification'
+        ]
+        read_only_fields = [
+            'reference_suivi', 'volume_ecoule_m3', 'taux_ecoulement_percent',
+            'duree_stockage_jours', 'statut_display', 'date_creation', 'date_modification'
+        ]
+    
+    def get_plateforme_details(self, obj):
+        """Détails de la plateforme"""
+        if obj.plateforme:
+            return {
+                'id': obj.plateforme.id,
+                'nom': obj.plateforme.nom,
+                'localisation': obj.plateforme.localisation,
+                'entreprise_gestionnaire': obj.plateforme.entreprise_gestionnaire
+            }
+        return None
+    
+    def get_melange_details(self, obj):
+        """Détails du mélange"""
+        if obj.melange:
+            return {
+                'id': obj.melange.id,
+                'nom': obj.melange.nom,
+                'etat': obj.melange.etat,
+                'etat_display': obj.melange.get_etat_display()
+            }
+        return None
+    
+    def get_produit_vente_details(self, obj):
+        """Détails du produit de vente si existant"""
+        if obj.produit_vente:
+            return {
+                'id': obj.produit_vente.id,
+                'reference_produit': obj.produit_vente.reference_produit,
+                'fournisseur': obj.produit_vente.fournisseur,
+                'volume_initial': float(obj.produit_vente.volume_initial),
+                'volume_disponible': float(obj.produit_vente.volume_disponible),
+                'date_disponibilite': obj.produit_vente.date_disponibilite.isoformat() if obj.produit_vente.date_disponibilite else None,
+                'pret_pour_vente': obj.produit_vente.pret_pour_vente,
+                'display_name': str(obj.produit_vente)
+            }
+        return None
+    
+    def get_utilisateur_details(self, obj):
+        """Détails de l'utilisateur responsable"""
+        if obj.utilisateur:
+            return {
+                'id': obj.utilisateur.id,
+                'username': obj.utilisateur.username,
+                'company_name': obj.utilisateur.company_name
+            }
+        return None
+    
+    def validate(self, data):
+        """Validation personnalisée"""
+        # Vérifier que le volume restant n'est pas supérieur au volume initial
+        volume_initial = data.get('volume_initial_m3')
+        volume_restant = data.get('volume_restant_m3')
+        
+        if volume_initial and volume_restant and volume_restant > volume_initial:
+            raise serializers.ValidationError({
+                'volume_restant_m3': 'Le volume restant ne peut pas être supérieur au volume initial.'
+            })
+        
+        # Vérifier l'unicité andain/plateforme lors de la création
+        if not self.instance:  # Création
+            plateforme = data.get('plateforme')
+            andain_numero = data.get('andain_numero')
+            
+            if plateforme and andain_numero:
+                if SuiviStockPlateforme.objects.filter(
+                    plateforme=plateforme, 
+                    andain_numero=andain_numero
+                ).exists():
+                    raise serializers.ValidationError({
+                        'andain_numero': f'Un andain avec le numéro {andain_numero} existe déjà sur cette plateforme.'
+                    })
+        
+        return data
+    
+    def create(self, validated_data):
+        """Création avec utilisateur automatique"""
+        validated_data['utilisateur'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class SuiviStockPlateformeCreateSerializer(serializers.ModelSerializer):
+    """Serializer simplifié pour la création"""
+    
+    class Meta:
+        model = SuiviStockPlateforme
+        fields = [
+            'id', 'andain_numero', 'plateforme', 'melange', 'produit_vente',
+            'volume_initial_m3', 'volume_restant_m3', 'statut',
+            'date_mise_en_andains', 'date_mise_en_culture', 
+            'date_previsionnelle_vente', 'date_ecoulement',
+            'recette', 'remarques'
+        ]
+    
+    def validate(self, data):
+        """Validation pour la création"""
+        # Même validation que le serializer principal
+        volume_initial = data.get('volume_initial_m3')
+        volume_restant = data.get('volume_restant_m3')
+        
+        if volume_initial and volume_restant and volume_restant > volume_initial:
+            raise serializers.ValidationError({
+                'volume_restant_m3': 'Le volume restant ne peut pas être supérieur au volume initial.'
+            })
+        
+        # Vérifier l'unicité andain/plateforme
+        plateforme = data.get('plateforme')
+        andain_numero = data.get('andain_numero')
+        
+        if plateforme and andain_numero:
+            if SuiviStockPlateforme.objects.filter(
+                plateforme=plateforme, 
+                andain_numero=andain_numero
+            ).exists():
+                raise serializers.ValidationError({
+                    'andain_numero': f'Un andain avec le numéro {andain_numero} existe déjà sur cette plateforme.'
+                })
+        
+        return data
+    
+    def create(self, validated_data):
+        """Création avec utilisateur automatique"""
+        validated_data['utilisateur'] = self.context['request'].user
         return super().create(validated_data)
