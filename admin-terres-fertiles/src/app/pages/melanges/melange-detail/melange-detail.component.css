@@ -18,6 +18,39 @@
   --white: #ffffff;
 }
 
+/* === STYLES POUR L'INDICATEUR DE SAUVEGARDE === */
+.save-indicator-container {
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.save-indicator-container:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Animation de rotation pour l'icône de sauvegarde */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Styles pour les différents états de sauvegarde */
+.save-indicator-container .text-primary {
+  color: var(--primary-blue) !important;
+}
+
+.save-indicator-container .text-success {
+  color: var(--success-green) !important;
+}
+
+.save-indicator-container .text-muted {
+  color: var(--neutral-gray) !important;
+}
+
 /* Conteneur principal avec gradient sombre et fertile */
 .melange-detail-container {
   background: linear-gradient(135deg, #0a0a0a 0%, #1e3c1e 50%, #3a763a 100%);

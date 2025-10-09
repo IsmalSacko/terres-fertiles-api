@@ -93,7 +93,10 @@ export interface Melange {
   fiche_technique: string | null;
   ingredients: MelangeIngredient[];
   gisements: number[];
-  amendements: MelangeAmendement []
+  amendements: MelangeAmendement [];
+  // Nouveaux champs pour la gestion des brouillons
+  is_draft?: boolean;
+  draft_timestamp?: string;
 }
 
 // Pour POST uniquement (plateforme = ID, ingredients = tableau)

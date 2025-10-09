@@ -12,8 +12,103 @@
     <i class="bi bi-exclamation-triangle"></i> {{ error }}
   </div>
 
+  <!-- Indicateur de sauvegarde automatique -->
+  <div *ngIf="!loading" class="save-indicator-container fixed-top bg-light border-bottom shadow-sm py-2" 
+       style="top: 60px; z-index: 1000;">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <span *ngIf="isAutoSaving" class="text-primary me-2">
+          <i class="bi bi-arrow-repeat spin"></i>
+          Sauvegarde en cours...
+        </span>
+        <span *ngIf="!isAutoSaving && lastSaveTime" class="text-success me-2">
+          <i class="bi bi-check-circle"></i>
+          {{ getLastSaveInfo() }}
+        </span>
+        <span *ngIf="!lastSaveTime && !isAutoSaving" class="text-muted me-2">
+          <i class="bi bi-info-circle"></i>
+          Aucune sauvegarde automatique
+        </span>
+      </div>
+      <div class="d-flex align-items-center">
+        <button class="btn btn-sm btn-outline-secondary me-2" 
+                (click)="toggleDraftsManager()"
+                title="Gérer les brouillons">
+          <i class="bi bi-archive"></i>
+          <span class="d-none d-md-inline ms-1">Brouillons ({{ availableDrafts.length }})</span>
+        </button>
+        <button class="btn btn-sm btn-outline-primary me-2" 
+                (click)="forceSaveDraft()" 
+                [disabled]="isAutoSaving"
+                title="Sauvegarder maintenant">
+          <i class="bi bi-cloud-upload"></i>
+          <span class="d-none d-md-inline ms-1">Sauvegarder</span>
+        </button>
+        <small class="text-muted d-none d-lg-block">
+          Sauvegarde automatique toutes les 30s
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de gestion des brouillons -->
+  <div *ngIf="showDraftsManager" class="modal show d-block" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-archive"></i>
+            Gestion des Brouillons
+          </h5>
+          <button type="button" class="btn-close" (click)="toggleDraftsManager()"></button>
+        </div>
+        <div class="modal-body">
+          <div *ngIf="availableDrafts.length === 0" class="text-center text-muted py-4">
+            <i class="bi bi-inbox display-4"></i>
+            <p class="mt-2">Aucun brouillon disponible pour ce mélange</p>
+          </div>
+          
+          <div *ngIf="availableDrafts.length > 0">
+            <p class="text-muted mb-3">
+              Cliquez sur un brouillon pour le restaurer :
+            </p>
+            <div class="list-group">
+              <div *ngFor="let draft of availableDrafts" 
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-start"
+                   (click)="loadSpecificDraft(draft)"
+                   style="cursor: pointer;">
+                <div class="ms-2 me-auto">
+                  <div class="fw-bold">{{ draft.nom }}</div>
+                  <small class="text-muted">
+                    {{ formatDraftDate(draft.timestamp) }} - 
+                    État: {{ draft.etat === 1 ? 'Composition' : 
+                             draft.etat === 2 ? 'Conformité' : 
+                             draft.etat === 3 ? 'Consignes' : 
+                             draft.etat === 4 ? 'Contrôle 1' : 
+                             draft.etat === 5 ? 'Contrôle 2' : 
+                             draft.etat === 6 ? 'Validation' : 'Inconnu' }}
+                  </small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" 
+                        (click)="deleteDraft(draft, $event)"
+                        title="Supprimer ce brouillon">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="toggleDraftsManager()">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Main content container -->
-  <div *ngIf="!loading">
+  <div *ngIf="!loading" style="margin-top: 60px;">
 
     <!-- Phase de création initiale (pour un nouveau mélange sans ID encore) -->
     <div *ngIf="isNew && !melange?.id" class="row justify-content-center">
@@ -166,9 +261,19 @@
             <p class="melange-reference mb-0">{{ melange.reference_produit }}</p>
           </div>
           <div class="d-flex gap-2">
+            <!-- Bouton Fiche Technique (visible si workflow terminé) -->
+            <button *ngIf="isWorkflowCompleted()" 
+                    type="button" 
+                    class="btn btn-primary"
+                    (click)="openFicheTechniqueInNewTab()">
+              <i class="bi bi-file-text"></i> 
+              <span class="d-none d-md-inline">Fiche Technique</span>
+            </button>
+            
             <button type="button" class="btn melange-btn-back" routerLink="/melanges">
               <i class="bi bi-arrow-left"></i> <span class="d-none d-sm-inline">Retour</span>
             </button>
+            
             <!-- Bouton pour activer/désactiver le mode d'édition -->
             <button *ngIf="isWorkflowCompleted()" 
                     type="button" 
@@ -215,9 +320,16 @@
             </div>
 
             <!-- Success message when workflow is completed -->
-            <div *ngIf="isWorkflowCompleted()" class="alert alert-success">
-              <i class="bi bi-check-circle"></i>
-              <strong>Félicitations !</strong> Le workflow est terminé. La fiche technique a été validée avec succès.
+            <div *ngIf="isWorkflowCompleted()" class="alert alert-success d-flex justify-content-between align-items-center">
+              <div>
+                <i class="bi bi-check-circle"></i>
+                <strong>Félicitations !</strong> Le workflow est terminé. La fiche technique a été validée avec succès.
+              </div>
+              <button type="button" class="btn btn-success btn-sm"
+                      (click)="openFicheTechniqueInNewTab()">
+                <i class="bi bi-file-text"></i>
+                Voir la Fiche Technique
+              </button>
             </div>
 
             <!-- Navigation buttons -->
@@ -991,15 +1103,69 @@
                 </button>
               </div>
             </form>
-            <!-- Affichage de la fiche technique générée à la toute fin, uniquement si validé -->
-            <div *ngIf="!showFicheTechniqueForm && melange.fiche_technique" class="card border-success mt-4 mb-3">
-              <div class="card-header bg-success text-white">
+            <!-- Affichage du succès et bouton de redirection après validation -->
+            <div *ngIf="!showFicheTechniqueForm" class="card border-success mt-4 mb-3">
+              <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                 <h6 class="mb-0">
-                  <i class="bi bi-file-text"></i> Fiche technique générée
+                  <i class="bi bi-check-circle-fill"></i> Fiche technique finalisée
                 </h6>
+                <span class="badge bg-light text-success">
+                  <i class="bi bi-calendar"></i> {{ getCurrentDate() }}
+                </span>
               </div>
-              <div class="card-body">
-                <div class="fiche-technique-content" [innerHTML]="getFicheTechniqueResumeHtml()"></div>
+              <div class="card-body text-center py-4">
+                <div class="mb-4">
+                  <i class="bi bi-file-earmark-check display-1 text-success"></i>
+                </div>
+                <h5 class="text-success mb-3">
+                  Félicitations ! La fiche technique a été générée avec succès
+                </h5>
+                <p class="text-muted mb-4">
+                  Votre mélange <strong>{{ melange.nom || 'MEL-25-PHV-PTP-M01' }}</strong> 
+                  est maintenant prêt avec sa fiche technique complète.
+                </p>
+                
+                <!-- Boutons d'action -->
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                  <!-- Bouton principal - Voir la fiche technique -->
+                  <button type="button" class="btn btn-success btn-lg px-4"
+                          (click)="openFicheTechniqueInNewTab()">
+                    <i class="bi bi-file-text"></i>
+                    Voir la Fiche Technique Complète
+                  </button>
+                  
+                  <!-- Bouton secondaire - Télécharger PDF -->
+                  <button type="button" class="btn btn-outline-primary btn-lg px-4"
+                          (click)="downloadFicheTechniquePdf()"
+                          title="Génère un PDF via l'impression du navigateur">
+                    <i class="bi bi-file-pdf"></i>
+                    Générer PDF
+                  </button>
+                  
+                  <!-- Bouton tertiaire - Retour à la liste -->
+                  <a routerLink="/melanges" class="btn btn-outline-secondary px-4">
+                    <i class="bi bi-arrow-left"></i>
+                    Retour à la liste
+                  </a>
+                </div>
+
+                <!-- Informations supplémentaires -->
+                <div class="mt-4 pt-3 border-top">
+                  <div class="row text-center">
+                    <div class="col-md-4">
+                      <small class="text-muted d-block">Référence</small>
+                      <span class="fw-bold">{{ melange.reference_produit || 'MEL-25-PHV-PTP-M01' }}</span>
+                    </div>
+                    <div class="col-md-4">
+                      <small class="text-muted d-block">Statut</small>
+                      <span class="badge bg-success">Finalisé</span>
+                    </div>
+                    <div class="col-md-4">
+                      <small class="text-muted d-block">Type</small>
+                      <span class="fw-bold">Mélange Compost</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

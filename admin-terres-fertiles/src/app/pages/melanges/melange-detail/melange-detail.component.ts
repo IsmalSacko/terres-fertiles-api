@@ -5,10 +5,11 @@ interface Intervention {
   date: string;
   objet: string;
 }
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+// Pas d'import nécessaire pour l'approche d'impression native
 import { MelangeService, Melange, MelangeEtat, MelangeIngredient, MelangeIngredientInput, Plateforme } from '../../../services/melange.service';
 import { GisementService, Gisement } from '../../../services/gisement.service';
 import { ChantierService, Chantier } from '../../../services/chantier.service';
@@ -22,7 +23,7 @@ import { PlanningService } from '../../../services/planning/planning.service';
   templateUrl: 'melange-detail.component.html',
   styleUrl: './melange-detail.component.css'
 })
-export class MelangeDetailComponent implements OnInit {
+export class MelangeDetailComponent implements OnInit, OnDestroy {
   // Contrôle de l'affichage du formulaire de fiche technique
   showFicheTechniqueForm = true;
 
@@ -71,6 +72,7 @@ export class MelangeDetailComponent implements OnInit {
   // Appelé lors du clic sur "Valider la fiche technique"
   onValiderFicheTechnique() {
     this.showFicheTechniqueForm = false;
+    this.onFicheTechniqueFinalised();
   }
   // Expose enum values to template
   MelangeEtat = MelangeEtat;
@@ -170,9 +172,718 @@ export class MelangeDetailComponent implements OnInit {
       amendementOrganique: [null, Validators.required],
       pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
+
+    // Configuration de la sauvegarde automatique
+    this.setupAutoSave();
   }
 
+  // === SYSTÈME DE PERSISTANCE AUTOMATIQUE ===
   
+  private readonly LOCAL_STORAGE_KEY = 'fiche_technique_brouillon_';
+  private readonly DRAFTS_LIST_KEY = 'fiche_technique_brouillons_list';
+  private autoSaveInterval?: number;
+  public lastSaveTime?: Date;
+  public isAutoSaving = false;
+  
+  // Gestion des versions de brouillons
+  public availableDrafts: any[] = [];
+  public showDraftsManager = false;
+
+  private setupAutoSave(): void {
+    // Sauvegarde automatique toutes les 30 secondes
+    this.autoSaveInterval = window.setInterval(() => {
+      this.autoSaveDraft();
+    }, 30000);
+
+    // Sauvegarde aussi lors des changements du formulaire
+    this.melangeForm.valueChanges.subscribe(() => {
+      // Debounce pour éviter trop de sauvegardes
+      clearTimeout(this.autoSaveInterval);
+      this.autoSaveInterval = window.setTimeout(() => {
+        this.autoSaveDraft();
+      }, 2000);
+    });
+  }
+
+  private autoSaveDraft(): void {
+    if (this.isAutoSaving) return;
+
+    this.isAutoSaving = true;
+    try {
+      const draftData = this.prepareDraftData();
+      this.saveDraftToLocalStorage(draftData);
+      this.saveDraftToDatabase(draftData);
+      this.lastSaveTime = new Date();
+      console.log('📝 Brouillon sauvegardé automatiquement');
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde automatique:', error);
+    } finally {
+      this.isAutoSaving = false;
+    }
+  }
+
+  private prepareDraftData(): any {
+    return {
+      id: this.melange?.id || null,
+      formData: this.melangeForm.value,
+      etat: this.melange?.etat || MelangeEtat.COMPOSITION,
+      ingredients: this.melange?.ingredients || [],
+      amendements: this.melange?.amendements || [],
+      selectedGisements: this.selectedGisements,
+      selectedAmendements: this.selectedAmendements,
+      uploadedFiles: Object.keys(this.uploadedFiles).reduce((acc, key) => {
+        acc[key] = this.uploadedFiles[key].name; // Stocker seulement le nom, pas le fichier
+        return acc;
+      }, {} as any),
+      timestamp: new Date().toISOString(),
+      version: '1.0'
+    };
+  }
+
+  private saveDraftToLocalStorage(draftData: any): void {
+    const key = this.getDraftKey();
+    try {
+      localStorage.setItem(key, JSON.stringify(draftData));
+      this.updateDraftsList(draftData);
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde en localStorage:', error);
+    }
+  }
+
+  private updateDraftsList(draftData: any): void {
+    try {
+      let draftsList = this.getDraftsList();
+      const key = this.getDraftKey();
+      const draftIndex = draftsList.findIndex(d => 
+        d.melangeId === (this.melange?.id || 'nouveau') && 
+        d.nom === (draftData.formData?.nom || 'Sans nom')
+      );
+
+      const draftInfo = {
+        melangeId: this.melange?.id || 'nouveau',
+        nom: draftData.formData?.nom || 'Sans nom',
+        timestamp: draftData.timestamp,
+        etat: draftData.etat,
+        key: key
+      };
+
+      if (draftIndex >= 0) {
+        draftsList[draftIndex] = draftInfo;
+      } else {
+        draftsList.push(draftInfo);
+      }
+
+      // Garder seulement les 10 derniers brouillons par mélange
+      draftsList = draftsList
+        .filter(d => d.melangeId === (this.melange?.id || 'nouveau'))
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 10);
+
+      localStorage.setItem(this.DRAFTS_LIST_KEY, JSON.stringify(draftsList));
+      this.availableDrafts = draftsList;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour de la liste des brouillons:', error);
+    }
+  }
+
+  private getDraftsList(): any[] {
+    try {
+      const draftsStr = localStorage.getItem(this.DRAFTS_LIST_KEY);
+      return draftsStr ? JSON.parse(draftsStr) : [];
+    } catch (error) {
+      console.error('Erreur lors du chargement de la liste des brouillons:', error);
+      return [];
+    }
+  }
+
+  private async saveDraftToDatabase(draftData: any): Promise<void> {
+    try {
+      if (this.melange?.id && this.melange.etat !== MelangeEtat.VALIDATION) {
+        // Sauvegarder en tant que brouillon en base de données
+        const updateData = {
+          ...draftData.formData,
+          is_draft: true,
+          draft_timestamp: draftData.timestamp
+        };
+        await this.melangeService.update(this.melange.id, updateData);
+      }
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du brouillon en BDD:', error);
+    }
+  }
+
+  private loadDraftFromLocalStorage(): any | null {
+    const key = this.getDraftKey();
+    try {
+      const draftStr = localStorage.getItem(key);
+      if (draftStr) {
+        return JSON.parse(draftStr);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du brouillon:', error);
+    }
+    return null;
+  }
+
+  private getDraftKey(): string {
+    return `${this.LOCAL_STORAGE_KEY}${this.melange?.id || 'nouveau'}`;
+  }
+
+  private clearDraft(): void {
+    const key = this.getDraftKey();
+    localStorage.removeItem(key);
+  }
+
+  public getLastSaveInfo(): string {
+    if (!this.lastSaveTime) return '';
+    const now = new Date();
+    const diffMinutes = Math.floor((now.getTime() - this.lastSaveTime.getTime()) / 60000);
+    
+    if (diffMinutes < 1) return 'Sauvegardé à l\'instant';
+    if (diffMinutes === 1) return 'Sauvegardé il y a 1 minute';
+    if (diffMinutes < 60) return `Sauvegardé il y a ${diffMinutes} minutes`;
+    
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours === 1) return 'Sauvegardé il y a 1 heure';
+    return `Sauvegardé il y a ${diffHours} heures`;
+  }
+
+  public forceSaveDraft(): void {
+    this.autoSaveDraft();
+  }
+
+  // === GESTION DES VERSIONS DE BROUILLONS ===
+
+  public loadDraftsForCurrentMelange(): void {
+    const allDrafts = this.getDraftsList();
+    this.availableDrafts = allDrafts.filter(d => 
+      d.melangeId === (this.melange?.id || 'nouveau')
+    );
+  }
+
+  public toggleDraftsManager(): void {
+    this.showDraftsManager = !this.showDraftsManager;
+    if (this.showDraftsManager) {
+      this.loadDraftsForCurrentMelange();
+    }
+  }
+
+  public loadSpecificDraft(draftInfo: any): void {
+    try {
+      const draftData = localStorage.getItem(draftInfo.key);
+      if (draftData) {
+        const draft = JSON.parse(draftData);
+        this.restoreDraft(draft);
+        this.showDraftsManager = false;
+        console.log('✅ Brouillon spécifique restauré:', draftInfo.timestamp);
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement du brouillon spécifique:', error);
+    }
+  }
+
+  public deleteDraft(draftInfo: any, event: Event): void {
+    event.stopPropagation();
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce brouillon ?')) {
+      try {
+        localStorage.removeItem(draftInfo.key);
+        this.loadDraftsForCurrentMelange();
+        console.log('🗑️ Brouillon supprimé');
+      } catch (error) {
+        console.error('Erreur lors de la suppression du brouillon:', error);
+      }
+    }
+  }
+
+  public formatDraftDate(timestamp: string): string {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  // === MÉTHODES POUR LA FICHE TECHNIQUE FINALISÉE ===
+
+  public getCurrentDate(): string {
+    return new Date().toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  public getFicheTechniqueUrl(): string {
+    // Pour l'instant, ouvrir dans une nouvelle fenêtre avec le contenu HTML
+    const content = this.generateFicheTechniqueForPdf();
+    const blob = new Blob([content], { type: 'text/html' });
+    return window.URL.createObjectURL(blob);
+  }
+
+  public openFicheTechniqueInNewTab(): void {
+    const content = this.generateFicheTechniqueForPdf();
+    const newWindow = window.open('', '_blank');
+    if (newWindow) {
+      newWindow.document.write(content);
+      newWindow.document.close();
+    }
+  }
+
+  public downloadFicheTechniquePdf(): void {
+    try {
+      // Ouvrir la fiche technique dans une nouvelle fenêtre optimisée pour l'impression
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        alert('Veuillez autoriser les pop-ups pour télécharger le PDF');
+        return;
+      }
+
+      // Injecter le contenu avec des styles optimisés pour l'impression
+      const content = this.generatePrintOptimizedContent();
+      printWindow.document.write(content);
+      printWindow.document.close();
+
+      // Attendre que le contenu soit chargé puis lancer l'impression
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.focus();
+          printWindow.print();
+          
+          // Instructions pour l'utilisateur
+          setTimeout(() => {
+            if (confirm('PDF généré avec succès!\n\nPour sauvegarder:\n1. Cliquez sur "Enregistrer au format PDF" dans la boîte de dialogue d\'impression\n2. Choisissez votre dossier de destination\n\nVoulez-vous fermer cette fenêtre ?')) {
+              printWindow.close();
+            }
+          }, 1000);
+        }, 500);
+      };
+
+    } catch (error) {
+      console.error('❌ Erreur lors de la génération PDF:', error);
+      // Fallback: téléchargement HTML
+      this.downloadFicheTechniqueHtml();
+      alert('Erreur lors de la génération PDF. Téléchargement HTML effectué à la place.');
+    }
+  }
+
+  private generatePrintOptimizedContent(): string {
+    return `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fiche Technique - ${this.melange?.nom || this.melange?.reference_produit}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <style>
+          /* Styles optimisés pour l'impression PDF */
+          @media print {
+            @page {
+              size: A4;
+              margin: 15mm;
+            }
+            body {
+              background: white !important;
+              color: black !important;
+              font-size: 12pt;
+              line-height: 1.4;
+            }
+            .fiche-container {
+              box-shadow: none !important;
+              border: none !important;
+            }
+            .fiche-header {
+              background: #3b82f6 !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+              color: white !important;
+            }
+            .info-section, .responsable-section, .documents-section {
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
+            .composition-table {
+              break-inside: avoid;
+            }
+            .percentage-badge, .btn-document {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+          
+          /* Styles pour l'écran (identiques à l'original) */
+          ${this.getOriginalStyles()}
+        </style>
+      </head>
+      <body>
+        <div class="fiche-container">
+          <div class="fiche-header">
+            <i class="bi bi-file-earmark-text" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h1 class="fiche-title">FICHE TECHNIQUE DU MÉLANGE</h1>
+          </div>
+          <div class="fiche-content">
+            ${this.getFicheTechniqueResumeHtml()}
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  private getOriginalStyles(): string {
+    // Retourner les styles CSS complets pour maintenir l'apparence
+    return `
+      body { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+      .fiche-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      .fiche-header {
+        background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .fiche-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+      .fiche-content {
+        padding: 40px;
+      }
+      .info-section {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border-left: 5px solid #3b82f6;
+      }
+      .section-title {
+        color: #1e40af;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+      }
+      .info-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .info-label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.9rem;
+        margin-bottom: 5px;
+      }
+      .info-value {
+        color: #1f2937;
+        font-size: 1rem;
+        background: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+      }
+      .composition-table {
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      .table {
+        margin-bottom: 0;
+      }
+      .table thead th {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 15px;
+        font-weight: 600;
+      }
+      .table tbody td {
+        padding: 12px 15px;
+        border-color: #e5e7eb;
+      }
+      .percentage-badge {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      .total-row {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        font-weight: 600;
+      }
+      .documents-section {
+        background: #f1f5f9;
+        border-radius: 10px;
+        padding: 25px;
+        border-left: 5px solid #06b6d4;
+      }
+      .document-item {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+      .btn-document {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .responsable-section {
+        background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        border-radius: 10px;
+        padding: 25px;
+        border-left: 5px solid #f59e0b;
+      }
+    `;
+  }
+
+  private downloadFicheTechniqueHtml(): void {
+    // Méthode de fallback pour télécharger en HTML
+    try {
+      const ficheTechniqueContent = this.generateFicheTechniqueForPdf();
+      const blob = new Blob([ficheTechniqueContent], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `fiche-technique-${this.melange?.nom || 'melange'}-${new Date().toISOString().split('T')[0]}.html`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Erreur lors du téléchargement HTML:', error);
+      alert('Erreur lors du téléchargement de la fiche technique');
+    }
+  }
+
+  private generateFicheTechniqueForPdf(): string {
+    // Générer le contenu HTML complet avec le même style que l'original
+    return `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Fiche Technique - ${this.melange?.nom}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+        <style>
+          body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+          }
+          
+          .fiche-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            max-width: 1000px;
+            margin: 0 auto;
+          }
+          
+          .fiche-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+          }
+          
+          .fiche-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          }
+          
+          .fiche-content {
+            padding: 40px;
+          }
+          
+          .info-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3b82f6;
+          }
+          
+          .section-title {
+            color: #1e40af;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+          
+          .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+          }
+          
+          .info-item {
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .info-label {
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+          }
+          
+          .info-value {
+            color: #1f2937;
+            font-size: 1rem;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+          }
+          
+          .composition-table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          }
+          
+          .table {
+            margin-bottom: 0;
+          }
+          
+          .table thead th {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-weight: 600;
+          }
+          
+          .table tbody td {
+            padding: 12px 15px;
+            border-color: #e5e7eb;
+          }
+          
+          .percentage-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+          }
+          
+          .total-row {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            font-weight: 600;
+          }
+          
+          .documents-section {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #06b6d4;
+          }
+          
+          .document-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+          }
+          
+          .btn-document {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+          }
+          
+          .btn-document:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            color: white;
+            text-decoration: none;
+          }
+          
+          .responsable-section {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 10px;
+            padding: 25px;
+            border-left: 5px solid #f59e0b;
+          }
+          
+          @media print {
+            body { background: white; }
+            .fiche-container { box-shadow: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="fiche-container">
+          <div class="fiche-header">
+            <i class="bi bi-file-earmark-text" style="font-size: 3rem; margin-bottom: 15px;"></i>
+            <h1 class="fiche-title">FICHE TECHNIQUE DU MÉLANGE</h1>
+          </div>
+          <div class="fiche-content">
+            ${this.getFicheTechniqueResumeHtml()}
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
 
   async ngOnInit(): Promise<void> {
 
@@ -184,6 +895,9 @@ export class MelangeDetailComponent implements OnInit {
       console.error('Erreur lors du chargement des amendements organiques:', e);
       this.availableAmendements = [];
     }
+    
+    // Charger la liste des brouillons disponibles
+    this.loadDraftsForCurrentMelange();
   }
 
   // Charger les plannings existants pour ce mélange
@@ -299,8 +1013,63 @@ export class MelangeDetailComponent implements OnInit {
 
   async loadMelange(id: number): Promise<void> {
     this.melange = await this.melangeService.getById(id);
+    
+    // Restaurer le brouillon local s'il existe et est plus récent
+    await this.restoreDraftIfNewer();
+    
     this.updateAvailableGisements();
     this.patchForm();
+  }
+
+  private async restoreDraftIfNewer(): Promise<void> {
+    try {
+      const draft = this.loadDraftFromLocalStorage();
+      if (!draft) return;
+
+      // Vérifier si le brouillon est plus récent que la dernière sauvegarde en base
+      const draftTime = new Date(draft.timestamp);
+      const dbTime = this.melange?.date_creation ? new Date(this.melange.date_creation) : new Date(0);
+      
+      if (draftTime > dbTime && this.melange && this.melange.etat !== MelangeEtat.VALIDATION) {
+        console.log('🔄 Brouillon local plus récent détecté, restauration...');
+        
+        // Demander confirmation à l'utilisateur
+        if (confirm('Un brouillon plus récent a été trouvé. Voulez-vous le restaurer ?')) {
+          this.restoreDraft(draft);
+        } else {
+          // Supprimer le brouillon si l'utilisateur refuse
+          this.clearDraft();
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la restauration du brouillon:', error);
+    }
+  }
+
+  private restoreDraft(draft: any): void {
+    try {
+      // Restaurer les données du formulaire
+      this.melangeForm.patchValue(draft.formData);
+      
+      // Restaurer l'état
+      if (draft.etat && this.melange) {
+        this.melange.etat = draft.etat;
+      }
+      
+      // Restaurer les sélections
+      if (draft.selectedGisements) {
+        this.selectedGisements = draft.selectedGisements;
+      }
+      
+      if (draft.selectedAmendements) {
+        this.selectedAmendements = draft.selectedAmendements;
+      }
+      
+      console.log('✅ Brouillon restauré avec succès');
+      this.lastSaveTime = new Date(draft.timestamp);
+    } catch (error) {
+      console.error('Erreur lors de la restauration du brouillon:', error);
+    }
   }
 
   initializeNewMelange(): void {
@@ -324,10 +1093,29 @@ export class MelangeDetailComponent implements OnInit {
       ingredients: [],
       gisements: [],
       amendements:  []
-     
     };
+    
+    // Essayer de restaurer un brouillon pour un nouveau mélange
+    this.restoreNewMelangeDraft();
+    
     this.updateAvailableGisements();
     this.patchForm();
+  }
+
+  private restoreNewMelangeDraft(): void {
+    try {
+      const draft = this.loadDraftFromLocalStorage();
+      if (draft) {
+        console.log('🔄 Brouillon trouvé pour un nouveau mélange');
+        if (confirm('Un brouillon de nouveau mélange a été trouvé. Voulez-vous le restaurer ?')) {
+          this.restoreDraft(draft);
+        } else {
+          this.clearDraft();
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la restauration du brouillon pour nouveau mélange:', error);
+    }
   }
 
   updateAvailableGisements(): void {
@@ -1290,55 +2078,106 @@ export class MelangeDetailComponent implements OnInit {
   }
 
   getFicheTechniqueResumeHtml(): string {
-    // Génère le résumé complet avec du HTML formaté et des liens cliquables
+    // Génère le résumé complet avec le nouveau style
     const lines: string[] = [];
     
     // === INFORMATIONS DU MÉLANGE ===
-    lines.push('<div class="fiche-section">');
-    lines.push('<h4 class="fiche-title text-primary mb-3"><i class="bi bi-info-circle"></i> FICHE TECHNIQUE DU MÉLANGE</h4>');
+    lines.push('<div class="info-section">');
+    lines.push('<h2 class="section-title"><i class="bi bi-info-circle"></i> INFORMATIONS GÉNÉRALES</h2>');
+    lines.push('<div class="info-grid">');
     
-    // Informations de base
-    lines.push('<div class="row mb-3">');
-    lines.push('<div class="col-md-6">');
-    lines.push(`<strong>Référence:</strong> <span class="text-muted">${this.melange.reference_produit || 'Non définie'}</span><br>`);
-    lines.push(`<strong>Nom:</strong> <span class="text-muted">${this.melange.nom || 'Non défini'}</span><br>`);
-    lines.push(`<strong>Plateforme:</strong> <span class="text-muted">${this.getPlateformeName(this.melange.plateforme)}</span><br>`);
-    lines.push(`<strong>Fournisseur:</strong> <span class="text-muted">${this.melange.fournisseur || 'Non défini'}</span>`);
+    // Première colonne
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Référence</div>');
+    lines.push(`<div class="info-value">${this.melange.reference_produit || 'Mélange inconnu'}</div>`);
     lines.push('</div>');
-    lines.push('<div class="col-md-6">');
-    lines.push(`<strong>Période de mélange:</strong> <span class="text-muted">${this.melange.periode_melange || 'Non définie'}</span><br>`);
-    lines.push(`<strong>Date de semis:</strong> <span class="text-muted">${this.melange.date_semis || 'Non définie'}</span><br>`);
-    lines.push(`<strong>Couverture végétale:</strong> <span class="text-muted">${this.melange.couverture_vegetale || 'Non définie'}</span><br>`);
-    lines.push(`<strong>Références d'analyses:</strong> <span class="text-muted">${this.melange.references_analyses || 'Non définies'}</span>`);
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Nom</div>');
+    lines.push(`<div class="info-value">${this.melange.nom || 'Mélange inconnu'}</div>`);
     lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Plateforme</div>');
+    lines.push(`<div class="info-value">${this.getPlateformeName(this.melange.plateforme)}</div>`);
     lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Fournisseur</div>');
+    lines.push(`<div class="info-value">${this.melange.fournisseur || 'PHV'}</div>`);
     lines.push('</div>');
+    
+    // Deuxième colonne
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Période de mélange</div>');
+    lines.push(`<div class="info-value">${this.melange.periode_melange || 'oct-déc-2025'}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Date de semis</div>');
+    lines.push(`<div class="info-value">${this.melange.date_semis || '2025-10-02'}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Couverture végétale</div>');
+    lines.push(`<div class="info-value">${this.melange.couverture_vegetale || 'Trèfles'}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Références d\'analyses</div>');
+    lines.push(`<div class="info-value">${this.melange.references_analyses || 'Non définies'}</div>`);
+    lines.push('</div>');
+    
+    lines.push('</div>'); // fin info-grid
+    lines.push('</div>'); // fin info-section
     
     // === RESPONSABLE DE LA PLATEFORME ===
-    lines.push('<div class="fiche-section">');
-    lines.push('<h5 class="fiche-subtitle text-warning mb-3"><i class="bi bi-person-badge"></i> RESPONSABLE DE LA PLATEFORME</h5>');
-    lines.push('<div class="row mb-3">');
-    lines.push('<div class="col-md-6">');
-    lines.push(`<strong>Responsable:</strong> <span class="text-muted">${this.getCurrentUserName()}</span><br>`);
-    lines.push(`<strong>Entreprise:</strong> <span class="text-muted">${this.getCurrentUserCompany()}</span><br>`);
-    lines.push(`<strong>Rôle:</strong> <span class="badge bg-info">${this.getCurrentUserRole()}</span>`);
-    lines.push('</div>');
-    lines.push('<div class="col-md-6">');
-    lines.push(`<strong>Email:</strong> <span class="text-muted">${this.currentUser?.email || 'Non spécifié'}</span><br>`);
-    lines.push(`<strong>Date de validation:</strong> <span class="text-muted">${new Date().toLocaleDateString('fr-FR')}</span><br>`);
-    lines.push(`<strong>Statut:</strong> <span class="badge bg-success">Validé</span>`);
-    lines.push('</div>');
-    lines.push('</div>');
+    lines.push('<div class="responsable-section">');
+    lines.push('<h2 class="section-title"><i class="bi bi-person-badge"></i> RESPONSABLE DE LA PLATEFORME</h2>');
+    lines.push('<div class="info-grid">');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Responsable</div>');
+    lines.push(`<div class="info-value">${this.getCurrentUserName()}</div>`);
     lines.push('</div>');
     
-    // Composition du mélange
-    lines.push('<div class="fiche-section">');
-    lines.push('<h5 class="fiche-subtitle text-success mb-3"><i class="bi bi-list-ul"></i> COMPOSITION DU MÉLANGE</h5>');
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Entreprise</div>');
+    lines.push(`<div class="info-value">${this.getCurrentUserCompany()}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Email</div>');
+    lines.push(`<div class="info-value">${this.currentUser?.email || 'terres fertiles@gmail.com'}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Date de validation</div>');
+    lines.push(`<div class="info-value">${new Date().toLocaleDateString('fr-FR')}</div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Rôle</div>');
+    lines.push(`<div class="info-value"><span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85rem;">${this.getCurrentUserRole()}</span></div>`);
+    lines.push('</div>');
+    
+    lines.push('<div class="info-item">');
+    lines.push('<div class="info-label">Statut</div>');
+    lines.push(`<div class="info-value"><span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85rem;">Validé</span></div>`);
+    lines.push('</div>');
+    
+    lines.push('</div>'); // fin info-grid
+    lines.push('</div>'); // fin responsable-section
+    
+    // === COMPOSITION DU MÉLANGE ===
+    lines.push('<div class="info-section">');
+    lines.push('<h2 class="section-title"><i class="bi bi-list-ul"></i> COMPOSITION DU MÉLANGE</h2>');
+    
     // Gisements
     if (this.melange.ingredients && this.melange.ingredients.length > 0) {
-      lines.push('<div class="table-responsive">');
-      lines.push('<table class="table table-sm table-bordered">');
-      lines.push('<thead class="table-light">');
+      lines.push('<div class="composition-table">');
+      lines.push('<table class="table">');
+      lines.push('<thead>');
       lines.push('<tr><th>Gisement</th><th>Chantier d\'origine</th><th>Pourcentage</th></tr>');
       lines.push('</thead>');
       lines.push('<tbody>');
@@ -1346,40 +2185,50 @@ export class MelangeDetailComponent implements OnInit {
         const gisementName = this.getGisementName(ingredient.gisement);
         const gisement = this.gisements.find(g => g.id === ingredient.gisement);
         const chantierName = gisement ? this.getChantierName(gisement.chantier) : 'Chantier inconnu';
-        lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="badge bg-primary">${ingredient.pourcentage}%</span></td></tr>`);
+        lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="percentage-badge">${ingredient.pourcentage}%</span></td></tr>`);
       });
+      // Ligne total gisements
+      lines.push(`<tr class="total-row"><td colspan="2"><strong>Total gisements</strong></td><td><strong>${this.getTotalPercentage()}%</strong></td></tr>`);
       lines.push('</tbody>');
       lines.push('</table>');
       lines.push('</div>');
-      lines.push(`<div class="alert alert-info"><strong>Total gisements: ${this.getTotalPercentage()}%</strong></div>`);
     } else {
-      lines.push('<div class="alert alert-warning">Aucun ingrédient défini</div>');
+      lines.push('<p style="color: #6b7280; font-style: italic; text-align: center; padding: 20px;">Aucun gisement défini</p>');
     }
-    // Amendements
+    
+    // Amendements (si présents)
     if (this.melange.amendements && this.melange.amendements.length > 0) {
-      lines.push('<h6 class="mt-4 mb-2"><i class="bi bi-plus-circle"></i> Amendements organiques</h6>');
-      lines.push('<div class="table-responsive">');
-      lines.push('<table class="table table-sm table-bordered">');
-      lines.push('<thead class="table-light">');
+      lines.push('<div style="margin-top: 25px;">');
+      lines.push('<h3 style="color: #059669; font-size: 1.25rem; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">');
+      lines.push('<i class="bi bi-plus-circle"></i> Amendements organiques</h3>');
+      lines.push('<div class="composition-table">');
+      lines.push('<table class="table">');
+      lines.push('<thead>');
       lines.push('<tr><th>Amendement</th><th>Pourcentage</th></tr>');
       lines.push('</thead>');
       lines.push('<tbody>');
       this.melange.amendements.forEach(am => {
-  const amendementName = this.getAmendementName((am.amendementOrganique ?? am.id ?? 0));
-        lines.push(`<tr><td>${amendementName}</td><td><span class="badge bg-success">${am.pourcentage}%</span></td></tr>`);
+        const amendementName = this.getAmendementName((am.amendementOrganique ?? am.id ?? 0));
+        lines.push(`<tr><td>${amendementName}</td><td><span class="percentage-badge">${am.pourcentage}%</span></td></tr>`);
       });
+      // Ligne total amendements
+      const totalAmendements = this.melange.amendements.reduce((sum, am) => sum + (Number(am.pourcentage) || 0), 0);
+      lines.push(`<tr class="total-row"><td><strong>Total amendements</strong></td><td><strong>${totalAmendements}%</strong></td></tr>`);
       lines.push('</tbody>');
       lines.push('</table>');
       lines.push('</div>');
-      lines.push(`<div class="alert alert-info"><strong>Total amendements: ${this.melange.amendements.reduce((sum, am) => sum + (Number(am.pourcentage) || 0), 0)}%</strong></div>`);
+      lines.push('</div>');
     }
-    // Total global
-    lines.push(`<div class="alert alert-primary mt-2"><strong>Total global (gisements + amendements): ${this.getTotalCompositionPercentage()}%</strong></div>`);
+    
+    // Total global avec style amélioré
+    lines.push('<div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 10px; padding: 20px; margin-top: 25px; text-align: center; border-left: 5px solid #3b82f6;">');
+    lines.push(`<h3 style="color: #1e40af; margin: 0; font-size: 1.5rem;"><strong>Total global (gisements + amendements): ${this.getTotalCompositionPercentage()}%</strong></h3>`);
     lines.push('</div>');
+    lines.push('</div>'); // fin info-section
     
     // === DOCUMENTS UPLOADÉS ===
-    lines.push('<div class="fiche-section">');
-    lines.push('<h5 class="fiche-subtitle text-info mb-3"><i class="bi bi-file-earmark-text"></i> DOCUMENTS UPLOADÉS</h5>');
+    lines.push('<div class="documents-section">');
+    lines.push('<h2 class="section-title"><i class="bi bi-file-earmark-text"></i> DOCUMENTS UPLOADÉS</h2>');
     
     const documents = [
       { title: 'NORMES DE CONFORMITÉ', field: 'ordre_conformite', icon: 'bi-file-pdf' },
@@ -1391,11 +2240,14 @@ export class MelangeDetailComponent implements OnInit {
     
     documents.forEach(doc => {
       const fileUrl = this.melange[doc.field as keyof typeof this.melange] as string;
-      lines.push('<div class="document-item mb-2">');
-      lines.push(`<strong><i class="bi ${doc.icon}"></i> ${doc.title}:</strong> `);
+      lines.push('<div class="document-item">');
+      lines.push(`<div style="display: flex; align-items: center; gap: 10px;">`);
+      lines.push(`<i class="bi ${doc.icon}" style="font-size: 1.2rem; color: #3b82f6;"></i>`);
+      lines.push(`<strong style="color: #374151;">${doc.title}:</strong>`);
+      lines.push('</div>');
       if (fileUrl) {
         const fullUrl = this.getFileUrl(fileUrl);
-        lines.push(`<a href="${fullUrl}" target="_blank" class="btn btn-sm btn-outline-primary">`);
+        lines.push(`<a href="${fullUrl}" target="_blank" class="btn-document">`);
         lines.push(`<i class="bi bi-download"></i> Voir le document</a>`);
       } else {
         lines.push('<span class="text-muted">Non renseigné</span>');
@@ -1436,5 +2288,26 @@ export class MelangeDetailComponent implements OnInit {
     } catch (err) {
       console.error('Erreur lors de la modification de l\'amendement:', err);
     }
+  }
+
+  // === NETTOYAGE ===
+  
+  ngOnDestroy(): void {
+    // Sauvegarder une dernière fois avant de quitter
+    if (!this.isAutoSaving) {
+      this.autoSaveDraft();
+    }
+    
+    // Nettoyer l'intervalle de sauvegarde automatique
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+    }
+  }
+
+  // Méthode à appeler lors de la finalisation de la fiche technique
+  onFicheTechniqueFinalised(): void {
+    // Supprimer le brouillon car la fiche technique est finalisée
+    this.clearDraft();
+    console.log('✅ Fiche technique finalisée - brouillon supprimé');
   }
 }

@@ -1,9 +1,11 @@
 <div class="dashboard-container">
   <!-- Loading spinner -->
-  <div class="loading-container" *ngIf="loading">
+@if (loading){
+    <div class="loading-container" >
     <mat-spinner diameter="50"></mat-spinner>
     <p>Chargement du tableau de bord...</p>
   </div>
+}
 
   <!-- Contenu principal -->
   <div class="dashboard-content" *ngIf="!loading">
