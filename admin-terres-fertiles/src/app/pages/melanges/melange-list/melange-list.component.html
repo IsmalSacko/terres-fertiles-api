@@ -1,5 +1,5 @@
 <div class="container-fluid mt-5 page-with-intense-plants standard-page-content">
-  <div class="d-flex justify-content-between align-items-center mb-4 ">
+  <div class="d-flex justify-content-between align-items-center mb-4">
     <h1 class="h3 mb-0">Mélanges</h1>
     <a routerLink="/melanges/new" class="btn mel-btn mt-2">
       <i class="bi bi-plus-circle"></i> Nouveau mélange
@@ -23,70 +23,86 @@
   </div>
 
   <!-- Melanges list -->
-  <div *ngIf="!loading && !error" class="row">
-    <div *ngFor="let melange of melanges" class="col-lg-6 col-xl-4 mb-4">
+  <div *ngIf="!loading && !error" class="melanges-grid-container">
+    <div class="row g-4">
+      <div *ngFor="let melange of melanges" class="col-12 col-md-6 col-lg-4 col-xl-3">
 
-      <div class="card h-100 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h5 class="card-title mb-0">{{ melange.nom || 'Mélange sans nom' }}</h5>
-          <span class="badge bg-{{ getEtatColor(melange.etat) }}">
-            {{ getEtatLabel(melange.etat) }}
-          </span>
+      <div class="card h-100">
+        <div class="card-header">
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title">{{ melange.nom || 'Mélange sans nom' }}</h5>
+            <span class="badge bg-{{ getEtatColor(melange.etat) }}">
+              {{ getEtatLabelShort(melange.etat) }}
+            </span>
+          </div>
         </div>
         
         <div class="card-body">
           <div class="mb-3">
-            <strong>Référence:</strong> {{ melange.reference_produit }}
+            <div class="text-muted small mb-1">Référence</div>
+            <div class="fw-medium">{{ melange.reference_produit }}</div>
           </div>
           
           <div class="mb-3">
-            <strong>Fournisseur:</strong> {{ melange.fournisseur }}
+            <div class="text-muted small mb-1">Fournisseur</div>
+            <div>{{ melange.fournisseur }}</div>
           </div>
           
           <div class="mb-3">
-            <strong>Période:</strong> {{ melange.periode_melange }}
+            <div class="text-muted small mb-1">Période</div>
+            <div>{{ melange.periode_melange }}</div>
           </div>
           
           <div class="mb-3">
-            <i class="bi bi-calendar-event me-1"></i>
-            <strong>Date de création:</strong> {{ melange.date_creation | date:'dd/MM/yyyy' }}
+            <div class="text-muted small mb-1">
+              <i class="bi bi-calendar3 me-1"></i>Créé le
+            </div>
+            <div>{{ melange.date_creation | date:'dd/MM/yyyy' }}</div>
+          </div>
             
           <div class="mb-3">
-            <i class="bi bi-person "></i>
-            <strong >Crée par : {{melange.utilisateur}}</strong> 
+            <div class="text-muted small mb-1">
+              <i class="bi bi-person me-1"></i>Créé par
+            </div>
+            <div>{{ melange.utilisateur }}</div>
           </div>
 
           <!-- Progress bar -->
           <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <small class="text-muted">Progression</small>
-              <small class="text-muted">{{ getProgressPercentage(melange.etat) | number:'1.0-0' }}%</small>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="text-muted small p-2">Progression</span>
+              <span class="small fw-medium">{{ getProgressPercentageFormatted(melange) }}</span>
             </div>
-            <div class="progress" style="height: 8px;">
-              <div class="progress-bar bg-{{ getEtatColor(melange.etat) }}" 
-                   [style.width.%]="getProgressPercentage(melange.etat)"
-                   role="progressbar">
+            <div class="progress melange-progress">
+              <div class="progress-bar melange-progress-bar" 
+                   [style.width.%]="getProgressPercentage(melange)"
+                   role="progressbar"
+                   [attr.aria-valuenow]="getProgressPercentage(melange)"
+                   aria-valuemin="0"
+                   aria-valuemax="100">
               </div>
             </div>
           </div>
 
           <!-- Current task -->
-          <div class="alert alert-info py-2 mb-3">
-            <small>
-              <i class="bi bi-info-circle"></i>
-              {{ getTacheActuelle(melange.etat) }}
-            </small>
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <span class="small">{{ getTacheActuelle(melange.etat) }}</span>
           </div>
 
           <!-- Ingredients summary -->
           <div class="mb-3">
-            <strong>Ingrédients:</strong>
-            <span class="badge gis-amendement ms-2">{{ melange.ingredients.length || 0 }} 
-              {{ melange.ingredients.length > 1 ? 'gisements' : 'gisement' }}
+            <div class="text-muted small mb-2">Ingrédients</div>
+            <div class="d-flex flex-wrap gap-1">
+              <span class="badge gis-amendement">
+                {{ melange.ingredients.length || 0 }} 
+                {{ melange.ingredients.length > 1 ? 'gisements' : 'gisement' }}
               </span>
-            <span class="badge gis-amendement ms-2">{{ melange.amendements.length || 0 }}
-              {{ melange.amendements.length > 1 ? 'Matières organiques' : 'Matière organique' }}
+              <span class="badge gis-amendement">
+                {{ melange.amendements.length || 0 }}
+                {{ melange.amendements.length > 1 ? 'Matières organiques' : 'Matière organique' }}
               </span>
+            </div>
           </div>
         </div>
 
@@ -111,6 +127,7 @@
             </div>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>

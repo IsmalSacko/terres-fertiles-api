@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MelangeService, Melange, MelangeEtat } from '../../../services/melange.service';
 import { AuthService } from '../../../services/auth.service';
@@ -7,7 +7,7 @@ import { AuthService } from '../../../services/auth.service';
 @Component({
   selector: 'app-melange-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, DecimalPipe],
+  imports: [CommonModule, RouterModule],
   templateUrl: './melange-list.component.html',
   styleUrl: './melange-list.component.css'
 })
@@ -53,6 +53,10 @@ export class MelangeListComponent implements OnInit {
     return this.melangeService.getEtatLabel(etat);
   }
 
+  getEtatLabelShort(etat: MelangeEtat): string {
+    return this.melangeService.getEtatLabelShort(etat);
+  }
+
   getEtatColor(etat: MelangeEtat): string {
     return this.melangeService.getEtatColor(etat);
   }
@@ -61,8 +65,35 @@ export class MelangeListComponent implements OnInit {
     return this.melangeService.getTacheActuelle(etat);
   }
 
-  getProgressPercentage(etat: MelangeEtat): number {
-    return (etat / 6) * 100;
+
+
+  getProgressPercentageFormatted(melange: Melange): string {
+    let percentage: number;
+    
+    if (melange.etat === 1) {
+      // Calculer le pourcentage total des gisements sélectionnés
+      percentage = this.getTotalSelectedPercentage(melange);
+    } else {
+      // Progression basée sur l'état (comme dans le détail)
+      percentage = (melange.etat! / 6) * 100;
+    }
+    
+    return `${Math.round(percentage)}%`;
+  }
+
+  getTotalSelectedPercentage(melange: Melange): number {
+    if (!melange.ingredients) return 0;
+    return melange.ingredients.reduce((sum, ingredient) => sum + (Number(ingredient.pourcentage) || 0), 0);
+  }
+
+  getProgressPercentage(melange: Melange): number {
+    if (melange.etat === 1) {
+      // Calculer le pourcentage total des gisements sélectionnés
+      return this.getTotalSelectedPercentage(melange);
+    } else {
+      // Progression basée sur l'état (comme dans le détail)
+      return (melange.etat! / 6) * 100;
+    }
   }
 
   async previousStep(melange: Melange): Promise<void> {

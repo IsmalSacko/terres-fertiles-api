@@ -339,6 +339,18 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
     return labels[etat] || 'Inconnu';
   }
 
+  getEtatLabelShort(etat: MelangeEtat): string {
+    const shortLabels = {
+      [MelangeEtat.COMPOSITION]: 'Composition',
+      [MelangeEtat.CONFORMITE]: 'Ordre fabrication',
+      [MelangeEtat.CONSIGNE]: 'Consignes',
+      [MelangeEtat.CONTROLE_1]: 'Suivi stockage',
+      [MelangeEtat.CONTROLE_2]: 'Fiche produit',
+      [MelangeEtat.VALIDATION]: 'Validation finale'
+    };
+    return shortLabels[etat] || 'Inconnu';
+  }
+
   getTacheActuelle(etat: MelangeEtat): string {
     const taches = {
       [MelangeEtat.COMPOSITION]: 'Veuillez composer le mélange avec les gisements.',

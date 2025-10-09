@@ -173,238 +173,12 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
     });
 
-    // Configuration de la sauvegarde automatique
-    this.setupAutoSave();
+    // Système de sauvegarde automatique supprimé
   }
 
-  // === SYSTÈME DE PERSISTANCE AUTOMATIQUE ===
-  
-  private readonly LOCAL_STORAGE_KEY = 'fiche_technique_brouillon_';
-  private readonly DRAFTS_LIST_KEY = 'fiche_technique_brouillons_list';
-  private autoSaveInterval?: number;
-  public lastSaveTime?: Date;
-  public isAutoSaving = false;
-  
-  // Gestion des versions de brouillons
-  public availableDrafts: any[] = [];
-  public showDraftsManager = false;
-
-  private setupAutoSave(): void {
-    // Sauvegarde automatique toutes les 30 secondes
-    this.autoSaveInterval = window.setInterval(() => {
-      this.autoSaveDraft();
-    }, 30000);
-
-    // Sauvegarde aussi lors des changements du formulaire
-    this.melangeForm.valueChanges.subscribe(() => {
-      // Debounce pour éviter trop de sauvegardes
-      clearTimeout(this.autoSaveInterval);
-      this.autoSaveInterval = window.setTimeout(() => {
-        this.autoSaveDraft();
-      }, 2000);
-    });
-  }
-
-  private autoSaveDraft(): void {
-    if (this.isAutoSaving) return;
-
-    this.isAutoSaving = true;
-    try {
-      const draftData = this.prepareDraftData();
-      this.saveDraftToLocalStorage(draftData);
-      this.saveDraftToDatabase(draftData);
-      this.lastSaveTime = new Date();
-      console.log('📝 Brouillon sauvegardé automatiquement');
-    } catch (error) {
-      console.error('❌ Erreur lors de la sauvegarde automatique:', error);
-    } finally {
-      this.isAutoSaving = false;
-    }
-  }
-
-  private prepareDraftData(): any {
-    return {
-      id: this.melange?.id || null,
-      formData: this.melangeForm.value,
-      etat: this.melange?.etat || MelangeEtat.COMPOSITION,
-      ingredients: this.melange?.ingredients || [],
-      amendements: this.melange?.amendements || [],
-      selectedGisements: this.selectedGisements,
-      selectedAmendements: this.selectedAmendements,
-      uploadedFiles: Object.keys(this.uploadedFiles).reduce((acc, key) => {
-        acc[key] = this.uploadedFiles[key].name; // Stocker seulement le nom, pas le fichier
-        return acc;
-      }, {} as any),
-      timestamp: new Date().toISOString(),
-      version: '1.0'
-    };
-  }
-
-  private saveDraftToLocalStorage(draftData: any): void {
-    const key = this.getDraftKey();
-    try {
-      localStorage.setItem(key, JSON.stringify(draftData));
-      this.updateDraftsList(draftData);
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde en localStorage:', error);
-    }
-  }
-
-  private updateDraftsList(draftData: any): void {
-    try {
-      let draftsList = this.getDraftsList();
-      const key = this.getDraftKey();
-      const draftIndex = draftsList.findIndex(d => 
-        d.melangeId === (this.melange?.id || 'nouveau') && 
-        d.nom === (draftData.formData?.nom || 'Sans nom')
-      );
-
-      const draftInfo = {
-        melangeId: this.melange?.id || 'nouveau',
-        nom: draftData.formData?.nom || 'Sans nom',
-        timestamp: draftData.timestamp,
-        etat: draftData.etat,
-        key: key
-      };
-
-      if (draftIndex >= 0) {
-        draftsList[draftIndex] = draftInfo;
-      } else {
-        draftsList.push(draftInfo);
-      }
-
-      // Garder seulement les 10 derniers brouillons par mélange
-      draftsList = draftsList
-        .filter(d => d.melangeId === (this.melange?.id || 'nouveau'))
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-        .slice(0, 10);
-
-      localStorage.setItem(this.DRAFTS_LIST_KEY, JSON.stringify(draftsList));
-      this.availableDrafts = draftsList;
-    } catch (error) {
-      console.error('Erreur lors de la mise à jour de la liste des brouillons:', error);
-    }
-  }
-
-  private getDraftsList(): any[] {
-    try {
-      const draftsStr = localStorage.getItem(this.DRAFTS_LIST_KEY);
-      return draftsStr ? JSON.parse(draftsStr) : [];
-    } catch (error) {
-      console.error('Erreur lors du chargement de la liste des brouillons:', error);
-      return [];
-    }
-  }
-
-  private async saveDraftToDatabase(draftData: any): Promise<void> {
-    try {
-      if (this.melange?.id && this.melange.etat !== MelangeEtat.VALIDATION) {
-        // Sauvegarder en tant que brouillon en base de données
-        const updateData = {
-          ...draftData.formData,
-          is_draft: true,
-          draft_timestamp: draftData.timestamp
-        };
-        await this.melangeService.update(this.melange.id, updateData);
-      }
-    } catch (error) {
-      console.error('Erreur lors de la sauvegarde du brouillon en BDD:', error);
-    }
-  }
-
-  private loadDraftFromLocalStorage(): any | null {
-    const key = this.getDraftKey();
-    try {
-      const draftStr = localStorage.getItem(key);
-      if (draftStr) {
-        return JSON.parse(draftStr);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement du brouillon:', error);
-    }
-    return null;
-  }
-
-  private getDraftKey(): string {
-    return `${this.LOCAL_STORAGE_KEY}${this.melange?.id || 'nouveau'}`;
-  }
-
-  private clearDraft(): void {
-    const key = this.getDraftKey();
-    localStorage.removeItem(key);
-  }
-
-  public getLastSaveInfo(): string {
-    if (!this.lastSaveTime) return '';
-    const now = new Date();
-    const diffMinutes = Math.floor((now.getTime() - this.lastSaveTime.getTime()) / 60000);
-    
-    if (diffMinutes < 1) return 'Sauvegardé à l\'instant';
-    if (diffMinutes === 1) return 'Sauvegardé il y a 1 minute';
-    if (diffMinutes < 60) return `Sauvegardé il y a ${diffMinutes} minutes`;
-    
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours === 1) return 'Sauvegardé il y a 1 heure';
-    return `Sauvegardé il y a ${diffHours} heures`;
-  }
-
-  public forceSaveDraft(): void {
-    this.autoSaveDraft();
-  }
-
-  // === GESTION DES VERSIONS DE BROUILLONS ===
-
-  public loadDraftsForCurrentMelange(): void {
-    const allDrafts = this.getDraftsList();
-    this.availableDrafts = allDrafts.filter(d => 
-      d.melangeId === (this.melange?.id || 'nouveau')
-    );
-  }
-
-  public toggleDraftsManager(): void {
-    this.showDraftsManager = !this.showDraftsManager;
-    if (this.showDraftsManager) {
-      this.loadDraftsForCurrentMelange();
-    }
-  }
-
-  public loadSpecificDraft(draftInfo: any): void {
-    try {
-      const draftData = localStorage.getItem(draftInfo.key);
-      if (draftData) {
-        const draft = JSON.parse(draftData);
-        this.restoreDraft(draft);
-        this.showDraftsManager = false;
-        console.log('✅ Brouillon spécifique restauré:', draftInfo.timestamp);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement du brouillon spécifique:', error);
-    }
-  }
-
-  public deleteDraft(draftInfo: any, event: Event): void {
-    event.stopPropagation();
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce brouillon ?')) {
-      try {
-        localStorage.removeItem(draftInfo.key);
-        this.loadDraftsForCurrentMelange();
-        console.log('🗑️ Brouillon supprimé');
-      } catch (error) {
-        console.error('Erreur lors de la suppression du brouillon:', error);
-      }
-    }
-  }
-
-  public formatDraftDate(timestamp: string): string {
-    const date = new Date(timestamp);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
+  // === SYSTÈME DE BROUILLONS SUPPRIMÉ ===
+  // Le système de sauvegarde automatique des brouillons a été complètement supprimé
+  // pour éviter les conflits avec la navigation normale du workflow
 
   // === MÉTHODES POUR LA FICHE TECHNIQUE FINALISÉE ===
 
@@ -896,8 +670,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       this.availableAmendements = [];
     }
     
-    // Charger la liste des brouillons disponibles
-    this.loadDraftsForCurrentMelange();
+    // Chargement des brouillons supprimé
   }
 
   // Charger les plannings existants pour ce mélange
@@ -1014,63 +787,11 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   async loadMelange(id: number): Promise<void> {
     this.melange = await this.melangeService.getById(id);
     
-    // Restaurer le brouillon local s'il existe et est plus récent
-    await this.restoreDraftIfNewer();
-    
     this.updateAvailableGisements();
     this.patchForm();
   }
 
-  private async restoreDraftIfNewer(): Promise<void> {
-    try {
-      const draft = this.loadDraftFromLocalStorage();
-      if (!draft) return;
-
-      // Vérifier si le brouillon est plus récent que la dernière sauvegarde en base
-      const draftTime = new Date(draft.timestamp);
-      const dbTime = this.melange?.date_creation ? new Date(this.melange.date_creation) : new Date(0);
-      
-      if (draftTime > dbTime && this.melange && this.melange.etat !== MelangeEtat.VALIDATION) {
-        console.log('🔄 Brouillon local plus récent détecté, restauration...');
-        
-        // Demander confirmation à l'utilisateur
-        if (confirm('Un brouillon plus récent a été trouvé. Voulez-vous le restaurer ?')) {
-          this.restoreDraft(draft);
-        } else {
-          // Supprimer le brouillon si l'utilisateur refuse
-          this.clearDraft();
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la restauration du brouillon:', error);
-    }
-  }
-
-  private restoreDraft(draft: any): void {
-    try {
-      // Restaurer les données du formulaire
-      this.melangeForm.patchValue(draft.formData);
-      
-      // Restaurer l'état
-      if (draft.etat && this.melange) {
-        this.melange.etat = draft.etat;
-      }
-      
-      // Restaurer les sélections
-      if (draft.selectedGisements) {
-        this.selectedGisements = draft.selectedGisements;
-      }
-      
-      if (draft.selectedAmendements) {
-        this.selectedAmendements = draft.selectedAmendements;
-      }
-      
-      console.log('✅ Brouillon restauré avec succès');
-      this.lastSaveTime = new Date(draft.timestamp);
-    } catch (error) {
-      console.error('Erreur lors de la restauration du brouillon:', error);
-    }
-  }
+  // Méthodes de restauration de brouillons supprimées
 
   initializeNewMelange(): void {
     this.melange = {
@@ -1095,28 +816,13 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       amendements:  []
     };
     
-    // Essayer de restaurer un brouillon pour un nouveau mélange
-    this.restoreNewMelangeDraft();
+    // Restauration de brouillon supprimée
     
     this.updateAvailableGisements();
     this.patchForm();
   }
 
-  private restoreNewMelangeDraft(): void {
-    try {
-      const draft = this.loadDraftFromLocalStorage();
-      if (draft) {
-        console.log('🔄 Brouillon trouvé pour un nouveau mélange');
-        if (confirm('Un brouillon de nouveau mélange a été trouvé. Voulez-vous le restaurer ?')) {
-          this.restoreDraft(draft);
-        } else {
-          this.clearDraft();
-        }
-      }
-    } catch (error) {
-      console.error('Erreur lors de la restauration du brouillon pour nouveau mélange:', error);
-    }
-  }
+  // Méthode restoreNewMelangeDraft supprimée
 
   updateAvailableGisements(): void {
     if (!this.melange) return;
@@ -1485,6 +1191,9 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
         console.log('État du mélange mis à jour:', this.melange.etat);
         }
       }
+      
+      // Sauvegarde réussie
+      
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       this.error = 'Erreur lors de la sauvegarde du mélange';
@@ -1538,6 +1247,8 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
 
   async saveAndNextStep(): Promise<void> {
     try {
+      // Sauvegarde et passage à l'étape suivante
+      
       // --- CONTRÔLE FICHIER REQUIS PAR ÉTAPE ---
       let docField = '';
       let docLabel = '';
@@ -1658,6 +1369,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       if (this.isWorkflowCompleted()) {
         this.disableEditMode();
         this.updateFormControlsState();
+        // Workflow terminé
       }
     } catch (error) {
       this.error = 'Erreur lors de la sauvegarde et passage à l\'étape suivante';
@@ -2028,7 +1740,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     lines.push('=== DOCUMENTS UPLOADÉS ===');
     lines.push('');
     
-    lines.push('NORMES DE CONFORMITÉ:');
+    lines.push('COMPOSITION:');
     if (this.melange.ordre_conformite) {
       lines.push(this.getFileUrl(this.melange.ordre_conformite));
     } else {
@@ -2036,7 +1748,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     }
     lines.push('');
     
-    lines.push("CONDITIONS D'UTILISATION:");
+    lines.push('ORDRE FABRICATION:');
     if (this.melange.consignes_melange) {
       lines.push(this.getFileUrl(this.melange.consignes_melange));
     } else {
@@ -2044,7 +1756,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     }
     lines.push('');
     
-    lines.push('CONTRÔLE QUALITÉ +1 MOIS:');
+    lines.push('CONSIGNES DE BRASSAGE ET STOCKAGE:');
     if (this.melange.controle_1) {
       lines.push(this.getFileUrl(this.melange.controle_1));
     } else {
@@ -2052,7 +1764,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     }
     lines.push('');
     
-    lines.push('CONTRÔLE QUALITÉ +2 MOIS:');
+    lines.push('SUIVI DES ÉTAPES DE STOCKAGE ET MATURATION (DE 30 JOURS À 8 MOIS):');
     if (this.melange.controle_2) {
       lines.push(this.getFileUrl(this.melange.controle_2));
     } else {
@@ -2060,7 +1772,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     }
     lines.push('');
     
-    lines.push('FICHE TECHNIQUE FINALE:');
+    lines.push('ÉTABLISSEMENT DE FICHE PRODUIT:');
     if (this.melange.fiche_technique) {
       lines.push(this.getFileUrl(this.melange.fiche_technique));
     } else {
@@ -2231,11 +1943,11 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     lines.push('<h2 class="section-title"><i class="bi bi-file-earmark-text"></i> DOCUMENTS UPLOADÉS</h2>');
     
     const documents = [
-      { title: 'NORMES DE CONFORMITÉ', field: 'ordre_conformite', icon: 'bi-file-pdf' },
-      { title: "CONDITIONS D'UTILISATION", field: 'consignes_melange', icon: 'bi-file-word' },
-      { title: 'CONTRÔLE QUALITÉ +1 à 8 MOIS', field: 'controle_1', icon: 'bi-file-excel' },
-      { title: 'CONTRÔLE QUALITÉ Établissement de la fiche produit', field: 'controle_2', icon: 'bi-file-excel' },
-      { title: 'FICHE TECHNIQUE FINALE', field: 'fiche_technique', icon: 'bi-file-text' }
+      { title: 'COMPOSITION', field: 'ordre_conformite', icon: 'bi-file-pdf' },
+      { title: 'ORDRE FABRICATION', field: 'consignes_melange', icon: 'bi-file-word' },
+      { title: 'CONSIGNES DE BRASSAGE ET STOCKAGE', field: 'controle_1', icon: 'bi-file-excel' },
+      { title: 'SUIVI DES ÉTAPES DE STOCKAGE ET MATURATION (DE 30 JOURS À 8 MOIS)', field: 'controle_2', icon: 'bi-file-excel' },
+      { title: 'ÉTABLISSEMENT DE FICHE PRODUIT', field: 'fiche_technique', icon: 'bi-file-text' }
     ];
     
     documents.forEach(doc => {
@@ -2293,21 +2005,12 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   // === NETTOYAGE ===
   
   ngOnDestroy(): void {
-    // Sauvegarder une dernière fois avant de quitter
-    if (!this.isAutoSaving) {
-      this.autoSaveDraft();
-    }
-    
-    // Nettoyer l'intervalle de sauvegarde automatique
-    if (this.autoSaveInterval) {
-      clearInterval(this.autoSaveInterval);
-    }
+    // Nettoyage lors de la destruction du composant
+    console.log('Destruction du composant mélange');
   }
 
-  // Méthode à appeler lors de la finalisation de la fiche technique
+  // Méthode appelée lors de la finalisation de la fiche technique
   onFicheTechniqueFinalised(): void {
-    // Supprimer le brouillon car la fiche technique est finalisée
-    this.clearDraft();
-    console.log('✅ Fiche technique finalisée - brouillon supprimé');
+    console.log('✅ Fiche technique finalisée');
   }
 }
