@@ -173,6 +173,19 @@ class Chantier(models.Model):
         return new_nom
 
     def __str__(self):
+        try:
+            return f"{self.nom}" if self.nom else f"Gisement {self.pk}"
+        except Exception:
+            return f"Gisement {getattr(self, 'pk', 'n/a')}"
+
+    def __str__(self):
+        # Afficher le nom du gisement si disponible, sinon fallback sur l'ID
+        try:
+            return f"{self.nom}" if self.nom else f"Gisement {self.pk}"
+        except Exception:
+            return f"Gisement {getattr(self, 'pk', 'n/a')}"
+
+    def __str__(self):
         return f"{self.nom}"
 
     class Meta:
@@ -346,6 +359,83 @@ class Gisement(models.Model):
         verbose_name = "Gisement"
         verbose_name_plural = "Gisements"
         ordering = ['-periode_terrassement']
+
+    def __str__(self):
+        return f"{self.nom}"
+
+class FicheAgroPedodeSol(models.Model):
+    EAP = models.CharField("Etude Agro Pedo", max_length=100, unique=True, blank=True, null=True)
+    
+    ville = models.CharField(max_length=100, blank=True, null=True)
+    projet = models.CharField(max_length=100, blank=True, null=True)
+    date = models.DateField(auto_now_add=True)  # Date de création automatique
+    commanditaire = models.CharField(max_length=100, blank=True, null=True)
+    observateur = models.CharField(max_length=100, blank=True, null=True)
+    nom_sondage = models.CharField(max_length=50)  # Obligatoire, sert de référence
+    coord_x = models.FloatField(blank=True, null=True)  # Rempli côté Angular (GPS)
+    coord_y = models.FloatField(blank=True, null=True)  # Rempli côté Angular (GPS)
+    indication_lieu = models.TextField(blank=True, null=True)
+    antecedent_climatique = models.TextField(blank=True, null=True)
+    etat_surface = models.TextField(blank=True, null=True)
+    couvert_vegetal = models.TextField(blank=True, null=True)
+    test_beche = models.TextField(blank=True, null=True)
+    # autres champs selon la fiche papier...
+    def save(self, *args, **kwargs):
+        if not self.EAP:
+            ville_code = (self.ville or "").upper().replace("'", "").replace(" ", "-")[:10]
+            # Compte le nombre de fiches existantes pour la ville
+            count = FicheAgroPedodeSol.objects.filter(ville=self.ville).count() + 1
+            self.EAP = f"EAP-25-{ville_code}-{count:03d}"
+        super().save(*args, **kwargs)
+    def __str__(self):
+        return f"{self.nom_sondage} ({self.EAP})".upper()
+
+    class Meta:
+        db_table = 'fiche_agropedodesol'
+        verbose_name = "Fiche agro-pédologique de sol"
+        verbose_name_plural = "Fiches agro-pédologiques de sol"
+        ordering = ['-date', 'nom_sondage']
+
+class FicheHorizon(models.Model):
+    fiche = models.ForeignKey('FicheAgroPedodeSol', on_delete=models.CASCADE, related_name='horizons')
+    nom = models.CharField(max_length=10)  # H1, H2, H3... (obligatoire)
+    profondeur = models.CharField(max_length=20, blank=True, null=True)
+    texture = models.CharField(max_length=50, blank=True, null=True)
+    humidite = models.CharField(max_length=50, blank=True, null=True)
+    couleur = models.CharField(max_length=50, blank=True, null=True)
+    hydromorphie = models.CharField(max_length=50, blank=True, null=True)
+    test_hcl = models.CharField(max_length=50, blank=True, null=True)
+    porosite = models.CharField(max_length=100, blank=True, null=True)
+    compacite = models.CharField(max_length=100, blank=True, null=True)
+    activite_bio = models.CharField(max_length=100, blank=True, null=True)
+    commentaires = models.TextField(blank=True, null=True)
+    representation_profil = models.CharField(max_length=100, blank=True, null=True)
+    echantillon = models.CharField(max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.fiche.nom_sondage} - {self.nom}"
+
+    class Meta:
+        db_table = 'fiche_horizon'
+        verbose_name = "Horizon de fiche agro-pédologique"
+        verbose_name_plural = "Horizons de fiche agro-pédologique"
+        ordering = ['fiche', 'nom']
+
+class FichePhoto(models.Model):
+    horizon = models.ForeignKey('FicheHorizon', on_delete=models.CASCADE, related_name='photos')
+    image = models.ImageField(upload_to='photos_fichesagropedosol')
+    description = models.CharField(max_length=100, blank=True, null=True)
+
+
+  
+    def __str__(self):
+        return f"Photo {self.horizon.fiche.nom_sondage} - {self.horizon.nom}"
+
+    class Meta:
+        db_table = 'fiche_photo'
+        verbose_name = "Photo de fiche horizon"
+        verbose_name_plural = "Photos de fiche horizon"
+        ordering = ['horizon', 'id']
 
 
 # Table intermédiaire pour les mélanges de gisements

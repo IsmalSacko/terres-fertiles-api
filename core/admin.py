@@ -9,8 +9,11 @@ from django.core.exceptions import ValidationError
 from .models import (
     CustomUser, Gisement, Chantier, Melange, AmendementOrganique, Plateforme, 
     ProduitVente, SuiviStockPlateforme, MelangeIngredient, MelangeAmendement,
-    DocumentProduitVente, SaisieVente, ChantierRecepteur, Planning
+    DocumentProduitVente, SaisieVente, ChantierRecepteur, Planning,
+    FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
+
+from django import forms
 
 
 class SuiviStockPlateformeForm(forms.ModelForm):
@@ -310,6 +313,7 @@ class SuiviStockPlateformeAdmin(admin.ModelAdmin):
         return form
 
 
+
 # Enregistrements simples pour les autres modèles
 @admin.register(MelangeIngredient)
 class MelangeIngredientAdmin(admin.ModelAdmin):
@@ -334,3 +338,24 @@ class ChantierRecepteurAdmin(admin.ModelAdmin):
 @admin.register(Planning)
 class PlanningAdmin(admin.ModelAdmin):
     list_display = ('titre', 'date_debut', 'duree_jours', 'statut')
+
+@admin.register(FicheAgroPedodeSol)
+class FicheAgroPedodeSolAdmin(admin.ModelAdmin):
+    list_display = ('nom_sondage', 'EAP', 'ville', 'projet', 'date')
+    search_fields = ('nom_sondage', 'EAP', 'ville', 'projet')
+    list_filter = ('EAP', 'ville', 'date')
+@admin.register(FicheHorizon)
+class FicheHorizonAdmin(admin.ModelAdmin):
+    list_display = ('nom', 'fiche', 'profondeur', 'texture', 'echantillon')
+    search_fields = ('nom', 'fiche__nom_sondage', 'echantillon')
+    list_filter = ('fiche', 'nom')
+    ordering = ['fiche', 'nom']
+    autocomplete_fields = ['fiche']  # Facilite la recherche si beaucoup de fiches
+
+@admin.register(FichePhoto)
+class FichePhotoAdmin(admin.ModelAdmin):
+    list_display = ('horizon', 'image', 'description')
+    search_fields = ('horizon__fiche__nom_sondage', 'description')
+    list_filter = ('horizon',)
+    ordering = ['horizon', 'id']
+    autocomplete_fields = ['horizon']  # Facilite la recherche si beaucoup d'horizons

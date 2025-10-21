@@ -1,0 +1,32 @@
+<div class="container form-container">
+	<form (ngSubmit)="savePhoto()" #photoForm="ngForm" class="mat-elevation-z2 photo-form">
+		<h2>Ajouter une photo d'horizon</h2>
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>Type de photo</mat-label>
+			<mat-select required name="type_photo" [(ngModel)]="photo.type_photo">
+				<mat-option value="environnement">Environnement</mat-option>
+				<mat-option value="profil">Profil</mat-option>
+				<mat-option value="horizon">Horizon</mat-option>
+				<mat-option value="sondage">Sondage</mat-option>
+				<mat-option value="autre">Autre</mat-option>
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>Description</mat-label>
+			<textarea matInput name="description" [(ngModel)]="photo.description"></textarea>
+		</mat-form-field>
+			<!-- Champ fichier en dehors du mat-form-field -->
+			<label for="image">Image</label>
+			<input type="file" name="image" id="image" (change)="onFileChange($event)">
+		<button mat-raised-button color="primary" type="submit" [disabled]="loading || !photoForm.form.valid">Enregistrer la photo</button>
+			@if (loading) {
+				<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+			}
+			@if (success) {
+				<mat-icon color="primary">check_circle</mat-icon>
+			}
+			@if (error) {
+				<div class="error">{{ error }}</div>
+			}
+	</form>
+</div>

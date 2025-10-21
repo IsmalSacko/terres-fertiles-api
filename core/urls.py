@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    next_eap,
     CurrentUserView,
     CustomUserViewSet,
     ChantierViewSet,
@@ -20,9 +21,11 @@ from .views import (
     SaisieVenteViewSet,
     ChantierRecepteurViewSet,
     SuiviStockPlateformeViewSet,
+    FicheAgroPedodeSolViewSet,
+    FicheHorizonViewSet,
+    FichePhotoViewSet,
     custom_reset_password,
-    reset_password_confirm
-    
+    reset_password_confirm,
 )
 
 router = DefaultRouter()
@@ -42,6 +45,10 @@ router.register(r'plannings', PlanningViewSet)
 router.register(r'saisies-vente', SaisieVenteViewSet)
 router.register(r'chantiers-recepteurs', ChantierRecepteurViewSet)
 router.register(r'suivi-stock-plateforme', SuiviStockPlateformeViewSet)
+router.register(r'fiches-agro', FicheAgroPedodeSolViewSet)
+router.register(r'fiches-horizons', FicheHorizonViewSet)
+router.register(r'fiches-photos', FichePhotoViewSet)
+
 
 
 urlpatterns = [
@@ -53,6 +60,7 @@ urlpatterns = [
     path('user/me/', CurrentUserView.as_view(), name='current_user'),  # pour récupérer l'utilisateur courant
     path('users/custom-reset-password/', custom_reset_password, name='custom_reset_password'),
     path('users/reset-password-confirm/', reset_password_confirm),
+    path('fiche-agropedodesol/next-eap/', next_eap, name='next_eap'),
 
 ]
 

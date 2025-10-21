@@ -269,59 +269,38 @@ export class ProduitVenteListComponent implements OnInit {
   }
 
   openEmailForQuote(produit: ProduitVente): void {
-    // Email du responsable - génération depuis le nom d'utilisateur
-    const responsableEmail = produit.utilisateur ? 
-      `${produit.utilisateur.toLowerCase().replace(/\s+/g, '.')}@terres-fertiles.com` : 
-      'contact@terres-fertiles.com';
-    
+    // Email du destinataire (par défaut, à personnaliser si besoin)
+    const destinataire = '';
     // Sujet de l'email
-    const subject = `Demande de devis - ${produit.reference_produit || produit.nom_site}`;
-    
-    // Corps de l'email avec les informations du produit
-    const body = this.generateEmailBody(produit);
-    
-    // Création du lien mailto
-    const mailtoLink = `mailto:${responsableEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Ouverture du client mail
+    const subject = `Partage d'opportunité : Produit disponible à la vente - ${produit.reference_produit || produit.nom_site}`;
+    // Corps de l'email
+    const body = this.generateShareEmailBody(produit);
+    // Lien mailto prêt à être partagé
+    const mailtoLink = `mailto:${destinataire}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.location.href = mailtoLink;
   }
 
-  private generateEmailBody(produit: ProduitVente): string {
+  private generateShareEmailBody(produit: ProduitVente): string {
     const currentDate = new Date().toLocaleDateString('fr-FR');
-    
     return `Bonjour,
 
-Je vous contacte suite à la consultation de votre catalogue de produits et souhaiterais recevoir un devis pour le produit suivant :
+Je souhaite vous informer d'une opportunité d'achat sur le catalogue Terres Fertiles :
 
-=== INFORMATIONS PRODUIT ===
+=== PRODUIT DISPONIBLE ===
 Référence : ${produit.reference_produit || 'Non spécifiée'}
 Site : ${produit.nom_site || 'Non spécifié'}
-Volume disponible : ${(+produit.volume_disponible).toLocaleString()} m³
+Volume disponible : ${( +produit.volume_disponible).toLocaleString()} m³
 Date de disponibilité : ${new Date(produit.date_disponibilite).toLocaleDateString('fr-FR')}
 Fournisseur : ${produit.fournisseur || 'Non spécifié'}
-
 ${produit.chantier_info ? `Chantier source : ${produit.chantier_info.nom} (${produit.chantier_info.localisation})` : ''}
 ${produit.plateforme ? `Plateforme : ${produit.plateforme.nom} (${produit.plateforme.localisation})` : ''}
 
-=== MA DEMANDE ===
-Volume souhaité : [À compléter] m³
-Date de livraison souhaitée : [À compléter]
-Adresse de livraison : [À compléter]
-Commentaires particuliers : [À compléter]
-
-=== MES COORDONNÉES ===
-Nom/Prénom : [À compléter]
-Entreprise : [À compléter]
-Téléphone : [À compléter]
-Email : [À compléter]
-
-Je reste à votre disposition pour tout complément d'information.
+N'hésitez pas à me contacter si ce produit vous intéresse ou pour toute question complémentaire.
 
 Cordialement,
 
 ---
-Demande générée automatiquement le ${currentDate} depuis le catalogue Terres Fertiles`;
+Partage généré automatiquement le ${currentDate} depuis le catalogue Terres Fertiles`;
   }
 
   // Méthodes de pagination améliorée

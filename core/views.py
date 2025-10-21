@@ -1,13 +1,14 @@
 import io
+import logging
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Prefetch, Q, F, Case, When
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
 from rest_framework import status   
 from rest_framework.response import Response  # ✅ BON import
@@ -18,16 +19,40 @@ from django_filters.rest_framework import DjangoFilterBackend
 import re
 import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions, generics
+from rest_framework.decorators import api_view
+from rest_framework.permissions import AllowAny
+from core.models import FicheAgroPedodeSol
 
+@api_view(['GET'])
+def next_eap(request):
+    ville = request.GET.get('ville', '').strip()
+    ville_code = ville.upper().replace("'", "").replace(" ", "-")[:3] if ville else 'XXX'
+    # Récupère tous les EAP existants pour la ville
+    eaps = FicheAgroPedodeSol.objects.filter(ville__iexact=ville, EAP__startswith=f"EAP-25-{ville_code}-", EAP__isnull=False).values_list('EAP', flat=True)
+    nums = []
+    for eap in eaps:
+        try:
+            num = int(eap.split('-')[-1])
+            nums.append(num)
+        except Exception:
+            continue
+    next_num = max(nums) + 1 if nums else 1
+    next_eap = f"EAP-25-{ville_code}-{next_num:03d}"
+    return Response({"next_eap": next_eap})
 from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser
 from .models import (
-    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique,
-    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente, SuiviStockPlateforme
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, FicheAgroPedodeSol, FicheHorizon, FichePhoto, Gisement, AmendementOrganique,
+    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente, SuiviStockPlateforme,
+   
 )
 from .serializers import (
-    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
+    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
     MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer, SuiviStockPlateformeSerializer, SuiviStockPlateformeCreateSerializer
+    
 )
+import json
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -69,6 +94,8 @@ class GisementViewSet(viewsets.ModelViewSet):
     queryset = Gisement.objects.all()
     serializer_class = GisementSerializer
     permission_classes = [permissions.AllowAny]
+
+
 
 
 # Vues pour le modèle AmendementOrganique (gestion des amendements organiques)
@@ -737,3 +764,25 @@ class SuiviStockPlateformeViewSet(viewsets.ModelViewSet):
             'repartition_statuts': repartition_statuts,
             'andains_par_mois': mois_data
         })
+    
+
+
+# Vues pour le modèle FicheAgroPedodeSol (gestion des fiches agro-pédologiques)
+class FicheAgroPedodeSolViewSet(viewsets.ModelViewSet):
+    queryset = FicheAgroPedodeSol.objects.all()
+    serializer_class = FicheAgroPedodeSolSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# Vues pour le modèle FicheHorizon (gestion des horizons des fiches agro-pédologiques)
+class FicheHorizonViewSet(viewsets.ModelViewSet):
+    queryset = FicheHorizon.objects.all()
+    serializer_class = FicheHorizonSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# Vues pour le modèle FichePhoto (gestion des photos des fiches agro-pédologiques)
+class FichePhotoViewSet(viewsets.ModelViewSet):
+    queryset = FichePhoto.objects.all()
+    serializer_class = FichePhotoSerializer
+    permission_classes = [permissions.IsAuthenticated]

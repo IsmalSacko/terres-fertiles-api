@@ -1,3 +1,5 @@
+from rest_framework import serializers
+from .models import  Gisement
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
@@ -5,16 +7,15 @@ from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
-from decouple import config
 from datetime import date, datetime
 
 from rest_framework import serializers
 
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
-    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SuiviStockPlateforme
+    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SuiviStockPlateforme,
+    FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
-# ...existing code...
 
 # Exemple d'un serializer ProduitVenteDetailSerializer avec sécurisation de l'accès à la plateforme
 class ProduitVenteDetailSerializer(serializers.ModelSerializer):
@@ -626,3 +627,25 @@ class SuiviStockPlateformeCreateSerializer(serializers.ModelSerializer):
         """Création avec utilisateur automatique"""
         validated_data['utilisateur'] = self.context['request'].user
         return super().create(validated_data)
+
+class FichePhotoSerializer(serializers.ModelSerializer):
+    fiche_nom_sondage = serializers.CharField(source='fiche.nom_sondage', read_only=True)
+    horizon_nom = serializers.CharField(source='horizon.nom', read_only=True)
+    class Meta:
+        model = FichePhoto
+        fields = '__all__'
+        read_only_fields = ['id']
+
+class FicheHorizonSerializer(serializers.ModelSerializer):
+    photos = FichePhotoSerializer(many=True, read_only=True)
+    class Meta:
+        model = FicheHorizon
+        fields = '__all__'
+        read_only_fields = ['id']
+
+class FicheAgroPedodeSolSerializer(serializers.ModelSerializer):
+    horizons = FicheHorizonSerializer(many=True, read_only=True)
+    class Meta:
+        model = FicheAgroPedodeSol
+        fields = '__all__'
+        read_only_fields = ['id', 'date']

@@ -224,9 +224,9 @@
               color="accent" 
               [disabled]="getStatutProduit(produit) === 'Vendu'"
               (click)="openEmailForQuote(produit)"
-              [title]="'Contacter le responsable: ' + (produit.utilisateur || 'contact@terres-fertiles.com')">
+              [title]="'Contacter le responsable: ' + (produit.utilisateur || '')">
               <mat-icon>contact_mail</mat-icon>
-              Demander un devis
+              Partager avec un client
             </button>
           </div>
         </div>

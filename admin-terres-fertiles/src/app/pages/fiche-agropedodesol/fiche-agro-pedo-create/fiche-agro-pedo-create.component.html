@@ -1,0 +1,86 @@
+<div class="container form-container">
+    
+<form (ngSubmit)="save()" #ficheForm="ngForm" class="mat-elevation-z2" style="max-width:600px;margin:auto;">
+	<h2>Créer une fiche agro-pédologique</h2>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Nom du sondage *</mat-label>
+		<input matInput required name="nom_sondage" [(ngModel)]="fiche.nom_sondage">
+	</mat-form-field>
+
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>EAP</mat-label>
+			<input matInput name="EAP" [(ngModel)]="fiche.EAP" placeholder="Entrer la valeur EAP" />
+		</mat-form-field>
+
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>Ville</mat-label>
+			<input matInput name="ville" [(ngModel)]="fiche.ville">
+			<button mat-icon-button matSuffix type="button" (click)="geolocaliser()" [disabled]="geoLoading" aria-label="Géolocaliser">
+				<mat-icon>my_location</mat-icon>
+			</button>
+		</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Projet</mat-label>
+		<input matInput name="projet" [(ngModel)]="fiche.projet">
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Commanditaire</mat-label>
+		<input matInput name="commanditaire" [(ngModel)]="fiche.commanditaire">
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Observateur</mat-label>
+		<input matInput name="observateur" [(ngModel)]="fiche.observateur">
+	</mat-form-field>
+
+			<mat-form-field appearance="outline" class="full-width">
+				<mat-label>Coordonnée X (latitude)</mat-label>
+				<input matInput type="number" name="coord_x" [(ngModel)]="fiche.coord_x" step="any" placeholder="Latitude">
+			</mat-form-field>
+
+			<mat-form-field appearance="outline" class="full-width">
+				<mat-label>Coordonnée Y (longitude)</mat-label>
+				<input matInput type="number" name="coord_y" [(ngModel)]="fiche.coord_y" step="any" placeholder="Longitude">
+			</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Indication lieu</mat-label>
+		<textarea matInput name="indication_lieu" [(ngModel)]="fiche.indication_lieu"></textarea>
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Antécédent climatique</mat-label>
+		<textarea matInput name="antecedent_climatique" [(ngModel)]="fiche.antecedent_climatique"></textarea>
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>État de surface</mat-label>
+		<textarea matInput name="etat_surface" [(ngModel)]="fiche.etat_surface"></textarea>
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Couvert végétal</mat-label>
+		<textarea matInput name="couvert_vegetal" [(ngModel)]="fiche.couvert_vegetal"></textarea>
+	</mat-form-field>
+
+	<mat-form-field appearance="outline" class="full-width">
+		<mat-label>Test bêche</mat-label>
+		<textarea matInput name="test_beche" [(ngModel)]="fiche.test_beche"></textarea>
+	</mat-form-field>
+
+	<button mat-raised-button color="primary" type="submit" [disabled]="loading || !ficheForm.form.valid">SUIVANT</button>
+
+		@if (loading) {
+			<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+		}
+		@if (success) {
+			<mat-icon color="primary">check_circle</mat-icon>
+		}
+		@if (error) {
+			<div class="error">{{ error }}</div>
+		}
+</form>
+</div>

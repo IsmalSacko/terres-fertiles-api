@@ -1,0 +1,35 @@
+.form-container {
+ 	background-image: url('https://raw.githubusercontent.com/IsmalSacko/CV-SACKO/main/public/cover_image.svg') !important;
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+}
+
+form {
+	padding: 2rem;
+	background: #fff;
+	border-radius: 8px;
+
+
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.full-width {
+	width: 100%;
+	margin-bottom: 1rem;
+}
+
+button[mat-raised-button] {
+	margin-top: 1.5rem;
+	width: 100%;
+}
+
+.error {
+	color: #d32f2f;
+	margin-top: 1rem;
+	font-weight: bold;
+}
+
+mat-progress-bar {
+	margin-top: 1rem;
+}

@@ -1,0 +1,35 @@
+<div class="photo-edit-container">
+	<form (ngSubmit)="savePhoto()" #photoForm="ngForm" class="mat-elevation-z2 photo-form">
+		<h2>Modifier la photo</h2>
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>Type de photo</mat-label>
+			<mat-select required name="type_photo" [(ngModel)]="photo.type_photo">
+				<mat-option value="environnement">Environnement</mat-option>
+				<mat-option value="profil">Profil</mat-option>
+				<mat-option value="horizon">Horizon</mat-option>
+				<mat-option value="sondage">Sondage</mat-option>
+				<mat-option value="autre">Autre</mat-option>
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline" class="full-width">
+			<mat-label>Description</mat-label>
+			<textarea matInput name="description" [(ngModel)]="photo.description"></textarea>
+		</mat-form-field>
+		<label for="image">Image</label>
+		<input type="file" name="image" id="image" (change)="onFileChange($event)">
+		<div *ngIf="photo.image">
+			<img [src]="photo.image" alt="Photo horizon" class="photo-img" />
+		</div>
+		<button mat-raised-button color="primary" type="submit" [disabled]="loading || !photoForm.form.valid">Enregistrer les modifications</button>
+		<button mat-raised-button color="accent" type="button" (click)="goBack()">Annuler</button>
+		<div *ngIf="loading">
+			<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+		</div>
+		<div *ngIf="success">
+			<mat-icon color="primary">check_circle</mat-icon> Modifications enregistrées
+		</div>
+		<div *ngIf="error">
+			<div class="error">{{ error }}</div>
+		</div>
+	</form>
+</div>

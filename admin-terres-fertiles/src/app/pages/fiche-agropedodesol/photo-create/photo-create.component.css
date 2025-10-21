@@ -1,0 +1,39 @@
+.photo-form {
+	max-width: 600px;
+	margin: auto;
+	background: #fff;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+}
+.form-container {
+    
+	background-image: url('https://raw.githubusercontent.com/IsmalSacko/CV-SACKO/main/public/cover_image.svg') !important;
+	background-size: cover;
+	background-position: center;
+	min-height: 100vh;
+	border-radius: 12px;
+	box-shadow: 0 4px 24px rgba(44, 62, 80, 0.12);
+	padding: 40px 32px;
+
+}
+
+mat-progress-bar {
+	margin-top: 16px;
+}
+
+.error {
+	color: #d32f2f;
+	margin-top: 12px;
+	font-size: 1rem;
+}
+
+label[for="image"] {
+	display: block;
+	margin-bottom: 8px;
+	font-weight: 500;
+}
+
+input[type="file"] {
+	margin-bottom: 18px;
+}

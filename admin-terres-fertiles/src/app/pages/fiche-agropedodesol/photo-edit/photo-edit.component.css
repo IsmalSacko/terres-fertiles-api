@@ -1,0 +1,35 @@
+.photo-edit-container {
+	max-width: 500px;
+	margin: 48px auto;
+	background: #fff;
+	border-radius: 12px;
+	box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+	padding: 12px 14px;
+    position: relative;
+    top : 50px;
+}
+
+.photo-form {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.photo-img {
+	width: 75px;
+	height: 75px;
+	object-fit: cover;
+	border-radius: 8px;
+	margin-bottom: 18px;
+	background: #e0e0e0;
+}
+
+.full-width {
+	width: 100%;
+	margin-bottom: 18px;
+}
+
+.error {
+	color: #d32f2f;
+	margin-bottom: 16px;
+}

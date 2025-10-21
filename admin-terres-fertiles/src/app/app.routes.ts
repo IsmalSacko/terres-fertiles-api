@@ -37,6 +37,18 @@ import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-deta
 
 // Import des routes du module de suivi de stock
 import { SUIVISTOCK_ROUTES } from './pages/suivistock';
+import { FicheAgroPedoCreateComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-create/fiche-agro-pedo-create.component';
+import { FicheAgroPedoDetailComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-detail/fiche-agro-pedo-detail.component';
+import { FicheAgroPedoEditComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-edit/fiche-agro-pedo-edit.component';
+import { FicheAgroPedoListComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-list/fiche-agro-pedo-list.component';
+import { HorizonCreateComponent } from './pages/fiche-agropedodesol/horizon-create/horizon-create.component';
+import { HorizonDetailComponent } from './pages/fiche-agropedodesol/horizon-detail/horizon-detail.component';
+import { HorizonEditComponent } from './pages/fiche-agropedodesol/horizon-edit/horizon-edit.component';
+import { PhotoCreateComponent } from './pages/fiche-agropedodesol/photo-create/photo-create.component';
+import { PhotoDetailComponent } from './pages/fiche-agropedodesol/photo-detail/photo-detail.component';
+import { PhotoEditComponent } from './pages/fiche-agropedodesol/photo-edit/photo-edit.component';
+import { PhotoListComponent } from './pages/fiche-agropedodesol/photo-list/photo-list.component';
+
 
 
 export const routes: Routes = [
@@ -76,6 +88,7 @@ export const routes: Routes = [
   { path: 'analyses-laboratoire', component: AnalyseLaboratoireListComponent },
   { path: 'analyses-laboratoire/:id', component: AnalyseLaboratoireDetailComponent },
 
+  // Fiches de renseignement
   { path: 'activate/:uid/:token', component: ActivateComponent},
   // Routes pour la réinitialisation du mot de passe
   { path: 'reset-password', component: ResetPasswordComponent},
@@ -95,6 +108,25 @@ export const routes: Routes = [
   { path: 'amendements/new', component: AmendementCreateComponent },
   { path: 'amendements/:id', component: AmendementDetailComponent },
   { path: 'amendements/:id/edit', component: AmendementEditComponent },
+
+ // Routes pour les fiches agro-pédologiques
+  { path: 'fiches-agro-pedologiques', component: FicheAgroPedoListComponent },
+  { path: 'fiches-agro-pedologiques/new', component: FicheAgroPedoCreateComponent },
+  { path: 'fiches-agro-pedologiques/:id', component: FicheAgroPedoDetailComponent },
+  { path: 'fiches-agro-pedologiques/:id/edit', component: FicheAgroPedoEditComponent },
+
+  // Ajout de la route pour la création d'un horizon
+  { path: 'fiche-agropedodesol/horizons', component: FicheAgroPedoListComponent },
+  { path:'fiche-agropedodesol/horizon-create', component: HorizonCreateComponent },
+  { path:'fiche-agropedodesol/horizon-detail/:id', component: HorizonDetailComponent },
+  { path:'fiche-agropedodesol/horizon-edit/:id', component: HorizonEditComponent },
+
+  // Routes pour les photos d'horizon
+  { path:'fiche-agropedodesol/photos', component: PhotoListComponent },
+  { path:'fiche-agropedodesol/photo-create', component: PhotoCreateComponent },
+  { path:'fiche-agropedodesol/photo-detail/:id', component: PhotoDetailComponent },
+  { path:'fiche-agropedodesol/photo-edit/:id', component: PhotoEditComponent },
+  
 
   // Routes pour le module de suivi de stock
   {

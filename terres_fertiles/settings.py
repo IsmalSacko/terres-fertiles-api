@@ -180,6 +180,10 @@ JAZZMIN_SETTINGS = {
     "core.DocumentProduitVente": "fas fa-file-invoice",
     "core.SaisieVente": "fas fa-receipt",
     "core.Planning": "fas fa-calendar-alt",
+    "core.SuiviStockPlateforme": "fas fa-warehouse",
+    "core.FicheAgroPedodeSol": "fas fa-book",
+    "core.FicheHorizon": "fas fa-layer-group",
+    "core.FichePhoto": "fas fa-images",
 },
     "topmenu_links": [
         {"name": "Documentation", "url": "https://docs.terres-fertiles.com", "new_window": True, "icon": "fas fa-book"},

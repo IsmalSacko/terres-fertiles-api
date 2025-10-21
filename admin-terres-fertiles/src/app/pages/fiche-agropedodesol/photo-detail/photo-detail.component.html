@@ -1,0 +1,20 @@
+<div class="photo-detail-container">
+	<h2>Détail de la photo</h2>
+	<div *ngIf="loading">
+		<mat-progress-bar mode="indeterminate"></mat-progress-bar>
+	</div>
+	<div *ngIf="error" class="error">{{ error }}</div>
+	<ng-container *ngIf="photo">
+		<img [src]="photo.image" alt="Photo horizon" class="photo-img" />
+		<div class="photo-info">
+			<div><strong>Type :</strong> {{ photo.type_photo }}</div>
+			<div><strong>Description :</strong> {{ photo.description }}</div>
+			<div><strong>Fiche :</strong> {{ photo.fiche_nom_sondage || photo.fiche }}</div>
+			<div><strong>Horizon :</strong> {{ photo.horizon_nom || photo.horizon }}</div>
+		</div>
+		<div class="photo-actions">
+			<button mat-raised-button color="primary" (click)="goBack()">Retour</button>
+			<button mat-raised-button color="accent" (click)="goToEdit()">Modifier</button>
+		</div>
+	</ng-container>
+</div>
