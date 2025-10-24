@@ -17,7 +17,7 @@ build/
 
 # Base de données locale (SQLite)
 *.sqlite3
-
+# b2aaceec345bd0bfb8c4d7533c74ebd6 --secret---
 # Secrets et variables d’environnement
 .env
 .env.*

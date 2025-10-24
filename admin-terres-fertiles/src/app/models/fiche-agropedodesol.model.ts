@@ -43,6 +43,7 @@ export interface FichePhoto {
   fiche?: number;
   horizon?: number;
   image: string;
+  imageUrl?: string;
   type_photo: 'environnement' | 'profil' | 'horizon' | 'sondage' | 'autre';
   description?: string;
   fiche_nom_sondage?: string;

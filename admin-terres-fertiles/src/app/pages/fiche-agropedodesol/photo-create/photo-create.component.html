@@ -19,14 +19,27 @@
 			<label for="image">Image</label>
 			<input type="file" name="image" id="image" (change)="onFileChange($event)">
 		<button mat-raised-button color="primary" type="submit" [disabled]="loading || !photoForm.form.valid">Enregistrer la photo</button>
-			@if (loading) {
+			<div *ngIf="loading">
 				<mat-progress-bar mode="indeterminate"></mat-progress-bar>
-			}
-			@if (success) {
+			</div>
+			<div *ngIf="success" style="display:flex;align-items:center;gap:8px;margin-top:8px;">
 				<mat-icon color="primary">check_circle</mat-icon>
-			}
-			@if (error) {
+				<span>Photo enregistrée</span>
+			</div>
+			<div *ngIf="error">
 				<div class="error">{{ error }}</div>
-			}
+			</div>
 	</form>
+
+		<!-- Liste des photos créées récemment -->
+		<div *ngIf="createdPhotos.length > 0" class="created-photos">
+			<h3>Photos enregistrées</h3>
+			<div class="photos-grid">
+				<div *ngFor="let p of createdPhotos" class="photo-item">
+					<img [src]="p.image || p.url || (p.image_url ? p.image_url : '')" alt="photo" />
+					<div class="photo-desc">{{ p.description }}</div>
+				</div>
+			</div>
+			<button mat-stroked-button color="primary" (click)="goToFicheList()">Liste des fiches</button>
+		</div>
 </div>

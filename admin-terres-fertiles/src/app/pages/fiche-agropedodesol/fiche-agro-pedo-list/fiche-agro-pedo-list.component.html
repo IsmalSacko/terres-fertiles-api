@@ -1,1 +1,92 @@
-<p>fiche-agro-pedo-list works!</p>
+<div class="container fiche-contenainer">
+    <h2>Liste des fiches agro-pédologiques</h2>
+    <div *ngIf="loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+    <div *ngIf="error" class="error">{{ error }}</div>
+    <div *ngIf="!loading && fiches.length === 0" class="empty">Aucune fiche trouvée.</div>
+        <div *ngIf="!loading && fiches.length > 0" class="fiche-list">
+            <div *ngFor="let fiche of fiches" class="fiche-list-item">
+                
+                                        <!-- En-tête complet (copie exacte du détail) -->
+                                        <div class="fiche-header pdf-header">
+
+                                            <!-- Colonne gauche : logo -->
+                                            <div class="logo"><img src="/assets/tf.png" alt="TF logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'72\' height=\'72\'><rect width=\'100%\' height=\'100%\' fill=\'%23eee\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23888\' font-size=\'12\'>TF</text></svg>'" /></div>
+
+                                            <!-- Colonne centrale -->
+                                            <div class="header-main">
+                                                <table class="main-table excel" aria-label="Entête principale">
+                                                    <colgroup>
+                                                        <col style="width: 160px" />
+                                                        <col />
+                                                    </colgroup>
+                                                    <tr>
+                                                        <th class="title" colspan="2">Fiche de description agro-pédologique de sols</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Projet :</td>
+                                                        <td class="value">{{ fiche?.projet }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Commanditaire :</td>
+                                                        <td class="value">{{ fiche?.commanditaire }}</td>
+                                                    </tr>
+                                                </table>
+
+                                                <table class="info-table excel no-top-border" aria-label="Informations">
+                                                    <colgroup>
+                                                        <col style="width: 260px" />
+                                                        <col />
+                                                    </colgroup>
+                                                    <tr>
+                                                        <td class="label">Nom du sondage/profil&nbsp;:</td>
+                                                        <td class="center big"><strong>{{ fiche?.nom_sondage }}</strong></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Indication lieu&nbsp;:</td>
+                                                        <td class="value">{{ fiche?.indication_lieu }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Antécédent climatique (durée, nature, intensité)&nbsp;:</td>
+                                                        <td class="value">{{ fiche?.antecedent_climatique }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Etat de surface (battance, érosion, turricules, autres observations)&nbsp;:</td>
+                                                        <td class="value">{{ fiche?.etat_surface }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Couvert végétal / surface&nbsp;:</td>
+                                                        <td class="value">{{ fiche?.couvert_vegetal }}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td class="label">Synthèse de l'observation de terrain&nbsp;:</td>
+                                                        <td class="value">{{ fiche?.test_beche || fiche?.indication_lieu || fiche?.antecedent_climatique || fiche?.etat_surface }}</td>
+                                                    </tr>
+                                                </table>
+                                            </div>
+
+                                            <!-- Colonne droite -->
+                                            <div class="right-column">
+                                                <table class="right-table excel" aria-label="Infos droites">
+                                                    <colgroup>
+                                                        <col style="width: 210px" />
+                                                        <col style="width: 210px" />
+                                                    </colgroup>
+                                                    <tr><td class="r-label">Ville&nbsp;:</td><td class="r-val">{{ fiche?.ville }}</td></tr>
+                                                    <tr><td class="r-label">Date&nbsp;:</td><td class="r-val">{{ fiche?.date }}</td></tr>
+                                                    <tr><td class="r-label">Observateur&nbsp;:</td><td class="r-val">{{ fiche?.observateur }}</td></tr>
+                                                    <tr><td class="r-label">N (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_x }}</td></tr>
+                                                    <tr><td class="r-label">E (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_y }}</td></tr>
+                                                </table>
+                                            </div>
+                                        </div>
+
+                <div class="fiche-actions">
+                    <button mat-icon-button color="primary" (click)="goToDetail(fiche.id)"><mat-icon>visibility</mat-icon></button>
+                    <button mat-icon-button color="accent" (click)="goToEdit(fiche.id)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" (click)="deleteFiche(fiche.id)"><mat-icon>delete</mat-icon></button>
+                </div>
+            </div>
+        </div>
+</div>

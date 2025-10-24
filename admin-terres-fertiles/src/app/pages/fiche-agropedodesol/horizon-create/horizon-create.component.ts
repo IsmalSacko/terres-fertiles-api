@@ -28,13 +28,14 @@ import { Router } from '@angular/router';
     MatOptionModule
   ],
   templateUrl: './horizon-create.component.html',
-  styleUrl: './horizon-create.component.css'
+  styleUrls: ['./horizon-create.component.css']
 })
 export class HorizonCreateComponent implements OnInit {
   horizon: Partial<FicheHorizon> = {};
   fiches: any[] = [];
   loading = false;
   success = false;
+  lastCreatedHorizonId: number | null = null;
   error: string | null = null;
   constructor(
     private horizonService: FicheHorizonService, 
@@ -58,12 +59,22 @@ export class HorizonCreateComponent implements OnInit {
     try {
       const createdHorizon = await this.horizonService.create(this.horizon);
       this.success = true;
-  this.horizon = {};
-  this.router.navigate(['/fiche-agropedodesol/photo-create'], { queryParams: { horizon: createdHorizon.id } });
+      // retenir l'ID créé pour possibilité d'ajout de photos
+      this.lastCreatedHorizonId = (createdHorizon as any).id || null;
+      // garder la fiche sélectionnée pour faciliter l'ajout d'un autre horizon
+      const selectedFiche = this.horizon.fiche;
+      // reset autres champs mais conserver la fiche
+      this.horizon = { fiche: selectedFiche };
     } catch (e: any) {
       this.error = e?.message || 'Erreur lors de la création.';
     }
     this.loading = false;
+  }
+
+  // méthode publique utilisée depuis le template pour naviguer vers l'ajout de photos
+  goToAddPhotos(horizonId?: number) {
+    if (!horizonId) return;
+    this.router.navigate(['/fiche-agropedodesol/photo-create'], { queryParams: { horizon: horizonId } });
   }
 
 }

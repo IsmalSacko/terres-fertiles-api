@@ -20,6 +20,7 @@
     <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> PTF</a>
     <a (click)="navigateAndClose('/suivistock')"><mat-icon>inventory_2</mat-icon> STOCK</a>
     <a (click)="navigateAndClose('/amendements')"><mat-icon>eco</mat-icon> MAO</a>
+    <a (click)="navigateAndClose('/fiches-agro-pedologiques/new')"><mat-icon>description</mat-icon> Nouvelle fiche agro-pédologique</a>
     <div class="mobile-menu-divider"></div>
     <button *ngIf="isLoggedIn" (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
     <button *ngIf="!isLoggedIn" (click)="login()"><mat-icon>login</mat-icon> Connexion</button>
@@ -42,6 +43,7 @@
     <a mat-button routerLink="/plateformes" routerLinkActive="active-link"><mat-icon>home_work</mat-icon> PTF</a>
     <a mat-button routerLink="/suivistock" routerLinkActive="active-link"><mat-icon>inventory_2</mat-icon> STOCK</a>
     <a mat-button routerLink="/amendements" routerLinkActive="active-link"><mat-icon>eco</mat-icon> MAO</a>
+    <a mat-button routerLink="/fiches-agro-pedologiques/new" routerLinkActive="active-link"><mat-icon>description</mat-icon> EAP</a>
   </nav>
   <button mat-icon-button class="mobile-menu-btn" (click)="openSidenav()">
     <mat-icon>menu</mat-icon>

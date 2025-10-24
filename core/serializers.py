@@ -649,3 +649,6 @@ class FicheAgroPedodeSolSerializer(serializers.ModelSerializer):
         model = FicheAgroPedodeSol
         fields = '__all__'
         read_only_fields = ['id', 'date']
+    
+    def get_fiche(self, obj):
+        return obj.horizon.fiche.id if obj.horizon and obj.horizon.fiche else None

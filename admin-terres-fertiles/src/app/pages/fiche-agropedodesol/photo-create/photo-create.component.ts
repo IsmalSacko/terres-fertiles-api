@@ -34,12 +34,17 @@ export class PhotoCreateComponent implements OnInit {
   error: string | null = null;
   imageFile: File | null = null;
   horizonId: number | null = null;
+  createdPhotos: any[] = [];
 
   constructor(
     private photoService: FichePhotoService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
+
+  goToFicheList() {
+    this.router.navigate(['/fiches-agro-pedologiques']);
+  }
 
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
@@ -71,12 +76,17 @@ export class PhotoCreateComponent implements OnInit {
       formData.append('description', this.photo.description || '');
       if (this.photo.horizon) formData.append('horizon', String(this.photo.horizon));
       if (this.photo.fiche) formData.append('fiche', String(this.photo.fiche));
-      const createdPhoto = await this.photoService.create(formData);
-      this.success = true;
-      this.photo = {};
-      this.imageFile = null;
-      // Redirection ou autre logique après succès
-      // this.router.navigate(['/...']);
+  const createdPhoto = await this.photoService.create(formData);
+  this.success = true;
+  // conserver la référence à la photo créée pour affichage sous le formulaire
+  this.createdPhotos.unshift(createdPhoto);
+  // réinitialiser le formulaire pour permettre un autre envoi
+  const keepHorizon = this.photo.horizon || this.horizonId;
+  const keepFiche = this.photo.fiche;
+  this.photo = {};
+  if (keepHorizon) this.photo.horizon = keepHorizon;
+  if (keepFiche) this.photo.fiche = keepFiche;
+  this.imageFile = null;
     } catch (e: any) {
       this.error = e?.message || 'Erreur lors de l\'enregistrement.';
     }

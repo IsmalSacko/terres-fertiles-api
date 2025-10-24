@@ -1,1 +1,238 @@
-<p>fiche-agro-pedo-detail works!</p>
+<div class="fiche-detail-container">
+  <!-- ENTÊTE : logo | tableau central | infos droites -->
+  <div class="fiche-header pdf-header">
+
+  <!-- Colonne gauche : logo -->
+  <div class="logo"><img src="/assets/tf.png" alt="TF logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'72\' height=\'72\'><rect width=\'100%\' height=\'100%\' fill=\'%23eee\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23888\' font-size=\'12\'>TF</text></svg>'" /></div>
+
+    <!-- Colonne centrale -->
+    <div class="header-main">
+      <table class="main-table excel" aria-label="Entête principale">
+        <colgroup>
+          <col style="width: 160px" />
+          <col />
+        </colgroup>
+        <tr>
+          <th class="title" colspan="2">Fiche de description agro-pédologique de sols</th>
+        </tr>
+        <tr>
+          <td class="label">Projet :</td>
+          <td class="value">{{ fiche?.projet }}</td>
+        </tr>
+        <tr>
+          <td class="label">Commanditaire :</td>
+          <td class="value">{{ fiche?.commanditaire }}</td>
+        </tr>
+      </table>
+
+      <!-- Pour obtenir des bordures continues, cette table "colle" à la précédente -->
+      <table class="info-table excel no-top-border" aria-label="Informations">
+        <colgroup>
+          <col style="width: 260px" />
+          <col />
+        </colgroup>
+        <tr>
+          <td class="label">Nom du sondage/profil&nbsp;:</td>
+          <td class="center big"><strong>{{ fiche?.nom_sondage }}</strong></td>
+        </tr>
+        <tr>
+          <td class="label">Indication lieu&nbsp;:</td>
+          <td class="value">{{ fiche?.indication_lieu }}</td>
+        </tr>
+        <tr>
+          <td class="label">Antécédent climatique (durée, nature, intensité)&nbsp;:</td>
+          <td class="value">{{ fiche?.antecedent_climatique }}</td>
+        </tr>
+        <tr>
+          <td class="label">Etat de surface (battance, érosion, turricules, autres observations)&nbsp;:</td>
+          <td class="value">{{ fiche?.etat_surface }}</td>
+        </tr>
+        <tr>
+          <td class="label">Couvert végétal / surface&nbsp;:</td>
+          <td class="value">{{ fiche?.couvert_vegetal }}</td>
+        </tr>
+        <tr>
+          <td class="label">Synthèse de l'observation de terrain&nbsp;:</td>
+          <td class="value">{{ fiche?.test_beche || fiche?.indication_lieu || fiche?.antecedent_climatique || fiche?.etat_surface }}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Colonne droite -->
+    <div class="right-column">
+      <table class="right-table excel" aria-label="Infos droites">
+        <colgroup>
+          <col style="width: 210px" />
+          <col style="width: 210px" />
+        </colgroup>
+        <tr><td class="r-label">Ville&nbsp;:</td><td class="r-val">{{ fiche?.ville }}</td></tr>
+        <tr><td class="r-label">Date&nbsp;:</td><td class="r-val">{{ fiche?.date }}</td></tr>
+        <tr><td class="r-label">Observateur&nbsp;:</td><td class="r-val">{{ fiche?.observateur }}</td></tr>
+        <tr><td class="r-label">N (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_x }}</td></tr>
+        <tr><td class="r-label">E (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_y }}</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Section Horizons -->
+  <section class="pdf-horizons">
+    <h2>Horizons</h2>
+  <div class="horizon-table-wrapper" *ngIf="horizons && horizons.length > 0; else noHorizons">
+      <table class="horizon-table full excel" aria-label="Table des horizons">
+        <colgroup>
+          <!-- 10 petites colonnes -->
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <col style="width:40px" />
+          <!-- large commentaires -->
+          <col style="width:420px" />
+          <!-- représentation et échantillon -->
+          <col style="width:48px" />
+          <col style="width:48px" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th class="vertical">Horizon</th>
+            <th class="vertical">Profondeur</th>
+            <th class="vertical">Texture</th>
+            <th class="vertical">Humidité</th>
+            <th class="vertical">Couleur</th>
+            <th class="vertical">Hydromorphie</th>
+            <th class="vertical">Test HCL</th>
+            <th class="vertical">Porosité</th>
+            <th class="vertical">Compacité</th>
+            <th class="vertical">Activité biologique</th>
+            <th class="wide">Commentaires spécifiques de l'horizon</th>
+            <th class="vertical">Représentation du profil</th>
+            <th class="vertical">Echantillon</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let h of horizons">
+            <td class="rotate-vertical h3">{{ h.nom }}</td>
+            <td class="rotate-vertical">{{ h.profondeur }}</td>
+            <td class="rotate-vertical">{{ h.texture }}</td>
+            <td class="rotate-vertical">{{ h.humidite }}</td>
+            <td class="rotate-vertical">{{ h.couleur }}</td>
+            <td class="rotate-vertical">{{ h.hydromorphie }}</td>
+            <td class="rotate-vertical">{{ h.test_hcl }}</td>
+            <td class="rotate-vertical">{{ h.porosite }}</td>
+            <td class="rotate-vertical">{{ h.compacite }}</td>
+            <td class="rotate-vertical">{{ h.activite_bio }}</td>
+            <td class="wide">{{ h.commentaires }}</td>
+            <td>
+              <div class="rep-circles">
+                <!-- représentation simple: remplis/vides selon valeur (adapter si nécessaire) -->
+                <div class="circle" *ngIf="h.representation_profil">●</div>
+              </div>
+            </td>
+            <td class="rotate-vertical h4">{{ h.echantillon }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-template #noHorizons>
+      <div class="empty">Aucun horizon enregistré.</div>
+    </ng-template>
+  </section>
+
+  <!-- Section photos imprimable : entête répétée + layout photos -->
+  <section class="photos print-section">
+    <div class="photos-header fiche-header">
+  <div class="logo"><img src="/assets/tf.png" alt="TF logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'72\' height=\'72\'><rect width=\'100%\' height=\'100%\' fill=\'%23eee\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23888\' font-size=\'12\'>TF</text></svg>'" /></div>
+
+      <!-- copy of main center tables for exact alignment -->
+      <div class="header-main">
+        <table class="main-table excel" aria-label="Entête principale">
+          <colgroup>
+            <col style="width: 160px" />
+            <col />
+          </colgroup>
+          <tr>
+            <th class="title" colspan="2">Fiche de description agro-pédologique de sols</th>
+          </tr>
+          <tr>
+            <td class="label">Projet :</td>
+            <td class="value">{{ fiche?.projet }}</td>
+          </tr>
+          <tr>
+            <td class="label">Commanditaire :</td>
+            <td class="value">{{ fiche?.commanditaire }}</td>
+          </tr>
+        </table>
+
+        <table class="info-table excel no-top-border" aria-label="Informations">
+          <colgroup>
+            <col style="width: 260px" />
+            <col />
+          </colgroup>
+          <tr>
+            <td class="label">Nom du sondage/profil&nbsp;:</td>
+            <td class="center big"><strong>{{ fiche?.nom_sondage }}</strong></td>
+          </tr>
+          <tr>
+            <td class="label">Indication lieu&nbsp;:</td>
+            <td class="value">{{ fiche?.indication_lieu }}</td>
+          </tr>
+          <tr>
+            <td class="label">Antécédent climatique (durée, nature, intensité)&nbsp;:</td>
+            <td class="value">{{ fiche?.antecedent_climatique }}</td>
+          </tr>
+          <tr>
+            <td class="label">Etat de surface (battance, érosion, turricules, autres observations)&nbsp;:</td>
+            <td class="value">{{ fiche?.etat_surface }}</td>
+          </tr>
+          <tr>
+            <td class="label">Couvert végétal / surface&nbsp;:</td>
+            <td class="value">{{ fiche?.couvert_vegetal }}</td>
+          </tr>
+          <tr>
+            <td class="label">Synthèse de l'observation de terrain&nbsp;:</td>
+            <td class="value">{{ fiche?.test_beche || fiche?.indication_lieu || fiche?.antecedent_climatique || fiche?.etat_surface }}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- copy of right column -->
+      <div class="right-column">
+        <table class="right-table excel" aria-label="Infos droites">
+          <colgroup>
+            <col style="width: 210px" />
+            <col style="width: 210px" />
+          </colgroup>
+          <tr><td class="r-label">Ville&nbsp;:</td><td class="r-val">{{ fiche?.ville }}</td></tr>
+          <tr><td class="r-label">Date&nbsp;:</td><td class="r-val">{{ fiche?.date }}</td></tr>
+          <tr><td class="r-label">Observateur&nbsp;:</td><td class="r-val">{{ fiche?.observateur }}</td></tr>
+          <tr><td class="r-label">N (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_x }}</td></tr>
+          <tr><td class="r-label">E (Degrés Décimal WGS84)&nbsp;:</td><td class="r-val">{{ fiche?.coord_y }}</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="photo-page">
+      <!-- debug: show count and first URL to help diagnose missing images -->
+      <div class="photo-debug" *ngIf="photos">
+        <strong>Photos:</strong> {{ photos.length }}
+      </div>
+      <div class="photo-grid">
+        <div class="photo-block" *ngFor="let p of photos">
+          <img [src]="p.imageUrl || p.image" alt="photo" (error)="onImgError($event)" />
+          <div class="caption">{{ p.type_photo }}<span *ngIf="p.horizon"> — {{ p.horizon_nom || p.horizon }}</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Actions (écran) -->
+  <div class="actions">
+    <button mat-raised-button color="primary" (click)="goToEdit()">Modifier la fiche</button>
+    <button mat-raised-button color="accent" (click)="print()">Imprimer</button>
+  </div>
+</div>

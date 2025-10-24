@@ -492,4 +492,27 @@
 }
 
 
+/* Hide navbar and mobile overlays when printing */
+@media print {
+  :host {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Fallback selectors in case host encapsulation differs */
+  .navbar-glass,
+  .mobile-menu-overlay,
+  .mobile-menu-backdrop,
+  .mobile-menu-btn,
+  .logo {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+
 

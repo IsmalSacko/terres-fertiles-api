@@ -35,6 +35,9 @@ import { MatOptionModule } from '@angular/material/core';
   ]
 })
 export class FicheAgroPedoCreateComponent {
+goToHorizonCreate() {
+    this.router.navigate(['/fiche-agropedodesol/horizon-create']);
+}
   fiche: Partial<FicheAgroPedodeSol> = {};
   loading = false;
   success = false;

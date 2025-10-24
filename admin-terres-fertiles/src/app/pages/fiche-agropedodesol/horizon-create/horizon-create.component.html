@@ -62,11 +62,13 @@
         </mat-form-field>
         <!-- Ajout des photos si besoin -->
     <button mat-raised-button color="primary" type="submit" [disabled]="loading || !ficheForm.form.valid">SUIVANT</button>
+    <button *ngIf="lastCreatedHorizonId" mat-stroked-button color="accent" type="button" (click)="goToAddPhotos(lastCreatedHorizonId)">Ajouter des photos au dernier horizon</button>
         <div *ngIf="loading">
             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>
         <div *ngIf="success">
             <mat-icon color="primary">check_circle</mat-icon>
+            <span style="margin-left:8px">Horizon créé (ID: {{ lastCreatedHorizonId }})</span>
         </div>
         <div *ngIf="error">
             <div class="error">{{ error }}</div>

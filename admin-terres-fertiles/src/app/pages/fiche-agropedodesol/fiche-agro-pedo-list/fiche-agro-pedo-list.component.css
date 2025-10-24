@@ -1,0 +1,120 @@
+
+.container.fiche-contenainer {
+	max-width: 1350px;
+	margin: 32px auto;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+	padding: 24px;
+    position: relative;
+    top : 50px;
+}
+
+.fiche-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.fiche-table th, .fiche-table td {
+	padding: 12px 8px;
+	border-bottom: 1px solid #eee;
+	text-align: left;
+}
+
+.fiche-table th {
+	background: #fafafa;
+}
+
+.error {
+	color: #d32f2f;
+}
+
+.empty {
+	color: #777;
+}
+
+.fiche-list {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.fiche-list-item {
+	border: 1px solid #e6e6e6;
+	padding: 12px;
+	border-radius: 8px;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	align-items: start;
+	gap: 12px;
+	width: 100%;
+}
+
+.fiche-header.small-header {
+	display: flex;
+	align-items: stretch;
+	gap: 12px;
+	width: 100%;
+}
+
+.fiche-header.small-header .logo img {
+	width: 48px;
+	height: 48px;
+	object-fit: contain;
+}
+
+.fiche-header.small-header .header-main {
+	flex: 1 1 auto;
+}
+
+.fiche-header.small-header .right-column {
+	width: 220px;
+	flex: 0 0 220px;
+}
+
+.fiche-actions {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+/* Styles d'en-tête reproduisant le rendu 'Excel' (scopés par fiche-list-item) */
+.fiche-list-item .fiche-header {
+	display: grid;
+	grid-template-columns: 90px 1fr 420px;
+	align-items: stretch;
+	border: 1px solid #000;
+	border-bottom: 0;
+	padding: 0;
+}
+
+.fiche-list-item .logo {
+	display: flex;
+	align-items: flex-start;
+	justify-content: center;
+	border-right: 1px solid #000;
+	font-weight: 700;
+	font-size: 22px;
+	padding-top: 6px;
+}
+
+.fiche-list-item .logo img { width: 72px; height: 72px; object-fit: contain; padding: 6px; }
+
+.fiche-list-item .header-main { display: flex; flex-direction: column; }
+
+.fiche-list-item table.excel { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #000; }
+.fiche-list-item table.excel th, .fiche-list-item table.excel td { border: 1px solid #000; padding: 6px 8px; vertical-align: middle; word-wrap: break-word; }
+.fiche-list-item .main-table .title { text-align: center; font-weight: 700; background: #f2f2f2; font-size: 14px; padding: 8px 6px; }
+.fiche-list-item .label { white-space: normal; }
+.fiche-list-item .center { text-align: center; }
+.fiche-list-item .big { font-size: 18px; }
+.fiche-list-item .info-table.no-top-border { border-top: 0; }
+.fiche-list-item .info-table.no-top-border tr:first-child td, .fiche-list-item .info-table.no-top-border tr:first-child th { border-top: 0; }
+.fiche-list-item .right-column { border-left: 1px solid #000; }
+.fiche-list-item .right-table .r-label { font-weight: 600; }
+.fiche-list-item .right-table .r-val { text-align: left; }
+
+/* réduire la taille pour s'adapter en liste */
+.fiche-list-item .main-table .title { font-size: 13px; }
+.fiche-list-item .logo img { width: 56px; height: 56px; }
+

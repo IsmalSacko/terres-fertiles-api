@@ -362,3 +362,18 @@ mat-form-field {
   box-shadow: 0 8px 32px var(--primary-light) !important;
   letter-spacing: 0.5px;
 }
+
+/* Hide global navbar when printing fiche pages */
+@media print {
+  app-navbar, .navbar-glass {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  /* Avoid printing other site chrome */
+  .mobile-menu-overlay, .mobile-menu-backdrop, .mobile-menu-btn {
+    display: none !important;
+  }
+}
