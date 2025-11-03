@@ -54,7 +54,7 @@
                 <div class="client-details">
                   <h3 class="client-name">{{ s.nom_client }}</h3>
                   <span class="vente-id">
-                    {{ s.produit ? (s.produit.melange.nom || s.produit.reference_produit) : 'Vente #' + s.id }}
+                    {{ s.produit ? (s.produit.reference_produit ) : 'Vente #' + s.id }}
                   </span>
                 </div>
               </div>

@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
 
@@ -79,7 +81,7 @@ export interface Melange {
   plateforme_details?: Plateforme;
   plateforme_nom?: string;
   fournisseur: string;
-  producteur: string;
+  commune: string;
   couverture_vegetale: string | null;
   periode_melange: string;
   date_semis: string;
@@ -103,6 +105,7 @@ export interface Melange {
 export interface PartialMelange {
   nom: string;
   fournisseur: string;
+  commune: string;
   couverture_vegetale?: string | null;
   periode_melange: string;
   date_semis: string;
@@ -124,7 +127,7 @@ export class MelangeService {
   private melangeAmendementsApiUrl = 'http://127.0.0.1:8000/api/melange-amendements/';
 
 
-  constructor() {}
+  constructor(private http: HttpClient,) {}
 
   private getHeaders() {
     const token = localStorage.getItem('token');
@@ -136,6 +139,11 @@ async getAmendementsOrganiques(): Promise<AmendementOrganique[]>{
   const response = await axios.get<AmendementOrganique[]>(this.amendementsOrganiquesApiUrl, this.getHeaders());
   return response.data;
 }
+
+ asyncgetMelangeByHttpClient(): Observable<Melange[]> {
+     return this.http.get<Melange[]>(`http://localhost:8000/api/melanges/`, this.getHeaders());
+  }
+
 
 // 🔄 Récupérer les amendements d'un mélange
 async getAmendementsByMelange(melangeId: number): Promise<MelangeAmendement[]> {
@@ -326,6 +334,8 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
     const response = await axios.get<Plateforme[]>(this.plateformesApiUrl, this.getHeaders());
     return response.data;
   }
+
+  
 
   getEtatLabel(etat: MelangeEtat): string {
     const labels = {

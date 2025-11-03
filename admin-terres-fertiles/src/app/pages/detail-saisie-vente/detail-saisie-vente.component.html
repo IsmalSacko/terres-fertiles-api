@@ -6,7 +6,7 @@
 			<div class="header-title">
 				<mat-icon class="header-icon">receipt_long</mat-icon>
 				<div class="title-text">
-					<h1>Détail de la Saisie de Vente</h1>
+					<h1>Détail de la Saisie de Vente ({{ saisieVente?.produit?.reference_produit }})</h1>
 					<p>Gestion des ventes de produits et mélanges</p>
 				</div>
 			</div>
@@ -28,29 +28,30 @@
 				<p class="error-message">{{ errorMsg }}</p>
 			</div>
 		}
-
+       
 		<!-- Affichage du détail -->
 		@if (!loading && !errorMsg && saisieVente) {
-			<div class="vente-card">
+		<div class="vente-card">
 			<!-- En-tête de la carte -->
 			<div class="vente-header">
 				<div class="header-main">
 					<div class="client-info-header">
 						<mat-icon class="client-icon">person</mat-icon>
 						<div class="client-details">
-											<h3 class="client-name">{{ saisieVente.nom_client }}</h3>
-														@if (saisieVente.produit) {
-															<span class="vente-id">Vente # {{ saisieVente.produit.melange.nom || saisieVente.produit.reference_produit }}</span>
-														} @else {
-															<span class="vente-id">Vente #{{ saisieVente.id }}</span>
-														}
+							<h3 class="client-name">{{ saisieVente.nom_client }}</h3>
+							@if (saisieVente.produit) {
+							<span class="vente-id">Vente # {{ saisieVente.produit.reference_produit ||
+								saisieVente.produit.melange.nom }}</span>
+							} @else {
+							<span class="vente-id">Vente #{{ saisieVente.id }}</span>
+							}
 						</div>
 					</div>
 					<div class="validation-status">
-									<span class="validation-badge" [ngClass]="saisieVente.est_validee ? 'validated' : 'pending'">
-										<mat-icon>{{ saisieVente.est_validee ? 'verified' : 'pending' }}</mat-icon>
-										<span>{{ saisieVente.est_validee ? 'Validée' : 'En attente' }}</span>
-									</span>
+						<span class="validation-badge" [ngClass]="saisieVente.est_validee ? 'validated' : 'pending'">
+							<mat-icon>{{ saisieVente.est_validee ? 'verified' : 'pending' }}</mat-icon>
+							<span>{{ saisieVente.est_validee ? 'Validée' : 'En attente' }}</span>
+						</span>
 					</div>
 				</div>
 			</div>
@@ -99,11 +100,11 @@
 						<div class="info-item">
 							<div class="info-label"><mat-icon>check_circle</mat-icon>Statut validation</div>
 							<div class="info-value">
-																@if (saisieVente.est_validee) {
-																	<span class="status-validated">✅ Validée</span>
-																} @else {
-																	<span class="status-pending">⏳ En attente</span>
-																}
+								@if (saisieVente.est_validee) {
+									<span class="status-validated">✅ Validée</span>
+								} @else {
+									<span class="status-pending">⏳ En attente</span>
+								}
 							</div>
 						</div>
 					</div>
@@ -119,8 +120,8 @@
 								<div class="info-value">{{ saisieVente.produit.utilisateur }}</div>
 							</div>
 							<div class="info-item">
-								<div class="info-label"><mat-icon>tag</mat-icon>Référence</div>
-								<div class="info-value">{{ saisieVente.produit.melange.nom || saisieVente.produit.reference_produit }}</div>
+								<div class="info-label"><mat-icon>tag</mat-icon>Référence/nom</div>
+								<div class="info-value">{{ saisieVente.produit.reference_produit }}</div>
 							</div>
 							<div class="info-item">
 								<div class="info-label"><mat-icon>business</mat-icon>Fournisseur</div>

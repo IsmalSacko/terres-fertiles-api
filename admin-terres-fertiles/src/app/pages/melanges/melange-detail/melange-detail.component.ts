@@ -1,10 +1,4 @@
 
-
-// Interface pour intervention utilisateur (contrôle +1 mois)
-interface Intervention {
-  date: string;
-  objet: string;
-}
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -16,6 +10,13 @@ import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { AuthService } from '../../../services/auth.service';
 import { PlanningService } from '../../../services/planning/planning.service';
 
+
+
+// Interface pour intervention utilisateur (contrôle +1 mois)
+interface Intervention {
+  date: string;
+  objet: string;
+}
 @Component({
   selector: 'app-melange-detail',
   standalone: true,
@@ -23,6 +24,7 @@ import { PlanningService } from '../../../services/planning/planning.service';
   templateUrl: 'melange-detail.component.html',
   styleUrl: './melange-detail.component.css'
 })
+
 export class MelangeDetailComponent implements OnInit, OnDestroy {
   // Contrôle de l'affichage du formulaire de fiche technique
   showFicheTechniqueForm = true;
@@ -30,10 +32,63 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   // Liste des plannings existants pour ce mélange
   existingPlannings: any[] = [];
   selectedPlanningId: number | null = null;
-
+  mlgs: any[] = [];
   // --- Gestion interventions utilisateur (contrôle +1 mois) ---
   interventions: Intervention[] = [];
   nouvelleIntervention: Intervention = { date: '', objet: '' };
+
+constructor(
+    private melangeService: MelangeService,
+    private gisementService: GisementService,
+    private chantierService: ChantierService,
+    private authService: AuthService,
+    private planningService: PlanningService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private fb: FormBuilder, 
+  ) {
+    this.melangeForm = this.fb.group({
+      nom: [''],
+      plateforme: [null],
+      fournisseur: ['', Validators.required],
+      commune: ['', Validators.required],
+      couverture_vegetale: [''],
+      periode_melange: ['', Validators.required],
+      date_semis: ['', Validators.required],
+      references_analyses: [''],
+      ordre_conformite: [''],
+      consignes_melange: [''],
+      controle_1: [''],
+      controle_2: [''],
+      fiche_technique: ['']
+    });
+
+    this.ingredientForm = this.fb.group({
+      gisement: [null, Validators.required],
+      pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
+    });
+    // Formulaire d'amendement
+    this.amendementForm = this.fb.group({
+      amendementOrganique: [null, Validators.required],
+      pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
+    });
+
+    // Système de sauvegarde automatique supprimé
+  }
+ async ngOnInit(): Promise<void> {
+    this.getMelangeByHttpClient();
+    await this.loadData();
+    await this.loadExistingPlannings();
+    try {
+      this.availableAmendements = await this.melangeService.getAmendementsOrganiques();
+    } catch (e) {
+      console.error('Erreur lors du chargement des amendements organiques:', e);
+      this.availableAmendements = [];
+    }
+    
+    // Chargement des brouillons supprimé
+  }
+
 
   ajouterIntervention() {
     if (this.nouvelleIntervention.date && this.nouvelleIntervention.objet) {
@@ -85,7 +140,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     reference_produit: '',
     plateforme: null,
     fournisseur: '',
-    producteur: '',
+    commune: '',
     couverture_vegetale: null,
     periode_melange: '',
     date_semis: new Date().toISOString().split('T')[0],
@@ -137,44 +192,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
 
   editingAmendement: any = null;
 
-  constructor(
-    private melangeService: MelangeService,
-    private gisementService: GisementService,
-    private chantierService: ChantierService,
-    private authService: AuthService,
-    private planningService: PlanningService,
-    private route: ActivatedRoute,
-    private router: Router,
-    private fb: FormBuilder
-  ) {
-    this.melangeForm = this.fb.group({
-      nom: [''],
-      plateforme: [null],
-      fournisseur: ['', Validators.required],
-      producteur: ['', Validators.required],
-      couverture_vegetale: [''],
-      periode_melange: ['', Validators.required],
-      date_semis: ['', Validators.required],
-      references_analyses: [''],
-      ordre_conformite: [''],
-      consignes_melange: [''],
-      controle_1: [''],
-      controle_2: [''],
-      fiche_technique: ['']
-    });
-
-    this.ingredientForm = this.fb.group({
-      gisement: [null, Validators.required],
-      pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
-    });
-    // Formulaire d'amendement
-    this.amendementForm = this.fb.group({
-      amendementOrganique: [null, Validators.required],
-      pourcentage: [null, [Validators.required, Validators.min(0), Validators.max(100)]]
-    });
-
-    // Système de sauvegarde automatique supprimé
-  }
+  
 
   // === SYSTÈME DE BROUILLONS SUPPRIMÉ ===
   // Le système de sauvegarde automatique des brouillons a été complètement supprimé
@@ -190,6 +208,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+ 
   public getFicheTechniqueUrl(): string {
     // Pour l'instant, ouvrir dans une nouvelle fenêtre avec le contenu HTML
     const content = this.generateFicheTechniqueForPdf();
@@ -204,6 +223,13 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       newWindow.document.write(content);
       newWindow.document.close();
     }
+  }
+
+  getMelangeByHttpClient(){
+  this.melangeService.asyncgetMelangeByHttpClient().subscribe(data => {   
+      console.log('Données récupérées par HttpClient:', data);
+      this.mlgs = data;
+    });
   }
 
   public downloadFicheTechniquePdf(): void {
@@ -659,19 +685,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     `;
   }
 
-  async ngOnInit(): Promise<void> {
-
-    await this.loadData();
-    await this.loadExistingPlannings();
-    try {
-      this.availableAmendements = await this.melangeService.getAmendementsOrganiques();
-    } catch (e) {
-      console.error('Erreur lors du chargement des amendements organiques:', e);
-      this.availableAmendements = [];
-    }
-    
-    // Chargement des brouillons supprimé
-  }
+ 
 
   // Charger les plannings existants pour ce mélange
   async loadExistingPlannings(): Promise<void> {
@@ -800,7 +814,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       reference_produit: '',
       plateforme: null,
       fournisseur: '',
-      producteur: '',
+      commune: '',
       couverture_vegetale: null,
       periode_melange: '',
       date_semis: new Date().toISOString().split('T')[0],
@@ -836,7 +850,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       nom: this.melange.nom,
       plateforme: this.melange.plateforme,
       fournisseur: this.melange.fournisseur,
-      producteur: this.melange.producteur,
+      commune: this.melange.commune,
       couverture_vegetale: this.melange.couverture_vegetale,
       periode_melange: this.melange.periode_melange,
       date_semis: this.melange.date_semis,
@@ -1126,6 +1140,9 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
         if (formData.fournisseur && formData.fournisseur.trim() !== '') {
           melangeData.fournisseur = formData.fournisseur;
         }
+        if (formData.commune && formData.commune.trim() !== '') {
+          melangeData.commune = formData.commune;
+        }
         if (formData.couverture_vegetale && formData.couverture_vegetale.trim() !== '') {
           melangeData.couverture_vegetale = formData.couverture_vegetale;
         }
@@ -1147,7 +1164,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
           // Ne pas envoyer de nom par défaut, laisser Django le générer automatiquement
           plateforme: formData.plateforme ? parseInt(formData.plateforme) : null,
           fournisseur: formData.fournisseur,
-          producteur: formData.producteur,
+          commune: formData.commune,
           couverture_vegetale: formData.couverture_vegetale || null,
           periode_melange: formData.periode_melange,
           date_semis: formData.date_semis,
@@ -1894,10 +1911,11 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
       lines.push('</thead>');
       lines.push('<tbody>');
       this.melange.ingredients.forEach(ingredient => {
-        const gisementName = this.getGisementName(ingredient.gisement);
-        const gisement = this.gisements.find(g => g.id === ingredient.gisement);
-        const chantierName = gisement ? this.getChantierName(gisement.chantier) : 'Chantier inconnu';
-        lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="percentage-badge">${ingredient.pourcentage}%</span></td></tr>`);
+  const gisementName = this.getGisementName(ingredient.gisement);
+  const gisement = this.gisements.find(g => g.id === ingredient.gisement);
+  const chantierId = gisement ? (typeof gisement.chantier === 'object' ? gisement.chantier.id : gisement.chantier) : null;
+  const chantierName = chantierId !== null && chantierId !== undefined ? this.getChantierName(chantierId) : 'Chantier inconnu';
+  lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="percentage-badge">${ingredient.pourcentage}%</span></td></tr>`);
       });
       // Ligne total gisements
       lines.push(`<tr class="total-row"><td colspan="2"><strong>Total gisements</strong></td><td><strong>${this.getTotalPercentage()}%</strong></td></tr>`);
@@ -2013,4 +2031,6 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   onFicheTechniqueFinalised(): void {
     console.log('✅ Fiche technique finalisée');
   }
+
+
 }

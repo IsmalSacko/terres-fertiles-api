@@ -966,7 +966,8 @@ class Melange(models.Model):
     reference_produit = models.CharField(max_length=100, unique=True, editable=False)
     plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True)
     fournisseur = models.CharField(max_length=255)
-    producteur = models.CharField(max_length=255, default='', help_text="Producteur du produit de vente")  
+    commune = models.CharField(max_length=100, default='', help_text="Commune du mélange")
+  
 
     couverture_vegetale = models.CharField(max_length=100, null=True, blank=True)
     periode_melange = models.CharField(max_length=100)
@@ -1031,8 +1032,8 @@ class Melange(models.Model):
         """Génère un nouveau nom pour un mélange"""
         prefix = "MEL"
         annee = self.date_creation.year % 100
-        fournisseur_code = (self.fournisseur or self.producteur)[:3].upper()
-        plateforme_code = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+        fournisseur_code = (self.fournisseur or "XXX")[:3].upper()
+        commune_code = (self.commune or "XXX")[:3].upper()
         
         # Base du nom pour la plateforme et l'année seulement (incrément global pour la plateforme)
         base_nom = f"{prefix}-{annee}-"
@@ -1051,7 +1052,7 @@ class Melange(models.Model):
         numero_str = f"M{next_num:02d}"
         
         # Nom final incluant fournisseur pour lecture claire
-        nom = f"{prefix}-{annee}-{fournisseur_code}-{plateforme_code}-{numero_str}"
+        nom = f"{prefix}-{annee}-{fournisseur_code}-{commune_code}-{numero_str}"
         return nom, nom
     
     def _generate_nom_with_existing_suffix(self):
@@ -1065,11 +1066,11 @@ class Melange(models.Model):
         
         prefix = "MEL"
         annee = self.date_creation.year % 100
-        fournisseur_code = (self.fournisseur or self.producteur)[:3].upper()
-        plateforme_code = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+        fournisseur_code = (self.fournisseur or "XXX")[:3].upper()
+        commune_code = (self.commune or "XXX")[:3].upper()
         
         # Générer le nouveau nom avec l'ancien suffixe
-        new_nom = f"{prefix}-{annee}-{fournisseur_code}-{plateforme_code}-{current_suffix}"
+        new_nom = f"{prefix}-{annee}-{fournisseur_code}-{commune_code}-{current_suffix}"
         
         # Vérifier que ce nouveau nom n'existe pas déjà (avec un autre mélange)
         if Melange.objects.exclude(pk=self.pk).filter(nom=new_nom).exists():
@@ -1161,12 +1162,19 @@ class ProduitVente(models.Model):
             return f"Produit de vente #{self.id}"
     
     def save(self, *args, **kwargs):
-        # Générer la référence produit à partir du nom du mélange en remplaçant 'MEL' par 'PRD'
+        # Générer la référence produit à partir du nom du mélange, mais suffixe = 001 pour les produits de vente
         if not self.reference_produit and self.melange_id:
             try:
-                # Utiliser melange_id au lieu de self.melange pour éviter l'erreur de relation
                 melange = Melange.objects.get(id=self.melange_id)
-                self.reference_produit = melange.nom.replace('MEL', 'PRD')
+                # Extraire les parties du nom du mélange
+                # Format attendu : MEL-25-PHV-BRO-M01
+                parts = melange.nom.split('-')
+                if len(parts) >= 5:
+                    # Remplacer le préfixe et le suffixe
+                    self.reference_produit = f"PRD-{parts[1]}-{parts[2]}-{parts[3]}-001"
+                else:
+                    # Fallback : remplacer MEL par PRD et Mxx par 001
+                    self.reference_produit = melange.nom.replace('MEL', 'PRD').rsplit('-', 1)[0] + '-001'
             except Melange.DoesNotExist:
                 pass
         super().save(*args, **kwargs)
@@ -1356,6 +1364,10 @@ class SaisieVente(models.Model):
     date_modification_vente = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
+        # Génération automatique du nom à partir de la référence produit du ProduitVente lié
+        if not hasattr(self, 'nom') or not self.nom:
+            if self.produit and hasattr(self.produit, 'reference_produit') and self.produit.reference_produit:
+                self.nom = self.produit.reference_produit
         if self.adresse_chantier:
             chantier, created = ChantierRecepteur.objects.get_or_create(
                 adresse=self.adresse_chantier,
@@ -1365,7 +1377,7 @@ class SaisieVente(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Vente {self.nom_client} - {self.produit.reference_produit} - {'Validée' if self.est_validee else 'En attente'}"
+        return f"{self.produit.reference_produit} - {'Validée' if self.est_validee else 'En attente'}"
 
     class Meta:
         db_table = 'saisie_vente'

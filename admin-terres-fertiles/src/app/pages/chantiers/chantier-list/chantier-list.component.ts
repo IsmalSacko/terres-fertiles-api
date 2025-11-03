@@ -11,6 +11,7 @@ import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-chantier-list',
@@ -122,13 +123,28 @@ export class ChantierListComponent implements OnInit, OnDestroy {
   }
 
   async deleteChantier(id: number) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?')) {
-      try {
-        await this.chantierService.delete(id);
-        this.chantiers = this.chantiers.filter(c => c.id !== id);
-      } catch (err) {
-        this.errorMsg = 'Erreur lors de la suppression du chantier.';
-        console.error(err);
+    
+    if (id) {
+      const nom =  this.chantiers.find(c => c.id === id)?.nom || '';
+      const result = await Swal.fire({
+        title: 'Supprimer le chantier ?',
+        text: 'Cette action est irréversible. Voulez-vous vraiment supprimer ce chantier ' + nom + ' ?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      });
+      
+      if (result.isConfirmed) {
+        try {
+          await this.chantierService.delete(id);
+          this.chantiers = this.chantiers.filter(c => c.id !== id); //
+        } catch (err) {
+          this.errorMsg = 'Erreur lors de la suppression du chantier.';
+          console.error(err);
+        }
       }
     }
   }

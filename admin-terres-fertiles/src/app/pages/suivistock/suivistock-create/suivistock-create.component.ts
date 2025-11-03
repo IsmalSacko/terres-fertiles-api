@@ -17,11 +17,10 @@ import { RouterModule } from '@angular/router';
 
 import { SuiviStockPlateformeService } from '../../../services/suivi-stock-plateforme.service';
 import { PlateformeService } from '../../../services/plateforme.service';
-import { MelangeService } from '../../../services/melange.service';
+import { MelangeService, Melange } from '../../../services/melange.service';
 import { ProduitVenteService } from '../../../services/produit-vente.service';
 import { CreateSuiviStockPlateforme, STATUT_CHOICES } from '../../../models/suivi-stock-plateforme.model';
 import { Plateforme } from '../../../models/plateforme';
-import { Melange } from '../../../models/melange.model';
 
 @Component({
   selector: 'app-suivistock-create',

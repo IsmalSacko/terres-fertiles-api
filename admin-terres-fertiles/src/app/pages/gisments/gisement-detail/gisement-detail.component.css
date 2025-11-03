@@ -1419,22 +1419,7 @@ document-delete-button
 }
 
 
-@keyframes headerGlow {
-  0% { 
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.15),
-      0 8px 16px rgba(0, 0, 0, 0.1),
-      inset 0 1px 2px rgba(255, 255, 255, 0.3),
-      0 0 60px rgba(46, 125, 50, 0.2);
-  }
-  100% { 
-    box-shadow: 
-      0 25px 50px rgba(0, 0, 0, 0.2),
-      0 12px 20px rgba(0, 0, 0, 0.15),
-      inset 0 1px 2px rgba(255, 255, 255, 0.4),
-      0 0 80px rgba(255, 160, 0, 0.3);
-  }
-}
+
 
 .page-header::before {
   content: '';
@@ -1456,26 +1441,6 @@ document-delete-button
   animation: rainbowShift 6s linear infinite;
 }
 
-@keyframes rainbowShift {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-
-
-@keyframes spinGlow {
-  /* Animation supprimée */
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  min-height: 120px;
-}
 
 .header-left {
   display: flex;
@@ -1621,16 +1586,7 @@ document-delete-button
   animation: gridFadeIn 1.2s ease-out 0.5s both;
 }
 
-@keyframes gridFadeIn {
-  from { 
-    opacity: 0; 
-    transform: translateY(30px); 
-  }
-  to { 
-    opacity: 1; 
-    transform: translateY(0); 
-  }
-}
+
 
 /* ===========================
    CARTES SPECTACULAIRES ET ANIMÉES
@@ -1680,14 +1636,10 @@ mat-card-header::before {
     transparent, 
     rgba(255, 255, 255, 0.2), 
     transparent);
-  animation: headerShimmer 3s ease-in-out infinite;
+ 
 }
 
-@keyframes headerShimmer {
-  0% { left: -100%; }
-  50% { left: 100%; }
-  100% { left: -100%; }
-}
+
 
 mat-card-title {
   color: #2E7D32 !important;
@@ -1696,13 +1648,9 @@ mat-card-title {
   margin: 0 !important;
   position: relative !important;
   z-index: 2 !important;
-  animation: titlePulse 2s ease-in-out infinite alternate;
+ 
 }
 
-@keyframes titlePulse {
-  from { text-shadow: 0 0 5px rgba(46, 125, 50, 0.3); }
-  to { text-shadow: 0 0 15px rgba(46, 125, 50, 0.6); }
-}
 
 /* Icônes d'avatar dans les cartes avec animations 3D */
 mat-card-header .header-icon {
@@ -1720,7 +1668,7 @@ mat-card-header .header-icon {
   box-shadow: 
     0 10px 20px rgba(46, 125, 50, 0.3),
     inset 0 1px 3px rgba(255, 255, 255, 0.3) !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+ 
 }
 
 

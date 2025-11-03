@@ -17,6 +17,7 @@ import { RouterModule } from '@angular/router';
 import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-gisement-detail',
@@ -67,12 +68,10 @@ export class GisementDetailComponent implements OnInit {
   };
   markerPosition?: google.maps.LatLngLiteral;
 
-  typeSolOptions = [
-    { value: 'limon', viewValue: 'Limon' },
-    { value: 'sableux', viewValue: 'Sableux' },
-    { value: 'argileux', viewValue: 'Argileux' },
-    { value: 'caillouteux', viewValue: 'Caillouteux' },
-    {value: 'terre', viewValue:'Terre'},
+  environnementOptions = [
+    { value: 'ouvert', viewValue: 'Ouvert' },
+    { value: 'remanie', viewValue: 'Remanié' },
+    { value: 'entropique', viewValue: 'Entropique' },
     { value: 'autre', viewValue: 'Autre' },
   ];
 
@@ -198,7 +197,20 @@ export class GisementDetailComponent implements OnInit {
   }
 
   async deleteDocument(doc: DocumentGisement): Promise<void> {
-    if (!confirm(`Confirmer la suppression du document "${doc.nom_fichier}" ?`)) {
+
+    // SweetAlert2 pour confirmation
+    const Swal = (await import('sweetalert2')).default;
+    const result = await Swal.fire({
+      title: 'Supprimer le document ?',
+      text: `Cette action est irréversible. Voulez-vous vraiment supprimer le document "${doc.nom_fichier}" ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    });
+    if (!result.isConfirmed) {
       return;
     }
 
@@ -207,16 +219,28 @@ export class GisementDetailComponent implements OnInit {
     
     try {
       await this.documentGisementService.deleteDocument(doc.id);
-      
       // Retirer le document de la liste locale
       if (this.gisement.documents) {
         this.gisement.documents = this.gisement.documents.filter(d => d.id !== doc.id);
       }
-      
       console.log('Document supprimé avec succès');
+      await Swal.fire({
+        title: 'Supprimé !',
+        text: 'Le document a bien été supprimé.',
+        icon: 'success',
+        timer: 1800,
+        showConfirmButton: false
+      });
     } catch (error: any) {
       console.error('Erreur lors de la suppression:', error);
       this.errorMsg = 'Erreur lors de la suppression du document';
+      await Swal.fire({
+        title: 'Erreur',
+        text: 'La suppression a échoué.',
+        icon: 'error',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } finally {
       this.loading = false;
     }
@@ -267,13 +291,38 @@ export class GisementDetailComponent implements OnInit {
   }
 
   async deleteGisement(): Promise<void> {
-    if (this.isEditMode && this.gisement && this.gisement.id && confirm('Confirmer la suppression de ce gisement ?')) {
+    if (this.gisement && this.gisement.id) {
+      const result = await Swal.fire({
+        title: 'Supprimer le gisement ?',
+        text: 'Cette action est irréversible. Voulez-vous vraiment supprimer ce gisement ?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      });
+      if (!result.isConfirmed) {
+        return;
+      }
       this.loading = true;
       try {
         await this.gisementService.delete(this.gisement.id);
         this.router.navigate(['/gisements']);
+        await Swal.fire({
+          title: 'Supprimé !',
+          text: 'Le gisement a bien été supprimé.',
+          icon: 'success',
+          timer: 1800,
+          showConfirmButton: false
+        });
       } catch (err: any) {
-        this.errorMsg = err.response?.data?.message || 'Erreur lors de la suppression du gisement.';
+        await Swal.fire({
+          title: 'Erreur',
+          text: err.response?.data?.message || 'Erreur lors de la suppression du gisement.',
+          icon: 'error'
+        });
+      } finally {
         this.loading = false;
       }
     }
@@ -288,7 +337,7 @@ export class GisementDetailComponent implements OnInit {
   }
 
   getSolTypeName(typeDeSolValue: string): string {
-    const option = this.typeSolOptions.find(opt => opt.value === typeDeSolValue);
+    const option = this.environnementOptions.find(opt => opt.value === typeDeSolValue);
     return option ? option.viewValue : typeDeSolValue;
   }
 

@@ -282,12 +282,12 @@
                 </div>
 
                   <div class="col-12 col-md-4 mb-3">
-                  <label for="producteur" class="form-label">Producteur *</label>
-                  <input type="text" class="form-control form-control-lg" id="producteur" formControlName="producteur"
-                         [class.is-invalid]="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)">
-                  <div *ngIf="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)"
+                  <label for="commune" class="form-label">Commune *</label>
+                  <input type="text" class="form-control form-control-lg" id="commune" formControlName="commune"
+                         [class.is-invalid]="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)">
+                  <div *ngIf="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)"
                        class="invalid-feedback">
-                    Le producteur est requis.
+                    La commune est requise.
                   </div>
                 </div>
               </div>
@@ -713,7 +713,7 @@
           </div>
         </div>
 
-        Control 2
+      
         <div class="card mb-4" *ngIf="melange.etat === MelangeEtat.CONTROLE_2">
           <div class="card-header">
             <h5 class="card-title mb-0">Établissement de fiche produit</h5>

@@ -20,7 +20,7 @@ export interface DocumentGisement {
 export interface Gisement {
   id: number;
   chantier_nom?: string;
-  chantier: number;
+  chantier: number | { id: number; [key: string]: any };
   documents: DocumentGisement[];
   nom: string;
   date_creation: string;

@@ -32,6 +32,34 @@ import { GisementService, Gisement } from '../../../services/gisement.service';
   standalone: true
 })
 export class ChantierDetailComponent implements OnInit, OnDestroy {
+  /** Recharge les gisements du chantier après modification */
+  async onGisementModified() {
+    if (this.chantier.id) {
+      await this.loadGisements(this.chantier.id);
+    }
+  }
+  @ViewChild('googleMap') googleMap!: any; // GoogleMap type si importé
+  /** Centre et ajuste le zoom de la carte sur tous les marqueurs (chantier + gisements) */
+  fitMapToMarkers(): void {
+    if (!window.google || !window.google.maps) return;
+    const bounds = new window.google.maps.LatLngBounds();
+    // Centrer uniquement sur les gisements du chantier
+    if (this.gisements && this.gisements.length > 0) {
+      this.gisements.forEach(gisement => {
+        if (gisement.latitude && gisement.longitude) {
+          bounds.extend(new window.google.maps.LatLng(gisement.latitude, gisement.longitude));
+        }
+      });
+    }
+    // Si au moins un point, centrer et ajuster le zoom
+    if (!bounds.isEmpty() && this.googleMap) {
+      this.googleMap.fitBounds(bounds);
+    } else if (!bounds.isEmpty()) {
+      // Fallback si pas de composant GoogleMap
+      const center = bounds.getCenter();
+      this.mapCenter = { lat: center.lat(), lng: center.lng() };
+    }
+  }
   chantier: Partial<Chantier> = {};
   loading = false;
   errorMsg = '';
@@ -40,7 +68,7 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
   isViewOnly = false;
   gisements: Gisement[] = [];
   google: any;
-  mapCenter: google.maps.LatLngLiteral = { lat: 48.8566, lng: 2.3522 };
+  mapCenter: google.maps.LatLngLiteral = { lat: 48.8566, lng: 2.3522 }; 
   mapZoom = 16;
   markerOptions: google.maps.MarkerOptions = { draggable: true };
   markerPosition: google.maps.LatLngLiteral = { lat: 48.8566, lng: 2.3522 };
@@ -130,6 +158,7 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
         this.markerPosition = { ...this.mapCenter };
       }
       await this.loadGisements(id);
+      this.fitMapToMarkers();
     } catch (err) {
       this.errorMsg = 'Erreur lors du chargement du chantier.';
     } finally {
@@ -137,9 +166,18 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+ 
+
   private async loadGisements(chantierId: number): Promise<void> {
     try {
-      this.gisements = await this.gisementService.getByChantierId(chantierId);
+      // Récupère tous les gisements liés à ce chantier uniquement
+      const allGisements = await this.gisementService.getByChantierId(chantierId);
+      // Filtre pour ne garder que ceux attribués à ce chantier (si doublons ou mauvaise association)
+      this.gisements = allGisements.filter(g => 
+        (typeof g.chantier === 'number' && g.chantier === chantierId) ||
+        (typeof g.chantier === 'object' && g.chantier?.id === chantierId)
+      );
+      this.fitMapToMarkers();
     } catch (err) {
       console.error('Erreur lors du chargement des gisements:', err);
     }

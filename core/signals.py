@@ -47,8 +47,8 @@ def melange_pre_save_uppercase(sender, instance, **kwargs):
         instance.nom = instance.nom.strip().upper()
     if instance.fournisseur:
         instance.fournisseur = instance.fournisseur.strip().upper()
-    if instance.producteur:
-        instance.producteur = instance.producteur.strip().upper()
+    if instance.commune:
+        instance.commune = instance.commune.strip().upper()
     if instance.reference_produit:
         instance.reference_produit = instance.reference_produit.strip().upper()
 

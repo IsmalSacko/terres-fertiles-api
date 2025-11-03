@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MelangeService, Melange, MelangeEtat } from '../../../services/melange.service';
@@ -114,6 +115,38 @@ export class MelangeListComponent implements OnInit {
         await this.loadMelanges();
       } catch (err) {
         console.error('Erreur lors du changement d\'état:', err);
+      }
+    }
+  }
+  async deleteMelange(melangeId: any): Promise<void> {
+    const result = await Swal.fire({
+      title: 'Supprimer le mélange ?',
+      text: 'Cette action est irréversible. Voulez-vous vraiment supprimer ce mélange ?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    });
+    if (result.isConfirmed) {
+      try {
+        await this.melangeService.delete(melangeId);
+        await Swal.fire({
+          title: 'Supprimé !',
+          text: 'Le mélange a bien été supprimé.',
+          icon: 'success',
+          timer: 1800,
+          showConfirmButton: false
+        });
+        await this.loadMelanges();
+      } catch (err) {
+        console.error('Erreur lors de la suppression du mélange:', err);
+        await Swal.fire({
+          title: 'Erreur',
+          text: 'La suppression a échoué.',
+          icon: 'error'
+        });
       }
     }
   }

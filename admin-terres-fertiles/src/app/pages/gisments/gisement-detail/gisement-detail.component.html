@@ -22,6 +22,9 @@
           <mat-icon>edit</mat-icon>
           Modifier
         </button>
+        <button mat-raised-button color="danger"  (click)="deleteGisement()" class="delete-button">
+          Supprimer
+        </button>
       </div>
     </div>
   </div>
@@ -98,11 +101,11 @@
               [center]="mapCenter"
               [zoom]="mapZoom">
               <map-marker
-                [position]="markerPosition!"
-                [label]="gisement.nom || gisement.commune || 'Gisement'"
-                [options]="{ icon: markerIconOptions }"
-                  (mapClick)="openGoogleMaps()">
-                </map-marker>
+  [position]="markerPosition!"
+  [label]="{ text: gisement.nom || gisement.commune || 'Gisement', color: '#1976d2', fontSize: '14px', fontWeight: 'bold'}"
+  [options]="{ icon: markerIconOptions }"
+  (mapClick)="openGoogleMaps()">
+</map-marker>
               </google-map>
             </div>
             <div class="map-actions-column">
@@ -208,11 +211,11 @@
               <mat-icon matSuffix>place</mat-icon>
             </mat-form-field>
 
-            <!-- Type de sol -->
+            <!-- Environnement -->
             <mat-form-field appearance="outline">
-              <mat-label>Type de sol</mat-label>
+              <mat-label>Environnement</mat-label>
               <mat-select [(ngModel)]="gisement.type_de_sol" name="type_de_sol" required>
-                <mat-option *ngFor="let option of typeSolOptions" [value]="option.value">
+                <mat-option *ngFor="let option of environnementOptions" [value]="option.value">
                   {{ option.viewValue }}
                 </mat-option>
               </mat-select>
