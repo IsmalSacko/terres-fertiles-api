@@ -774,180 +774,6 @@ class Plateforme(models.Model):
         ordering = ['numero_sequence']
 
 
-class SuiviStockPlateforme(models.Model):
-    """
-    Table de suivi des andains (tas de mélange) sur les plateformes
-    Correspond au tableau Excel de suivi des stocks
-    """
-    
-    STATUT_CHOICES = [
-        ('en_cours', 'En cours'),
-        ('en_culture', 'En culture'),
-        ('pret_vente', 'Prêt pour vente'),
-        ('ecoule', 'Écoulé'),
-        ('suspendu', 'Suspendu'),
-    ]
-    
-    # Identifiants
-    andain_numero = models.IntegerField(help_text="Numéro de l'andain sur la plateforme")
-    reference_suivi = models.CharField(max_length=100, unique=True, editable=False, help_text="Référence générée automatiquement")
-    
-    # Relations principales
-    plateforme = models.ForeignKey(
-        'Plateforme', 
-        on_delete=models.CASCADE, 
-        related_name='suivis_stock',
-        help_text="Plateforme où se trouve l'andain"
-    )
-    melange = models.ForeignKey(
-        'Melange', 
-        on_delete=models.CASCADE, 
-        related_name='suivis_stock',
-        help_text="Mélange associé à cet andain"
-    )
-    produit_vente = models.ForeignKey(
-        'ProduitVente', 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='suivis_stock',
-        help_text="Produit de vente une fois prêt"
-    )
-    
-    # Volumes et quantités
-    volume_initial_m3 = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        help_text="Volume initial en m³"
-    )
-    volume_restant_m3 = models.DecimalField(
-        max_digits=10, 
-        decimal_places=2,
-        help_text="Volume restant en m³ (MAJ)"
-    )
-    
-    # Statut et suivi
-    statut = models.CharField(
-        max_length=20, 
-        choices=STATUT_CHOICES, 
-        default='en_cours',
-        help_text="Statut actuel de l'andain"
-    )
-    
-    # Dates importantes
-    date_mise_en_andains = models.DateField(
-        null=True, 
-        blank=True,
-        help_text="Date de mise en andains"
-    )
-    date_mise_en_culture = models.DateField(
-        null=True, 
-        blank=True,
-        help_text="Date de mise en culture"
-    )
-    date_previsionnelle_vente = models.DateField(
-        null=True, 
-        blank=True,
-        help_text="Date prévisionnelle de mise en vente"
-    )
-    date_ecoulement = models.DateField(
-        null=True, 
-        blank=True,
-        help_text="Date d'écoulement complet"
-    )
-    
-    # Informations techniques
-    recette = models.TextField(
-        null=True, 
-        blank=True,
-        help_text="Recette/composition du mélange"
-    )
-    remarques = models.TextField(
-        null=True, 
-        blank=True,
-        help_text="Remarques et observations"
-    )
-    
-    # Métadonnées
-    utilisateur = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='suivis_stock',
-        help_text="Responsable du suivi"
-    )
-    date_creation = models.DateTimeField(auto_now_add=True)
-    date_modification = models.DateTimeField(auto_now=True)
-    
-    def save(self, *args, **kwargs):
-        # Générer la référence automatiquement si pas encore définie
-        if not self.reference_suivi:
-            self.reference_suivi = self._generate_reference()
-        
-        # Synchroniser le volume restant avec le statut
-        if self.statut == 'ecoule' and self.volume_restant_m3 > 0:
-            self.volume_restant_m3 = 0
-            if not self.date_ecoulement:
-                self.date_ecoulement = timezone.now().date()
-        
-        super().save(*args, **kwargs)
-    
-    def _generate_reference(self):
-        """Génère une référence unique pour le suivi"""
-        if not self.plateforme or not self.melange:
-            return "REF-TEMP"
-        
-        # Format: SUIVI-{PLATEFORME_CODE}-{MELANGE_CODE}-{ANDAIN_NUM}
-        plateforme_code = self.plateforme.nom.split('-')[-1] if self.plateforme.nom else "XXX"  # Prendre le numéro de la plateforme
-        melange_code = self.melange.nom.split('-')[-1] if self.melange.nom else "XXX"  # Prendre le numéro du mélange
-        andain_str = f"{self.andain_numero:02d}"
-        
-        reference = f"SUIVI-{plateforme_code}-{melange_code}-{andain_str}"
-        
-        # Vérifier l'unicité et ajuster si nécessaire
-        counter = 1
-        original_reference = reference
-        while SuiviStockPlateforme.objects.exclude(pk=self.pk).filter(reference_suivi=reference).exists():
-            reference = f"{original_reference}-{counter}"
-            counter += 1
-            
-        return reference
-    
-    @property
-    def volume_ecoule_m3(self):
-        """Calcule le volume écoulé"""
-        if self.volume_initial_m3 is not None and self.volume_restant_m3 is not None:
-            return self.volume_initial_m3 - self.volume_restant_m3
-        return 0
-    
-    @property
-    def taux_ecoulement_percent(self):
-        """Calcule le taux d'écoulement en pourcentage"""
-        if (self.volume_initial_m3 is not None and 
-            self.volume_restant_m3 is not None and 
-            self.volume_initial_m3 > 0):
-            return round((self.volume_ecoule_m3 / self.volume_initial_m3) * 100, 2)
-        return 0
-    
-    @property
-    def duree_stockage_jours(self):
-        """Calcule la durée de stockage en jours"""
-        if self.date_mise_en_andains:
-            date_fin = self.date_ecoulement or timezone.now().date()
-            return (date_fin - self.date_mise_en_andains).days
-        return None
-    
-    def __str__(self):
-        return f"Andain {self.andain_numero} - {self.melange.nom if self.melange else 'Sans mélange'} ({self.plateforme.nom if self.plateforme else 'Sans plateforme'})"
-    
-    class Meta:
-        db_table = 'suivi_stock_plateforme'
-        verbose_name = "Suivi de stock plateforme"
-        verbose_name_plural = "Suivis de stock plateforme"
-        ordering = ['plateforme', 'andain_numero']
-        unique_together = [('plateforme', 'andain_numero')]  # Un numéro d'andain unique par plateforme
-
 
 class Melange(models.Model):
     class Etat(models.IntegerChoices):
@@ -1162,19 +988,41 @@ class ProduitVente(models.Model):
             return f"Produit de vente #{self.id}"
     
     def save(self, *args, **kwargs):
-        # Générer la référence produit à partir du nom du mélange, mais suffixe = 001 pour les produits de vente
+        # Générer une référence produit unique à partir du nom du mélange
         if not self.reference_produit and self.melange_id:
             try:
                 melange = Melange.objects.get(id=self.melange_id)
-                # Extraire les parties du nom du mélange
-                # Format attendu : MEL-25-PHV-BRO-M01
-                parts = melange.nom.split('-')
+                # Exemple attendu pour melange.nom : MEL-25-PHV-BRO-M01
+                parts = (melange.nom or '').split('-')
                 if len(parts) >= 5:
-                    # Remplacer le préfixe et le suffixe
-                    self.reference_produit = f"PRD-{parts[1]}-{parts[2]}-{parts[3]}-001"
+                    # Base sans suffixe séquentiel
+                    base_prefix = f"PRD-{parts[1]}-{parts[2]}-{parts[3]}-"
                 else:
-                    # Fallback : remplacer MEL par PRD et Mxx par 001
-                    self.reference_produit = melange.nom.replace('MEL', 'PRD').rsplit('-', 1)[0] + '-001'
+                    # Fallback: remplacer MEL->PRD et enlever le dernier segment
+                    prefix = (melange.nom or '').replace('MEL', 'PRD')
+                    base_prefix = prefix.rsplit('-', 1)[0] + '-'
+
+                # Chercher les références existantes qui partagent ce préfixe
+                existing = (
+                    ProduitVente
+                    .objects
+                    .filter(reference_produit__startswith=base_prefix)
+                    .values_list('reference_produit', flat=True)
+                )
+
+                # Extraire le suffixe numérique à 3 chiffres et trouver le max
+                max_num = 0
+                for ref in existing:
+                    try:
+                        suffix = ref.split('-')[-1]
+                        num = int(suffix)
+                        if num > max_num:
+                            max_num = num
+                    except Exception:
+                        continue
+
+                next_num = max_num + 1 if max_num > 0 else 1
+                self.reference_produit = f"{base_prefix}{next_num:03d}"
             except Melange.DoesNotExist:
                 pass
         super().save(*args, **kwargs)

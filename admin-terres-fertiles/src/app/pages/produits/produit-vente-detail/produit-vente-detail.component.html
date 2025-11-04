@@ -23,13 +23,28 @@
       <section>
         <h3><mat-icon>track_changes</mat-icon> Traçabilité</h3>
         <div class="trace-grid">
-          <div>
-            <mat-icon>engineering</mat-icon>
-            <strong>Origine :</strong> {{ produit?.chantier_info?.nom || '—' }} ({{ produit?.chantier_info?.localisation || '—' }})
+          <div class="origine-row">
+            <div class="origine-info">
+              <mat-icon>engineering</mat-icon>
+              <strong>Origine :</strong>
+              <span>
+                {{ produit?.chantier_info?.nom || '—' }}
+         
+              </span>
+            </div>
+            <button mat-icon-button color="primary" aria-label="Modifier l'origine"
+                    (click)="editChantier()"
+                    *ngIf="produit?.chantier_info?.id">
+              <mat-icon>edit</mat-icon>
+            </button>
           </div>
           <div>
             <mat-icon>factory</mat-icon>
-            <strong>Plateforme :</strong> {{ produit?.plateforme?.nom || '—' }} ({{ produit?.plateforme?.localisation || '—' }})
+            <strong>Plateforme :</strong> {{ produit?.plateforme?.nom || '—' }}
+          </div>
+          <div>
+            <mat-icon>dynamic_feed </mat-icon>
+            <strong>Mélange :</strong> {{ produit?.melange?.nom || '—' }} 
           </div>
           <div>
             <mat-icon>login</mat-icon>
@@ -118,9 +133,17 @@
       </section>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button color="primary" (click)="contactVendeur()">
+      <button mat-raised-button color="accent" (click)="goToEdit()" [disabled]="!produit?.id">
+        <mat-icon>edit</mat-icon>
+        Modifier
+      </button>
+      <button mat-raised-button color="warn" (click)="pVenteDelete()" [disabled]="!produit?.id">
+        <mat-icon>delete</mat-icon>
+        Supprimer
+      </button>
+      <button mat-raised-button color="primary" (click)="partagerAvecAcheteur()">
         <mat-icon>mail</mat-icon>
-        Contacter le vendeur
+        Partager avec un acheteur potentiel
       </button>
     </mat-card-actions>
   </mat-card>

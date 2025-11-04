@@ -50,6 +50,33 @@
               </mat-form-field>
               </div>
 
+              <!-- Résumé plateforme / auto-remplissage -->
+              @if (autoFilledFromPlateforme) {
+                <div class="plateforme-summary" role="status" aria-live="polite">
+                  <div class="summary-header">
+                    <mat-icon class="summary-icon">warehouse</mat-icon>
+                    <div class="summary-title">
+                      <div class="label">Plateforme détectée</div>
+                      <div class="value">{{ selectedPlateformeNom }}</div>
+                    </div>
+                  </div>
+                  <div class="summary-metrics">
+                    <div class="metric">
+                      <div class="metric-label">Stock initial</div>
+                      <div class="metric-value">{{ plateformeTotals.initial.toLocaleString() }} m³</div>
+                    </div>
+                    <div class="metric">
+                      <div class="metric-label">Déjà vendu</div>
+                      <div class="metric-value">{{ plateformeTotals.vendu.toLocaleString() }} m³</div>
+                    </div>
+                  </div>
+                  <div class="summary-note">
+                    <mat-icon>lock</mat-icon>
+                    Champs auto-remplis et verrouillés pour cette plateforme
+                  </div>
+                </div>
+              }
+
               <!-- Informations générales -->
               <div class="form-section">
                 <h3>Informations générales</h3>
@@ -85,6 +112,14 @@
                     <mat-label>Volume initial (m³)</mat-label>
                     <input matInput type="number" formControlName="volume_initial" 
                            min="0.1" step="0.1" required>
+                    @if (autoFilledFromPlateforme) {
+                      <mat-icon matSuffix class="suffix-lock" matTooltip="Auto-rempli (plateforme)">lock</mat-icon>
+                    }
+                    @if (autoFilledFromPlateforme) {
+                      <mat-hint align="end">
+                        Valeur remplie automatiquement depuis la plateforme {{ selectedPlateformeNom || '' }}
+                      </mat-hint>
+                    }
                     @if (volume_initial?.hasError('required')) {
                       <mat-error>
                         Le volume initial est obligatoire
@@ -120,12 +155,21 @@
                     <mat-label>Volume vendu (m³)</mat-label>
                     <input matInput type="number" formControlName="volume_vendu" 
                            min="0" step="0.1">
+                    @if (autoFilledFromPlateforme) {
+                      <mat-icon matSuffix class="suffix-lock" matTooltip="Auto-rempli (plateforme)">lock</mat-icon>
+                    }
+                    @if (autoFilledFromPlateforme) {
+                      <mat-hint align="end">
+                        Valeur auto depuis {{ selectedPlateformeNom || 'plateforme' }}
+                      </mat-hint>
+                    } @else {
+                      <mat-hint align="start">Laissez vide si pas encore vendu</mat-hint>
+                    }
                     @if (volume_vendu?.hasError('volumeVenduTropElevé')) {
                       <mat-error>
                         Le volume vendu ne peut pas dépasser le volume initial
                       </mat-error>
                     }
-                    <mat-hint>Laissez vide si pas encore vendu</mat-hint>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="half-width">

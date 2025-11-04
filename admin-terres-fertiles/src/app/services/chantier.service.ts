@@ -7,11 +7,13 @@ export interface Chantier {
   maitre_ouvrage: string;
   entreprise_terrassement: string;
   localisation: string;
-  latitude: number;
-  longitude: number;
+  latitude: number | null;
+  longitude: number | null;
   commune: string;
   is_active: boolean;
 }
+
+export type ChantierUpdatePayload = Partial<Pick<Chantier, 'localisation' | 'latitude' | 'longitude' | 'commune'>>;
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +35,6 @@ export class ChantierService {
   }
 
   async getById(id: number): Promise<Chantier> {
-   
     const response = await axios.get<Chantier>(`${this.apiUrl}${id}/`, this.getHeaders());
     return response.data;
   }
@@ -43,9 +44,8 @@ export class ChantierService {
     return response.data;
   }
 
-  async update(id: number, chantier: Chantier): Promise<Chantier> {
-   
-    const response = await axios.put<Chantier>(`${this.apiUrl}${id}/`, chantier, this.getHeaders());
+  async update(id: number, payload: ChantierUpdatePayload): Promise<Chantier> {
+    const response = await axios.patch<Chantier>(`${this.apiUrl}${id}/`, payload, this.getHeaders());
     return response.data;
   }
 

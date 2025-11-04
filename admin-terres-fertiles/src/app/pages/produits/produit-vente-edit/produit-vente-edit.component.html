@@ -1,0 +1,102 @@
+<div class="standard-page-content">
+  <div class="container" *ngIf="!loading; else loadingTpl">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>edit</mat-icon>
+          Modifier le produit
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Utilisateur</mat-label>
+            <input matInput [value]="form.utilisateur" disabled />
+            <mat-hint>Responsable automatiquement défini à l'utilisateur connecté.</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fournisseur *</mat-label>
+            <input matInput [(ngModel)]="form.fournisseur" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Melange *</mat-label>
+            <mat-select [(ngModel)]="form.melange_id">
+              <mat-option *ngFor="let m of melanges" [value]="m.id">{{ m.nom }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Nom site</mat-label>
+            <input matInput [(ngModel)]="form.nom_site" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Volume initial *</mat-label>
+            <input matInput [(ngModel)]="form.volume_initial" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date disponibilite *</mat-label>
+            <input matInput type="date" [(ngModel)]="form.date_disponibilite" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Commentaires analyses</mat-label>
+            <textarea matInput rows="4" [(ngModel)]="form.commentaires_analyses"></textarea>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Volume vendu</mat-label>
+            <input matInput [(ngModel)]="form.volume_vendu" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Acheteur</mat-label>
+            <input matInput [(ngModel)]="form.acheteur" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Date achat</mat-label>
+            <input matInput type="date" [(ngModel)]="form.date_achat" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Periode destockage</mat-label>
+            <input matInput [(ngModel)]="form.periode_destockage" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Localisation projet</mat-label>
+            <input matInput [(ngModel)]="form.localisation_projet" />
+          </mat-form-field>
+
+          <div class="toggle-line full">
+            <mat-slide-toggle [(ngModel)]="form.pret_pour_vente">Prêt pour vente</mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+      <div class="actions">
+        <button mat-stroked-button color="primary" (click)="cancel()">
+          <mat-icon>arrow_back</mat-icon>
+          Annuler
+        </button>
+        <button mat-raised-button color="accent" (click)="save()" [disabled]="!produit?.id || !isValid()">
+          <mat-icon>save</mat-icon>
+          Enregistrer
+        </button>
+      </div>
+    </mat-card>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  </ng-template>
+
+  <div class="error-message" *ngIf="errorMsg">
+    {{ errorMsg }}
+  </div>
+</div>

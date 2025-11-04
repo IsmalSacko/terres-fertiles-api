@@ -4,9 +4,12 @@ from django.db.models.signals import post_save, pre_save, post_delete
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 from django.core.files.storage import default_storage
+from django.db.models import Sum, F, Value
+from django.db.models.functions import Coalesce, Greatest
+from decimal import Decimal
 
 
-from .models import (DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange, Chantier, Plateforme, SaisieVente)
+from .models import (DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange, Chantier, Plateforme, SaisieVente, ProduitVente)
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
@@ -181,3 +184,78 @@ def delete_unused_chantier(sender, instance, **kwargs):
     chantier = instance.chantier
     if chantier and not chantier.saisievente_set.exists():
         chantier.delete()
+
+
+###############################
+# Mise à jour Volume Vendu PRD
+###############################
+
+def _to_m3(volume_tonne: Decimal | None) -> Decimal:
+    """Convertit des tonnes en m³ avec densité par défaut 1.3 t/m³."""
+    if not volume_tonne:
+        return Decimal('0.00')
+    densite = Decimal('1.3')
+    return (Decimal(volume_tonne) / densite).quantize(Decimal('0.01'))
+
+
+def _apply_delta_produit_volume_vendu(produit_id: int, delta_m3: Decimal) -> None:
+    """Applique un delta (positif ou négatif) au volume_vendu du produit, sans jamais passer en dessous de 0."""
+    if not produit_id or not delta_m3:
+        return
+    ProduitVente.objects.filter(id=produit_id).update(
+        volume_vendu=Greatest(
+            Coalesce(F('volume_vendu'), Value(Decimal('0')))
+            + Value(delta_m3),
+            Value(Decimal('0'))
+        )
+    )
+
+
+@receiver(pre_save, sender=SaisieVente)
+def saisie_vente_pre_save_capture_old(sender, instance: SaisieVente, **kwargs):
+    """Capture l'ancien état pour calculer un delta après sauvegarde."""
+    if instance.pk:
+        try:
+            old = SaisieVente.objects.get(pk=instance.pk)
+            instance._old_est_validee = old.est_validee
+            instance._old_volume_tonne = old.volume_tonne
+        except SaisieVente.DoesNotExist:
+            instance._old_est_validee = False
+            instance._old_volume_tonne = Decimal('0')
+    else:
+        instance._old_est_validee = False
+        instance._old_volume_tonne = Decimal('0')
+
+
+@receiver(post_save, sender=SaisieVente)
+def saisie_vente_post_save_update_produit(sender, instance: SaisieVente, created: bool, **kwargs):
+    """Met à jour volume_vendu par delta selon création/modification et validation."""
+    if not instance or not instance.produit_id:
+        return
+
+    new_valid = bool(instance.est_validee)
+    new_m3 = _to_m3(instance.volume_tonne)
+
+    old_valid = bool(getattr(instance, '_old_est_validee', False))
+    old_m3 = _to_m3(getattr(instance, '_old_volume_tonne', Decimal('0')))
+
+    if created:
+        # Ajoute si validée à la création
+        delta = new_m3 if new_valid else Decimal('0.00')
+    else:
+        # Delta = (nouvel état) - (ancien état)
+        delta = (new_m3 if new_valid else Decimal('0.00')) - (old_m3 if old_valid else Decimal('0.00'))
+
+    if delta != Decimal('0.00'):
+        _apply_delta_produit_volume_vendu(instance.produit_id, delta)
+
+
+@receiver(post_delete, sender=SaisieVente)
+def saisie_vente_post_delete_update_produit(sender, instance: SaisieVente, **kwargs):
+    """Soustrait le volume si la saisie supprimée était validée."""
+    if not instance or not instance.produit_id:
+        return
+    if instance.est_validee:
+        delta = -_to_m3(instance.volume_tonne)
+        if delta != Decimal('0.00'):
+            _apply_delta_produit_volume_vendu(instance.produit_id, delta)

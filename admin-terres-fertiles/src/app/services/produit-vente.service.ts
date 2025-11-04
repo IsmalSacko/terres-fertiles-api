@@ -28,6 +28,7 @@ interface Melange {
 export interface ProduitVente {
   id: number;
   utilisateur?: string; // Ajout du champ utilisateur
+  pret_pour_vente?: boolean;
   chantier_info?: {
     id: number;
     nom: string;
@@ -180,6 +181,37 @@ export class ProduitVenteService {
         console.error('Status:', error.response?.status);
         console.error('Data:', error.response?.data);
         throw new Error(error.response?.data?.message || 'Erreur lors de la création du produit');
+      }
+      throw error;
+    }
+  }
+
+  async updateProduitVente(id: number, payload: Partial<ProduitVente>): Promise<ProduitVente> {
+    try {
+      const response = await axios.patch<ProduitVente>(
+        `${this.apiUrl}${id}/`,
+        payload,
+        this.getHeaders()
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du produit:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
+      }
+      throw error;
+    }
+  }
+
+  async deleteProduitVente(id: any): Promise<void> {
+    try {
+      await axios.delete(`${this.apiUrl}${id}/`, this.getHeaders());
+    } catch (error) {
+      console.error('Erreur lors de la suppression du produit:', error);
+      if (axios.isAxiosError(error)) {
+        console.error('Status:', error.response?.status);
+        console.error('Data:', error.response?.data);
       }
       throw error;
     }

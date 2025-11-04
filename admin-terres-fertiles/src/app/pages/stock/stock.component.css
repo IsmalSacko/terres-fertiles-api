@@ -1,0 +1,16 @@
+.stock-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; 
+ 
+    }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.kpi .kpi-value { font-size: 1.6rem; font-weight: 600; margin-top: 8px; }
+.panel { padding: 8px; }
+.charts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.chart-card.wide { grid-column: 1 / -1; }
+.loading-center, .loading-row { display: flex; justify-content: center; align-items: center; padding: 16px; }
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: 1fr; }
+  .charts { grid-template-columns: 1fr; }
+}

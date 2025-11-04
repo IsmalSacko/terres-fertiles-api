@@ -72,6 +72,13 @@ export class CreateSaisieVenteComponent implements OnInit {
     });
   }
 
+  // Conversion simple: tonnes -> m³ en supposant densité ~1.3 t/m³ (cohérent avec l'affichage ~34615.38 m³ pour 45000 t)
+  private tonnesToM3(tonnes: number): number {
+    const DENSITE_T_PAR_M3 = 1.3;
+    if (!tonnes || tonnes <= 0) return 0;
+    return tonnes / DENSITE_T_PAR_M3;
+  }
+
   async ngOnInit() {
     // Charger d'abord les produits, puis les plateformes (car on filtre les plateformes selon les produits)
     await this.loadProduits();
@@ -221,6 +228,8 @@ export class CreateSaisieVenteComponent implements OnInit {
 
         // Créer la saisie de vente
         const createdSaisie: SaisieVenteResponse = await this.createSaisieVenteService.createSaisieVente(saisieVenteData);
+
+        // La mise à jour du volume vendu est désormais gérée côté backend via un signal Django.
         
         this.snackBar.open(
           'Saisie de vente créée avec succès !', 

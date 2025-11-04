@@ -216,3 +216,80 @@ mat-form-field:has(input[formControlName="volume_disponible"])::after {
   margin-right: auto;
 }
 
+/* Suffix lock icon */
+.suffix-lock {
+  color: #6b7280;
+  opacity: 0.8;
+  font-size: 20px;
+}
+
+/* Résumé plateforme (auto-remplissage) */
+.plateforme-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  background: #f8faf9;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.summary-icon {
+  color: #2e7d32;
+}
+
+.summary-title .label {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.summary-title .value {
+  font-weight: 600;
+  color: #111827;
+}
+
+.summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.metric {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.summary-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .summary-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+

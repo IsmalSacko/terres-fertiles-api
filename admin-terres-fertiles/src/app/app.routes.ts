@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { DocumentGisementComponent } from './pages/gisments/document-gisement/document-gisement.component';
 import { GisementDetailComponent } from './pages/gisments/gisement-detail/gisement-detail.component';
 import { GisementListComponent } from './pages/gisments/gisement-list/gisement-list.component';
@@ -34,9 +33,10 @@ import { AmendementCreateComponent } from './pages/amendements/amendement-create
 import { AmendementDetailComponent } from './pages/amendements/amendement-detail/amendement-detail.component';
 import { AmendementEditComponent } from './pages/amendements/amendement-edit/amendement-edit.component';
 import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-detail/produit-vente-detail.component';
+import { ProduitVenteEditComponent } from './pages/produits/produit-vente-edit/produit-vente-edit.component';
+import { StockComponent } from './pages/stock/stock.component';
 
 // Import des routes du module de suivi de stock
-import { SUIVISTOCK_ROUTES } from './pages/suivistock';
 import { FicheAgroPedoCreateComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-create/fiche-agro-pedo-create.component';
 import { FicheAgroPedoDetailComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-detail/fiche-agro-pedo-detail.component';
 import { FicheAgroPedoEditComponent } from './pages/fiche-agropedodesol/fiche-agro-pedo-edit/fiche-agro-pedo-edit.component';
@@ -48,17 +48,18 @@ import { PhotoCreateComponent } from './pages/fiche-agropedodesol/photo-create/p
 import { PhotoDetailComponent } from './pages/fiche-agropedodesol/photo-detail/photo-detail.component';
 import { PhotoEditComponent } from './pages/fiche-agropedodesol/photo-edit/photo-edit.component';
 import { PhotoListComponent } from './pages/fiche-agropedodesol/photo-list/photo-list.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+// SuiviStock (lecture seule)
 
 
 
 export const routes: Routes = [
   // Route par défaut
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-
+  { path: 'dashboard', component: DashboardComponent },
   // Route pour l'authentification utilisateur
   { path: 'login', component: LoginComponent },
   // routes principales
-  { path: 'dashboard', component: DashboardComponent },
   { path: 'documents-gisement', component: DocumentGisementComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'profil',component: UserProfileComponent },
@@ -79,6 +80,7 @@ export const routes: Routes = [
   // Routes pour les produits de vente
   { path: 'produits', component: ProduitVenteListComponent },
   { path: 'produits/nouveau', component: CreateProduitVenteComponent },
+  { path: 'produits/edit/:id', component: ProduitVenteEditComponent },
   { path: 'produits/:id', component: ProduitVenteDetailComponent },
   // Routes pour les saisies de vente
   { path: 'saisies-vente', component: SaisieVenteComponent },
@@ -127,12 +129,7 @@ export const routes: Routes = [
   { path:'fiche-agropedodesol/photo-detail/:id', component: PhotoDetailComponent },
   { path:'fiche-agropedodesol/photo-edit/:id', component: PhotoEditComponent },
   
-
-  // Routes pour le module de suivi de stock
-  {
-    path: 'suivistock',
-    children: SUIVISTOCK_ROUTES,
-    title: 'Suivi des Stocks'
-  },
+  // Suivi des stocks (lecture seule)
+  { path: 'suivistock', component: StockComponent },
 
 ];

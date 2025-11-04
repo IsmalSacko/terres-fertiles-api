@@ -80,13 +80,23 @@ export class DetailSaisieVenteComponent {
     return `${tonnage} Tonnes (~${volume} m³)`;
   }
 
-  // Méthode pour calculer le stock restant après la vente
+  // Stock avant cette vente (en tenant compte de la validation de la vente courante)
+  calculateStockBeforeSale(volumeInitial: number, volumeVendu: number, volumeTonneActuel: number): number {
+    if (isNaN(volumeInitial) || isNaN(volumeVendu)) return 0;
+    const volumeTonneActuelM3 = isNaN(volumeTonneActuel) ? 0 : this.convertTonnageToVolume(volumeTonneActuel);
+    // Si la vente est déjà validée, le volume_vendu inclut déjà cette vente => on la retranche pour reconstituer l'état "avant"
+    const venduHorsCetteVente = (this.saisieVente?.est_validee ? (volumeVendu - volumeTonneActuelM3) : volumeVendu);
+    const before = volumeInitial - Math.max(0, venduHorsCetteVente);
+    return Math.round(before * 100) / 100;
+  }
+
+  // Stock après cette vente (prévision si non validée, état actuel si validée)
   calculateStockAfterSale(volumeInitial: number, volumeVendu: number, volumeTonneActuel: number): number {
-    if (isNaN(volumeInitial) || isNaN(volumeVendu) || isNaN(volumeTonneActuel)) {
-      return 0;
-    }
-    const volumeTonneActuelM3 = this.convertTonnageToVolume(volumeTonneActuel);
-    const stockRestant = volumeInitial - (volumeVendu + volumeTonneActuelM3);
+    if (isNaN(volumeInitial) || isNaN(volumeVendu)) return 0;
+    const volumeTonneActuelM3 = isNaN(volumeTonneActuel) ? 0 : this.convertTonnageToVolume(volumeTonneActuel);
+    // Pour éviter la double soustraction si la vente est validée, on reconstitue d'abord le vendu hors cette vente
+    const venduHorsCetteVente = (this.saisieVente?.est_validee ? (volumeVendu - volumeTonneActuelM3) : volumeVendu);
+    const stockRestant = volumeInitial - (Math.max(0, venduHorsCetteVente) + volumeTonneActuelM3);
     if (isNaN(stockRestant) || !isFinite(stockRestant)) {
       return 0;
     }

@@ -11,9 +11,9 @@ from datetime import date, datetime
 
 from rest_framework import serializers
 
-from .models import (
+from .models import ( 
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
-    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SuiviStockPlateforme,
+    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire,
     FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
 
@@ -251,16 +251,15 @@ class MelangeSerializer(serializers.ModelSerializer):
             return full_name if full_name else getattr(user, 'username', '')
         return ''
 
-
     def create(self, validated_data):
         ingredients_data = validated_data.pop("ingredients", [])
-       
+        
         melange = Melange.objects.create(**validated_data)
 
         for item in ingredients_data:
             MelangeIngredient.objects.create(melange=melange, **item)
        
-    
+        
         return melange
 
     def update(self, instance, validated_data):
@@ -353,15 +352,40 @@ class ProduitVenteDetailSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['melange', 'documents', 'analyses', 'utilisateur']  # On empêche la modification côté frontend
     def get_chantier_info(self, obj):
-        # Récupérer chantier depuis premier gisement du melange s’il existe
-        melange = obj.melange
-        if melange and melange.ingredients.exists():
-            premier_gisement = melange.ingredients.first().gisement
-            chantier = premier_gisement.chantier
+        """Retourne le chantier d'origine du produit.
+        Règle: chantier du gisement dominant (plus fort pourcentage).
+        Fallback: premier gisement lié; sinon None.
+        """
+        melange = getattr(obj, 'melange', None)
+        if not melange:
+            return None
+
+        dominant = (
+            MelangeIngredient.objects
+            .filter(melange=melange)
+            .select_related('gisement__chantier')
+            .order_by('-pourcentage', 'id')
+            .first()
+        )
+        if dominant and dominant.gisement and dominant.gisement.chantier:
+            chantier = dominant.gisement.chantier
             return {
                 'id': chantier.id,
                 'nom': chantier.nom,
-                'localisation': chantier.localisation
+                'localisation': chantier.localisation,
+                'latitude': getattr(chantier, 'latitude', None),
+                'longitude': getattr(chantier, 'longitude', None),
+            }
+
+        gisement = melange.gisements.select_related('chantier').first()
+        if gisement and gisement.chantier:
+            chantier = gisement.chantier
+            return {
+                'id': chantier.id,
+                'nom': chantier.nom,
+                'localisation': chantier.localisation,
+                'latitude': getattr(chantier, 'latitude', None),
+                'longitude': getattr(chantier, 'longitude', None),
             }
         return None
 
@@ -467,166 +491,8 @@ class PlanningSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
-class SuiviStockPlateformeSerializer(serializers.ModelSerializer):
-    """Serializer pour le suivi de stock des plateformes avec détails des relations"""
-    
-    # Champs en lecture seule pour les détails des relations
-    plateforme_details = serializers.SerializerMethodField()
-    melange_details = serializers.SerializerMethodField()
-    produit_vente_details = serializers.SerializerMethodField()
-    utilisateur_details = serializers.SerializerMethodField()
-    
-    # Champs calculés (propriétés du modèle)
-    volume_ecoule_m3 = serializers.ReadOnlyField()
-    taux_ecoulement_percent = serializers.ReadOnlyField()
-    duree_stockage_jours = serializers.ReadOnlyField()
-    
-    # Champs d'affichage
-    statut_display = serializers.CharField(source='get_statut_display', read_only=True)
-    
-    class Meta:
-        model = SuiviStockPlateforme
-        fields = [
-            'id', 'andain_numero', 'reference_suivi',
-            'plateforme', 'plateforme_details',
-            'melange', 'melange_details', 
-            'produit_vente', 'produit_vente_details',
-            'volume_initial_m3', 'volume_restant_m3', 'volume_ecoule_m3',
-            'taux_ecoulement_percent', 'statut', 'statut_display',
-            'date_mise_en_andains', 'date_mise_en_culture', 
-            'date_previsionnelle_vente', 'date_ecoulement',
-            'recette', 'remarques', 'duree_stockage_jours',
-            'utilisateur', 'utilisateur_details',
-            'date_creation', 'date_modification'
-        ]
-        read_only_fields = [
-            'reference_suivi', 'volume_ecoule_m3', 'taux_ecoulement_percent',
-            'duree_stockage_jours', 'statut_display', 'date_creation', 'date_modification'
-        ]
-    
-    def get_plateforme_details(self, obj):
-        """Détails de la plateforme"""
-        if obj.plateforme:
-            return {
-                'id': obj.plateforme.id,
-                'nom': obj.plateforme.nom,
-                'localisation': obj.plateforme.localisation,
-                'entreprise_gestionnaire': obj.plateforme.entreprise_gestionnaire
-            }
-        return None
-    
-    def get_melange_details(self, obj):
-        """Détails du mélange"""
-        if obj.melange:
-            return {
-                'id': obj.melange.id,
-                'nom': obj.melange.nom,
-                'etat': obj.melange.etat,
-                'etat_display': obj.melange.get_etat_display()
-            }
-        return None
-    
-    def get_produit_vente_details(self, obj):
-        """Détails du produit de vente si existant"""
-        if obj.produit_vente:
-            return {
-                'id': obj.produit_vente.id,
-                'reference_produit': obj.produit_vente.reference_produit,
-                'fournisseur': obj.produit_vente.fournisseur,
-                'volume_initial': float(obj.produit_vente.volume_initial),
-                'volume_disponible': float(obj.produit_vente.volume_disponible),
-                'date_disponibilite': obj.produit_vente.date_disponibilite.isoformat() if obj.produit_vente.date_disponibilite else None,
-                'pret_pour_vente': obj.produit_vente.pret_pour_vente,
-                'display_name': str(obj.produit_vente)
-            }
-        return None
-    
-    def get_utilisateur_details(self, obj):
-        """Détails de l'utilisateur responsable"""
-        if obj.utilisateur:
-            return {
-                'id': obj.utilisateur.id,
-                'username': obj.utilisateur.username,
-                'company_name': obj.utilisateur.company_name
-            }
-        return None
-    
-    def validate(self, data):
-        """Validation personnalisée"""
-        # Vérifier que le volume restant n'est pas supérieur au volume initial
-        volume_initial = data.get('volume_initial_m3')
-        volume_restant = data.get('volume_restant_m3')
-        
-        if volume_initial and volume_restant and volume_restant > volume_initial:
-            raise serializers.ValidationError({
-                'volume_restant_m3': 'Le volume restant ne peut pas être supérieur au volume initial.'
-            })
-        
-        # Vérifier l'unicité andain/plateforme lors de la création
-        if not self.instance:  # Création
-            plateforme = data.get('plateforme')
-            andain_numero = data.get('andain_numero')
-            
-            if plateforme and andain_numero:
-                if SuiviStockPlateforme.objects.filter(
-                    plateforme=plateforme, 
-                    andain_numero=andain_numero
-                ).exists():
-                    raise serializers.ValidationError({
-                        'andain_numero': f'Un andain avec le numéro {andain_numero} existe déjà sur cette plateforme.'
-                    })
-        
-        return data
-    
-    def create(self, validated_data):
-        """Création avec utilisateur automatique"""
-        validated_data['utilisateur'] = self.context['request'].user
-        return super().create(validated_data)
 
 
-class SuiviStockPlateformeCreateSerializer(serializers.ModelSerializer):
-    """Serializer simplifié pour la création"""
-    
-    class Meta:
-        model = SuiviStockPlateforme
-        fields = [
-            'id', 'andain_numero', 'plateforme', 'melange', 'produit_vente',
-            'volume_initial_m3', 'volume_restant_m3', 'statut',
-            'date_mise_en_andains', 'date_mise_en_culture', 
-            'date_previsionnelle_vente', 'date_ecoulement',
-            'recette', 'remarques'
-        ]
-    
-    def validate(self, data):
-        """Validation pour la création"""
-        # Même validation que le serializer principal
-        volume_initial = data.get('volume_initial_m3')
-        volume_restant = data.get('volume_restant_m3')
-        
-        if volume_initial and volume_restant and volume_restant > volume_initial:
-            raise serializers.ValidationError({
-                'volume_restant_m3': 'Le volume restant ne peut pas être supérieur au volume initial.'
-            })
-        
-        # Vérifier l'unicité andain/plateforme
-        plateforme = data.get('plateforme')
-        andain_numero = data.get('andain_numero')
-        
-        if plateforme and andain_numero:
-            if SuiviStockPlateforme.objects.filter(
-                plateforme=plateforme, 
-                andain_numero=andain_numero
-            ).exists():
-                raise serializers.ValidationError({
-                    'andain_numero': f'Un andain avec le numéro {andain_numero} existe déjà sur cette plateforme.'
-                })
-        
-        return data
-    
-    def create(self, validated_data):
-        """Création avec utilisateur automatique"""
-        validated_data['utilisateur'] = self.context['request'].user
-        return super().create(validated_data)
 
 class FichePhotoSerializer(serializers.ModelSerializer):
     fiche_nom_sondage = serializers.CharField(source='fiche.nom_sondage', read_only=True)

@@ -145,7 +145,7 @@
 									</ng-container>
 									<div class="stock-line before-sale">
 										<span class="stock-label">Avant cette vente:</span>
-										<span class="stock-value">{{ (+saisieVente.produit.volume_disponible).toLocaleString() }} m³</span>
+										<span class="stock-value">{{ calculateStockBeforeSale(+(saisieVente.produit.volume_initial || 0), +(saisieVente.produit.volume_vendu || 0), +saisieVente.volume_tonne).toLocaleString() }} m³</span>
 									</div>
 									<div class="stock-line current-sale">
 										<span class="stock-label">Achat actuel:</span>

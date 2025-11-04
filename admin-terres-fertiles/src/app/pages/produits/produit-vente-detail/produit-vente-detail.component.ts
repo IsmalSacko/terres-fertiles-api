@@ -12,6 +12,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import * as L from 'leaflet';
 import { ProduitVenteService, ProduitVente } from '../../../services/produit-vente.service';
+import { ChantierService } from '../../../services/chantier.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-produit-vente-detail',
@@ -28,7 +30,7 @@ import { ProduitVenteService, ProduitVente } from '../../../services/produit-ven
     MatDividerModule,
     MatChipsModule,
   ],
-  providers: [ProduitVenteService],
+  providers: [ProduitVenteService, ChantierService],
   templateUrl: './produit-vente-detail.component.html',
   styleUrl: './produit-vente-detail.component.css'
 })
@@ -36,6 +38,10 @@ export class ProduitVenteDetailComponent implements OnInit {
   produit: ProduitVente | null = null;
   loading = false;
   errorMsg = '';
+  editChantierMode = false;
+  editLocalisation: string | null = null;
+  editLatitude: number | null = null;
+  editLongitude: number | null = null;
 
   // Configuration de la carte
   mapOptions: L.MapOptions = {
@@ -58,7 +64,8 @@ export class ProduitVenteDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private produitService: ProduitVenteService
+    private produitService: ProduitVenteService,
+    private chantierService: ChantierService
   ) {}
 
   ngOnInit(): void {
@@ -130,17 +137,19 @@ export class ProduitVenteDetailComponent implements OnInit {
     }
   }
 
-  contactVendeur(): void {
-    const subject = encodeURIComponent(`Demande d'information - ${this.produit?.reference_produit}`);
+  partagerAvecAcheteur(): void {
+    if (!this.produit) return;
+    const subject = encodeURIComponent(`Demande d'information - ${this.produit.reference_produit}`);
     const body = encodeURIComponent(
       `Bonjour,\n\n` +
-      `Je suis intéressé(e) par votre produit ${this.produit?.reference_produit}.\n\n` +
-      `Détails du produit :\n` +
-      `- Site : ${this.produit?.nom_site}\n` +
-      `- Volume disponible : ${this.produit?.volume_disponible} m³\n` +
-      `- Localisation : ${this.produit?.localisation_projet}\n\n` +
-      `Pourriez-vous me donner plus d'informations ?\n\n` +
-      `Cordialement,`
+      `Nous vous informons de la disponibilité du produit suivant :\n\n` +
+      `- Référence : ${this.produit.reference_produit}\n` +
+      `- Site d'origine : ${this.produit.chantier_info?.nom } (${this.produit.chantier_info?.localisation})\n` +
+      `- Volume disponible : ${this.produit.volume_disponible} m³\n` +
+      `- Localisation : ${this.produit.localisation_projet}\n\n` +
+      `Pour toute demande complémentaire, vous pouvez nous contacter à l'adresse suivante : contact@terres-fertiles.fr\n\n` +
+      `Cordialement,\n` +
+      `L'équipe Terres Fertiles`
     );
     window.location.href = `mailto:contact@terres-fertiles.fr?subject=${subject}&body=${body}`;
   }
@@ -189,5 +198,68 @@ export class ProduitVenteDetailComponent implements OnInit {
     const maintenant = new Date();
     const diffTime = dateDisponibilite.getTime() - maintenant.getTime();
     return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  async editChantier(): Promise<void> {
+    if (!this.produit?.chantier_info?.id) {
+      window.alert("Aucun chantier n'est associé à ce produit. Ajoutez au moins un gisement au mélange pour définir un chantier d'origine.");
+      return;
+    }
+    this.editChantierMode = true;
+    this.editLocalisation = this.produit.chantier_info.localisation || '';
+    this.editLatitude = this.produit.chantier_info.latitude || null;
+    this.editLongitude = this.produit.chantier_info.longitude || null;
+  }
+
+  async cancelEditChantier(): Promise<void> {
+    this.editChantierMode = false;
+  }
+
+  async saveChantier(): Promise<void> {
+    if (!this.produit?.chantier_info?.id) return;
+    try {
+      await this.chantierService.update(this.produit.chantier_info.id, {
+        localisation: this.editLocalisation || '',
+        latitude: this.editLatitude,
+        longitude: this.editLongitude,
+      });
+      if (this.produit?.id) {
+        await this.loadProduit(this.produit.id);
+      }
+    } catch (e) {
+      console.error('Erreur de mise à jour du chantier', e);
+    } finally {
+      this.editChantierMode = false;
+    }
+  }
+
+  // Ouvre la page d'édition du produit
+  goToEdit(): void {
+    if (!this.produit?.id) return;
+    this.router.navigate(['/produits/edit', this.produit.id]);
+  }
+
+    async pVenteDelete(): Promise<void> {
+    const id = this.produit?.id;
+    if (!id) return;
+
+    const { isConfirmed } = await Swal.fire({
+      title: 'Supprimer le produit ?',
+      text: `Cette action est irréversible. Supprimer « ${this.produit?.nom_site || 'Produit'} » ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Supprimer',
+      cancelButtonText: 'Annuler'
+    });
+    if (!isConfirmed) return;
+
+    try {
+      await this.produitService.deleteProduitVente(id);
+      await Swal.fire('Supprimé', 'Le produit a été supprimé.', 'success');
+      this.router.navigate(['/produits']);
+    } catch (e) {
+      console.error('Erreur lors de la suppression du produit', e);
+      Swal.fire('Erreur', 'La suppression a échoué.', 'error');
+    }
   }
 }

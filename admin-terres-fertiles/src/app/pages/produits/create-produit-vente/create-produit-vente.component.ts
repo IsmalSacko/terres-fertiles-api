@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { MelangeService, Melange } from '../../../services/melange.service';
 import { ProduitVenteService } from '../../../services/produit-vente.service';
@@ -35,7 +36,8 @@ import { CreateProduitVente } from '../../../models/produit-vente.model';
     MatSnackBarModule,
     MatProgressSpinnerModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatTooltipModule
   ],
   templateUrl: './create-produit-vente.component.html',
   styleUrls: ['./create-produit-vente.component.css']
@@ -45,6 +47,10 @@ export class CreateProduitVenteComponent implements OnInit {
   isLoading = false;
   isCreating = false;
   melanges: Melange[] = [];
+  // Auto-remplissage basé sur la plateforme du mélange sélectionné
+  autoFilledFromPlateforme = false;
+  currentPlateformeId: number | null = null;
+  plateformeTotals = { initial: 0, vendu: 0, count: 0 };
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +77,10 @@ export class CreateProduitVenteComponent implements OnInit {
 
   async ngOnInit() {
     await this.loadMelanges();
+    // Surveille le changement de mélange pour auto-remplir volumes selon la plateforme
+    this.produitForm.get('melange')?.valueChanges.subscribe((melangeId: number) => {
+      this.handleMelangeChange(melangeId);
+    });
   }
 
   async loadMelanges() {
@@ -112,12 +122,63 @@ export class CreateProduitVenteComponent implements OnInit {
     }
   }
 
+  private async handleMelangeChange(melangeId: number) {
+    try {
+      const selected = this.melanges.find(m => m.id === Number(melangeId));
+      const plateformeId = selected?.plateforme ?? null;
+      this.currentPlateformeId = plateformeId ?? null;
+
+      if (!plateformeId) {
+        // Pas de plateforme renseignée => activer champs et nettoyer
+        this.autoFilledFromPlateforme = false;
+        this.plateformeTotals = { initial: 0, vendu: 0, count: 0 };
+        this.volume_initial?.enable({ emitEvent: false });
+        this.volume_vendu?.enable({ emitEvent: false });
+        return;
+      }
+
+      // Récupérer tous les produits pour agréger par plateforme
+      const produits = await this.produitVenteService.getAll();
+      const produitsPlateforme = produits.filter((p: any) => {
+        const pid = p?.melange?.plateforme ?? p?.plateforme?.id ?? p?.melange?.plateforme_details?.id;
+        return Number(pid) === Number(plateformeId);
+      });
+
+      const totalInitial = produitsPlateforme.reduce((acc, p) => acc + (Number(p.volume_initial) || 0), 0);
+      const totalVendu = produitsPlateforme.reduce((acc, p) => acc + (Number(p.volume_vendu) || 0), 0);
+
+      this.plateformeTotals = { initial: totalInitial, vendu: totalVendu, count: produitsPlateforme.length };
+
+      if (produitsPlateforme.length > 0) {
+        // Plateforme déjà utilisée: auto-remplir et désactiver
+        this.autoFilledFromPlateforme = true;
+        this.volume_initial?.setValue(totalInitial, { emitEvent: false });
+        this.volume_vendu?.setValue(totalVendu, { emitEvent: false });
+        this.volume_initial?.disable({ emitEvent: false });
+        this.volume_vendu?.disable({ emitEvent: false });
+      } else {
+        // Nouvelle plateforme: activer pour saisie manuelle
+        this.autoFilledFromPlateforme = false;
+        this.volume_initial?.enable({ emitEvent: false });
+        this.volume_vendu?.enable({ emitEvent: false });
+        // Ne pas forcer de valeur ici, laisser l'utilisateur saisir si première fois
+      }
+    } catch (error) {
+      console.error('Erreur lors du calcul des totaux plateforme:', error);
+      // En cas d'erreur, laisser l'édition manuelle possible
+      this.autoFilledFromPlateforme = false;
+      this.volume_initial?.enable({ emitEvent: false });
+      this.volume_vendu?.enable({ emitEvent: false });
+    }
+  }
+
   async onSubmit() {
     if (this.produitForm.valid && !this.isCreating) {
       this.isCreating = true;
       
       try {
-        const formData = this.produitForm.value;
+        // Inclure les champs désactivés (auto-remplis) dans la lecture
+        const formData = this.produitForm.getRawValue();
         
         // Validation des données critiques
         if (!formData.melange || Number(formData.melange) <= 0) {
@@ -146,7 +207,7 @@ export class CreateProduitVenteComponent implements OnInit {
         if (formData.commentaires_analyses?.trim()) {
           produitData.commentaires_analyses = formData.commentaires_analyses.trim();
         }
-        if (formData.volume_vendu && Number(formData.volume_vendu) > 0) {
+        if (formData.volume_vendu != null && formData.volume_vendu !== '' && Number(formData.volume_vendu) >= 0) {
           produitData.volume_vendu = Number(formData.volume_vendu);
         }
         if (formData.acheteur?.trim()) {
@@ -248,6 +309,11 @@ export class CreateProduitVenteComponent implements OnInit {
       localisation_projet: '',
       pret_pour_vente: false
     });
+    this.autoFilledFromPlateforme = false;
+    this.currentPlateformeId = null;
+    this.plateformeTotals = { initial: 0, vendu: 0, count: 0 };
+    this.volume_initial?.enable({ emitEvent: false });
+    this.volume_vendu?.enable({ emitEvent: false });
   }
 
   onCancel() {
@@ -267,6 +333,16 @@ export class CreateProduitVenteComponent implements OnInit {
   get periode_destockage() { return this.produitForm.get('periode_destockage'); }
   get localisation_projet() { return this.produitForm.get('localisation_projet'); }
   get pret_pour_vente() { return this.produitForm.get('pret_pour_vente'); }
+
+  // Helpers d'affichage
+  get selectedMelange(): Melange | undefined {
+    const id = Number(this.produitForm.get('melange')?.value);
+    return this.melanges.find(m => m.id === id);
+  }
+  get selectedPlateformeNom(): string {
+    const m = this.selectedMelange;
+    return m?.plateforme_nom || m?.plateforme_details?.nom || '';
+  }
 
   debugForm(): void {
     console.log('=== DEBUG FORM ===');

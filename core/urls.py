@@ -20,7 +20,6 @@ from .views import (
     PlateformeViewSet,
     SaisieVenteViewSet,
     ChantierRecepteurViewSet,
-    SuiviStockPlateformeViewSet,
     FicheAgroPedodeSolViewSet,
     FicheHorizonViewSet,
     FichePhotoViewSet,
@@ -44,7 +43,6 @@ router.register(r'plateformes', PlateformeViewSet)
 router.register(r'plannings', PlanningViewSet)
 router.register(r'saisies-vente', SaisieVenteViewSet)
 router.register(r'chantiers-recepteurs', ChantierRecepteurViewSet)
-router.register(r'suivi-stock-plateforme', SuiviStockPlateformeViewSet)
 router.register(r'fiches-agro', FicheAgroPedodeSolViewSet)
 router.register(r'fiches-horizons', FicheHorizonViewSet)
 router.register(r'fiches-photos', FichePhotoViewSet)
