@@ -157,11 +157,22 @@ export class StockComponent implements OnInit, AfterViewInit {
       .sort((a, b) => this.toNumber(b.volume_disponible) - this.toNumber(a.volume_disponible))
       .slice(0, 10);
     const labels = sorted.map(p => p.reference_produit);
-    const data = sorted.map(p => this.toNumber(p.volume_disponible));
+    const dataDisponible = sorted.map(p => this.toNumber(p.volume_disponible));
+    const dataVendu = sorted.map(p => this.toNumber(p.volume_vendu));
     const config: ChartConfiguration<'bar'> = {
       type: 'bar',
-      data: { labels, datasets: [{ label: 'Disponible (m³)', data, backgroundColor: '#42a5f5' }] },
-      options: { responsive: true, scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+      data: { 
+        labels, 
+        datasets: [
+          { label: 'Disponible (m³)', data: dataDisponible, backgroundColor: '#42a5f5' },
+          { label: 'Vendu (m³)', data: dataVendu, backgroundColor: '#ffb74d' }
+        ] 
+      },
+      options: { 
+        responsive: true, 
+        scales: { y: { beginAtZero: true } }, 
+        plugins: { legend: { display: true, position: 'bottom' } } 
+      }
     };
     this.barChart?.destroy();
     this.barChart = new Chart(this.barCanvas.nativeElement, config);
