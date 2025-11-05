@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { SaisieventeService } from '../../services/saisievente.service'; 
-import { SaisieVente } from '../../models/saisie-vente.model';
+import { SaisieventeService } from '../../../services/saisievente.service'; 
+import { SaisieVente } from '../../../models/saisie-vente.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';

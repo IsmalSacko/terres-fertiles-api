@@ -14,10 +14,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { from, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, map, catchError } from 'rxjs/operators';
-import { CreateSaisieVenteService } from '../../services/create-saisie-vente.service'
-import { CreateSaisieVente, SaisieVenteResponse } from '../../models/create-saisie-vente.model';
-import { ProduitVenteService, ProduitVente } from '../../services/produit-vente.service';
-import { PlateformeService } from '../../services/plateforme.service';
+import { CreateSaisieVenteService } from '../../../services/create-saisie-vente.service'
+import { CreateSaisieVente, SaisieVenteResponse } from '../../../models/create-saisie-vente.model';
+import { ProduitVenteService, ProduitVente } from '../../../services/produit-vente.service';
+import { PlateformeService } from '../../../services/plateforme.service';
 
 @Component({
   selector: 'app-create-saisie-vente',

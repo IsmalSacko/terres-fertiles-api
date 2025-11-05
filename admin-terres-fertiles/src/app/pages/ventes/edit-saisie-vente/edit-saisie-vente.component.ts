@@ -11,9 +11,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { CreateSaisieVenteService } from '../../services/create-saisie-vente.service';
-import { CreateSaisieVente, SaisieVenteResponse } from '../../models/create-saisie-vente.model';
-import { ProduitVenteService, ProduitVente } from '../../services/produit-vente.service';
+import { CreateSaisieVenteService } from '../../../services/create-saisie-vente.service';
+import { CreateSaisieVente, SaisieVenteResponse } from '../../../models/create-saisie-vente.model';
+import { ProduitVenteService, ProduitVente  } from '../../../services/produit-vente.service';
 
 @Component({
   selector: 'app-edit-saisie-vente',
