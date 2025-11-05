@@ -52,7 +52,7 @@ export class StockComponent implements OnInit, AfterViewInit {
   private doughnutChart?: Chart;
   private barChart?: Chart;
   private lineChart?: Chart;
-
+   
   displayedColumnsProduits = ['reference_produit', 'fournisseur', 'nom_site', 'volume_initial', 'volume_disponible', 'volume_vendu'];
   displayedColumnsVentes = ['date_vente', 'nom_client', 'produit', 'volume_tonne', 'est_validee'];
 

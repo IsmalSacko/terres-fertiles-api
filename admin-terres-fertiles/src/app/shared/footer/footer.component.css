@@ -1,0 +1,55 @@
+.tf-footer {
+  background: linear-gradient(180deg, #0f172a 0%, #0b1223 100%);
+  color: #cbd5e1;
+  border-top: 1px solid rgba(148,163,184,0.15);
+}
+.tf-footer .brand .title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #e2e8f0;
+}
+.tf-footer .brand .subtitle {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+.tf-footer .bi {
+  font-size: 1rem;
+}
+.tf-footer .section-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.tf-footer .footer-links li {
+  margin: .25rem 0;
+}
+.tf-footer .footer-links a {
+  color: #cbd5e1;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .15rem 0;
+}
+.tf-footer .footer-links a:hover {
+  color: #ffffff;
+}
+.tf-footer .divider {
+  border-color: rgba(148,163,184,0.15);
+  margin: 1rem 0 0.75rem;
+}
+.tf-footer .social .social-link {
+  color: #94a3b8;
+  margin-left: .75rem;
+}
+.tf-footer .social .social-link:hover {
+  color: #ffffff;
+}
+
+/* Container spacing alignment with Bootstrap */
+.tf-footer .container {
+  max-width: 1200px;
+}

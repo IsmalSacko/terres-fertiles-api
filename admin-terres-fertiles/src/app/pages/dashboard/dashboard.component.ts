@@ -22,8 +22,10 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit {
+  
   constructor(
     private chantierService: ChantierService,
+
     private gisementService: GisementService,
     private planningService: PlanningService,
     private melangeService: MelangeService,
@@ -41,6 +43,7 @@ amendements: number = 0;
 produitVente: number = 0;
 saisiesVente: number = 0;
 suiviStock: number = 0;
+stockDisponible: number = 0;
 loading: boolean = true;
 loadingGlobal: boolean = false;
 
@@ -49,7 +52,6 @@ ngOnInit() {
   this.loadAllData();
 
 }
-
 async loadAllData() {
   this.loading = true;
   try {
@@ -61,6 +63,7 @@ async loadAllData() {
       this.loadAmendementCount(),
       this.loadProduitVenteCount(),
       this.loadSaisiesVenteCount(),
+      this.loadStockDisponibleCount(),
       
 
     ]);
@@ -77,6 +80,8 @@ async loadChantierActifs() {
   this.animateCounter('chantierActifs', result);
 }
 
+
+
 async loadGisementCount() {
   const result = await this.gisementService.getGisementCount();
   this.animateCounter('gisements', result);
@@ -91,7 +96,6 @@ async loadMelangeCount() {
   const result = await this.melangeService.getMelangeCount();
   this.animateCounter('melanges', result);
 }
-
 async loadProduitVenteCount() {
   const result = await this.produitVenteService.getProduitVenteCount();
   console.log('Produits en vente:', result);
@@ -101,6 +105,16 @@ async loadProduitVenteCount() {
 async loadSaisiesVenteCount() {
   const result = await this.saisiesVenteService.getSaisiesVenteCount();
   this.animateCounter('saisiesVente', result);
+}
+
+async loadStockDisponibleCount() {
+  try {
+    const result = await this.produitVenteService.getStockDisponibleCount();
+    this.animateCounter('stockDisponible', result);
+  } catch (e) {
+    console.error('Erreur lors du chargement du stock disponible:', e);
+    this.animateCounter('stockDisponible', 0);
+  }
 }
 
 async loadAmendementCount() {
@@ -115,7 +129,7 @@ async loadAmendementCount() {
 
 
 // Animation du compteur pour rendre les statistiques attractives
-private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente' | 'suiviStock', targetValue: number) {
+private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente' | 'suiviStock' | 'stockDisponible', targetValue: number) {
   const duration = 1500; // 1.5 secondes
   const startTime = Date.now();
   const startValue = 0;
