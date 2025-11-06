@@ -1,1 +1,83 @@
-<p>horizon-edit works!</p>
+<div class="container py-3" *ngIf="!loading; else loadingTpl">
+	<div *ngIf="error" class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> {{ error }}</div>
+
+	<div *ngIf="horizon" class="card">
+		<div class="card-header d-flex justify-content-between align-items-center">
+			<h5 class="mb-0">Modifier l'horizon {{ horizon.nom }}</h5>
+			<div class="btn-group btn-group-sm">
+				<button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+					<i class="bi bi-arrow-left"></i> Annuler
+				</button>
+				<button type="button" class="btn btn-success" (click)="save()" [disabled]="saving">
+					<i class="bi bi-check2"></i> Enregistrer
+				</button>
+						<button type="button" class="btn btn-outline-danger" (click)="delete()">
+							<i class="bi bi-trash"></i> Supprimer
+						</button>
+			</div>
+		</div>
+		<div class="card-body">
+			<form>
+				<div class="row g-3">
+					<div class="col-md-3">
+						<label class="form-label">Nom</label>
+						<select class="form-select" [(ngModel)]="horizon.nom" name="nom">
+							<option *ngFor="let n of possibleNoms" [ngValue]="n">{{ n }}</option>
+						</select>
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Profondeur</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.profondeur" name="profondeur" placeholder="ex: 0-20 cm" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Texture</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.texture" name="texture" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Humidité</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.humidite" name="humidite" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Couleur</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.couleur" name="couleur" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Hydromorphie</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.hydromorphie" name="hydromorphie" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Test HCL</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.test_hcl" name="test_hcl" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Porosité</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.porosite" name="porosite" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Compacité</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.compacite" name="compacite" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Activité biologique</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.activite_bio" name="activite_bio" />
+					</div>
+					<div class="col-md-3">
+						<label class="form-label">Echantillon</label>
+						<input type="text" class="form-control" [(ngModel)]="horizon.echantillon" name="echantillon" />
+					</div>
+					<div class="col-12">
+						<label class="form-label">Commentaires</label>
+						<textarea class="form-control" rows="3" [(ngModel)]="horizon.commentaires" name="commentaires"></textarea>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<ng-template #loadingTpl>
+	<div class="container py-3">
+		<div class="alert alert-info">Chargement…</div>
+	</div>
+  
+</ng-template>

@@ -1,17 +1,21 @@
 <div class="container form-container">
-    
-<form (ngSubmit)="createHorizon()" #ficheForm="ngForm" class="mat-elevation-z2" style="max-width:600px;margin:auto;">
-	<h2>Créer un horizon</h2>
+
+    <form (ngSubmit)="createHorizon()" #ficheForm="ngForm" class="mat-elevation-z2"
+        style="max-width:600px;margin:auto;">
+        <h2>Créer un horizon</h2>
         <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Fiche associée *</mat-label>
+            <mat-label>Fiche associée</mat-label>
             <mat-select required name="fiche" [(ngModel)]="horizon.fiche">
-                <mat-option *ngFor="let fiche of fiches" [value]="fiche.id">{{ fiche.EAP || fiche.nom_sondage }}</mat-option>
+                <mat-option *ngFor="let fiche of fiches" [value]="fiche.id">{{ fiche.EAP || fiche.nom_sondage
+                    }}</mat-option>
             </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Nom *</mat-label>
-            <input matInput required name="nom" [(ngModel)]="horizon.nom">
-    </mat-form-field>
+            <mat-label>Nom de l'horizon</mat-label>
+            <mat-select [(ngModel)]="horizon.nom" name="nom" required="">
+                <mat-option *ngFor="let n of nomsDisponibles" [value]="n">{{n}}</mat-option>
+            </mat-select>
+        </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Profondeur</mat-label>
             <input matInput name="profondeur" [(ngModel)]="horizon.profondeur">
@@ -22,7 +26,9 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Humidité</mat-label>
-            <input matInput name="humidite" [(ngModel)]="horizon.humidite">
+            <mat-select name="humidite" [(ngModel)]="horizon.humidite" required>
+                <mat-option *ngFor="let h of humiditeDispo" [value]="h">{{h}}</mat-option>
+            </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Couleur</mat-label>
@@ -30,19 +36,27 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Hydromorphie</mat-label>
-            <input matInput name="hydromorphie" [(ngModel)]="horizon.hydromorphie">
+            <mat-select name="hydromorphie" [(ngModel)]="horizon.hydromorphie">
+                <mat-option *ngFor="let hy of hydromorphieDispo" [value]="hy">{{hy}}</mat-option>
+            </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Test HCl</mat-label>
-            <input matInput name="test_hcl" [(ngModel)]="horizon.test_hcl">
+            <mat-select name="test_hcl" [(ngModel)]="horizon.test_hcl">
+                <mat-option *ngFor="let htc of htcDispo" [value]="htc">{{htc}}</mat-option>
+            </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Porosité</mat-label>
-            <input matInput name="porosite" [(ngModel)]="horizon.porosite">
+            <mat-select matInput name="porosite" [(ngModel)]="horizon.porosite">
+                <mat-option *ngFor="let p of porositeDispo" [value]="p">{{p}}</mat-option>
+            </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Compacité</mat-label>
-            <input matInput name="compacite" [(ngModel)]="horizon.compacite">
+            <mat-select name="compacite" [(ngModel)]="horizon.compacite">
+                <mat-option *ngFor="let c of compaciteDispo" [value]="c">{{c}}</mat-option>
+            </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
             <mat-label>Activité biologique</mat-label>
@@ -61,8 +75,10 @@
             <input matInput name="echantillon" [(ngModel)]="horizon.echantillon">
         </mat-form-field>
         <!-- Ajout des photos si besoin -->
-    <button mat-raised-button color="primary" type="submit" [disabled]="loading || !ficheForm.form.valid">SUIVANT</button>
-    <button *ngIf="lastCreatedHorizonId" mat-stroked-button color="accent" type="button" (click)="goToAddPhotos(lastCreatedHorizonId)">Ajouter des photos au dernier horizon</button>
+        <button mat-raised-button color="primary" type="submit"
+            [disabled]="loading || !ficheForm.form.valid">SUIVANT</button>
+        <button *ngIf="lastCreatedHorizonId" mat-stroked-button color="accent" type="button"
+            (click)="goToAddPhotos(lastCreatedHorizonId)">Ajouter des photos au dernier horizon</button>
         <div *ngIf="loading">
             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
         </div>

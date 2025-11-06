@@ -26,8 +26,9 @@ import { SaisieVente } from '../../models/saisie-vente.model';
   styleUrl: './stock.component.css'
 })
 export class StockComponent implements OnInit, AfterViewInit {
-  private produitService = inject(ProduitVenteService);
-  private venteService = inject(SaisieventeService);
+  // Services et injections
+  private produitService = inject(ProduitVenteService); 
+  private venteService = inject(SaisieventeService); 
   private snackBar = inject(MatSnackBar);
 
   // Données
@@ -38,7 +39,7 @@ export class StockComponent implements OnInit, AfterViewInit {
   loadingProduits = false;
   loadingVentes = false;
 
-  // KPI agrégés produits
+  // KPI agrégés produits (KPI veut dire key performance indicator)
   totalVolumeInitial = 0;
   totalVolumeDisponible = 0;
   totalVolumeVendu = 0;
@@ -68,10 +69,11 @@ export class StockComponent implements OnInit, AfterViewInit {
   }
 
   async loadAll(): Promise<void> {
-    await Promise.all([this.loadProduits(), this.loadVentes()]);
+    await Promise.all([this.loadProduits(), this.loadVentes()]); // Charger en parallèle
     this.refreshCharts();
   }
 
+  // Convertit une valeur en nombre (gère les strings avec espaces insécables)
   toNumber(v: any): number {
     if (v === null || v === undefined) return 0;
     const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/\s/g, '').replace(/\u202F/g, ''));
@@ -87,7 +89,7 @@ export class StockComponent implements OnInit, AfterViewInit {
       // KPI
       let init = 0, disp = 0, vendu = 0;
       for (const p of this.produits) {
-        init += this.toNumber(p.volume_initial);
+        init += this.toNumber(p.volume_initial); // 
         // volume_disponible fourni en string
         disp += this.toNumber(p.volume_disponible);
         vendu += this.toNumber(p.volume_vendu);
