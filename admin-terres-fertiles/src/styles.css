@@ -376,4 +376,26 @@ mat-form-field {
   .mobile-menu-overlay, .mobile-menu-backdrop, .mobile-menu-btn {
     display: none !important;
   }
+
+  /* Hide footer and any explicitly marked elements */
+  app-footer, .no-print {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Force a new page when needed (Photos verso) */
+  .page-break {
+    break-before: page;
+    page-break-before: always;
+  }
+
+  /* Increase print font sizes for readability */
+  html, body { font-size: 13pt !important; line-height: 1.35 !important; }
+  .fiche-detail-container { font-size: 13pt !important; }
+  table.excel th, table.excel td { font-size: 12pt !important; }
+  .horizon-table.full th, .horizon-table.full td { font-size: 12pt !important; }
+  .main-table .title { font-size: 16pt !important; }
+  .big { font-size: 18pt !important; }
+  .horizon-table.full thead th.vertical { font-size: 11pt !important; }
+  .photo-block .caption { font-size: 11pt !important; }
 }

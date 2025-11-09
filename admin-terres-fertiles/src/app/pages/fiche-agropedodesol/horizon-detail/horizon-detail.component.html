@@ -1,1 +1,53 @@
-<p>horizon-detail works!</p>
+<div class="container py-3">
+	<div *ngIf="loading" class="alert alert-info">Chargement de l'horizon…</div>
+	<div *ngIf="error" class="alert alert-danger"><i class="bi bi-exclamation-triangle"></i> {{ error }}</div>
+
+	<div *ngIf="!loading && horizon" class="card">
+		<div class="card-header d-flex justify-content-between align-items-center">
+			<h5 class="mb-0">Horizon {{ horizon.nom }}</h5>
+			<span class="text-muted small ms-3">ID: {{ horizon.id }} • Fiche: {{ horizon.fiche }}</span>
+			<div class="btn-group btn-group-sm">
+				<button type="button" class="btn btn-outline-secondary" (click)="backToFiche()">
+					<i class="bi bi-arrow-left"></i> Retour fiche
+				</button>
+				<button type="button" class="btn btn-primary" (click)="editHorizon()">
+					<i class="bi bi-pencil"></i> Modifier
+				</button>
+						<button type="button" class="btn btn-outline-danger" (click)="deleteHorizon()">
+							<i class="bi bi-trash"></i> Supprimer
+						</button>
+			</div>
+		</div>
+		<div class="card-body">
+			<div class="row g-3">
+				<div class="col-md-3"><strong>Profondeur:</strong> {{ horizon.profondeur || '-' }}</div>
+				<div class="col-md-3"><strong>Texture:</strong> {{ horizon.texture || '-' }}</div>
+				<div class="col-md-3"><strong>Humidité:</strong> {{ horizon.humidite || '-' }}</div>
+				<div class="col-md-3"><strong>Couleur:</strong> {{ horizon.couleur || '-' }}</div>
+				<div class="col-md-3"><strong>Hydromorphie:</strong> {{ horizon.hydromorphie || '-' }}</div>
+				<div class="col-md-3"><strong>Test HCL:</strong> {{ horizon.test_hcl || '-' }}</div>
+				<div class="col-md-3"><strong>Porosité:</strong> {{ horizon.porosite || '-' }}</div>
+				<div class="col-md-3"><strong>Compacité:</strong> {{ horizon.compacite || '-' }}</div>
+				<div class="col-md-3"><strong>Activité biologique:</strong> {{ horizon.activite_bio || '-' }}</div>
+				<div class="col-md-3"><strong>Echantillon:</strong> {{ horizon.echantillon || '-' }}</div>
+				<div class="col-md-3"><strong>Représentation du profil:</strong> {{ horizon.representation_profil || '-' }}</div>
+				<div class="col-12"><strong>Commentaires:</strong><br/> {{ horizon.commentaires || '-' }}</div>
+			</div>
+
+			<div class="mt-4" *ngIf="horizon.photos?.length">
+				<h6 class="mb-2">Photos</h6>
+				<div class="row g-3">
+					<div class="col-6 col-md-4 col-lg-3" *ngFor="let p of horizon.photos">
+						<div class="card h-100">
+							<img [src]="p.imageUrl || p.image" class="card-img-top" alt="Photo horizon" (error)="onImgError($event)">
+							<div class="card-body p-2">
+								<div class="small text-muted">{{ p.description || '-' }}</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>

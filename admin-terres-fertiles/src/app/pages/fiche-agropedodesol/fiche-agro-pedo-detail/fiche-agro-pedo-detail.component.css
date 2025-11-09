@@ -144,7 +144,8 @@ table.excel td {
 .actions button, .actions [mat-raised-button] { background: #1976d2; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
 .actions button:hover, .actions [mat-raised-button]:hover { background: #165fa8; }
 
-@media (max-width: 900px) {
+/* Important: cette règle responsive ne doit s'appliquer qu'à l'écran, pas à l'impression */
+@media screen and (max-width: 900px) {
   .horizon-table.full thead th.vertical { writing-mode: horizontal-tb; transform: rotate(0); width: auto; }
 }
 

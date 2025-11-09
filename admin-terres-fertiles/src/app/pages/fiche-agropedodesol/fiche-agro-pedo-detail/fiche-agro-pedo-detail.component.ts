@@ -4,6 +4,9 @@ import { CommonModule, NgIf, NgForOf } from '@angular/common';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { ConfirmDialogComponent } from '../../../shared/navbar/confirm-dialog.component';
 
 import { FicheAgroPedodeSol, FicheHorizon, FichePhoto } from '../../../models/fiche-agropedodesol.model';
 import { FicheAgroService } from '../../../services/ficheAgroPedoServcices/fiche-agro-pedo.service';
@@ -14,7 +17,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-fiche-agro-pedo-detail',
   standalone: true,
-  imports: [CommonModule, NgIf, NgForOf, MatProgressBarModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, NgIf, NgForOf, MatProgressBarModule, MatButtonModule, MatIconModule, MatDialogModule, MatSnackBarModule],
   templateUrl: './fiche-agro-pedo-detail.component.html',
   styleUrls: ['./fiche-agro-pedo-detail.component.css']
 })
@@ -31,7 +34,9 @@ export class FicheAgroPedoDetailComponent implements OnInit {
     private router: Router,
     private ficheService: FicheAgroService,
     private horizonService: FicheHorizonService,
-    private photoService: FichePhotoService
+    private photoService: FichePhotoService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   async ngOnInit() {
@@ -142,9 +147,45 @@ export class FicheAgroPedoDetailComponent implements OnInit {
     this.router.navigate([`/fiche-agropedodesol/horizon-detail/${horizonId}`]);
   }
 
+  goToHorizonEdit(horizonId?: number) {
+    if (!horizonId) return;
+    this.router.navigate([`/fiche-agropedodesol/horizon-edit/${horizonId}`]);
+  }
+
+  goToAddPhotosForHorizon(horizonId?: number) {
+    if (!horizonId) return;
+    this.router.navigate([`/fiche-agropedodesol/photo-create`], { queryParams: { horizon: horizonId } });
+  }
+
   goToPhotoDetail(photoId?: number) {
     if (!photoId) return;
     this.router.navigate([`/fiche-agropedodesol/photo-detail/${photoId}`]);
+  }
+
+  goToHorizonCreateForFiche() {
+    if (!this.fiche?.id) return;
+    this.router.navigate([`/fiche-agropedodesol/horizon-create`], { queryParams: { fiche: this.fiche.id } });
+  }
+
+  async deleteHorizon(horizonId?: number) {
+    if (!horizonId) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        title: 'Confirmation',
+        message: 'Supprimer cet horizon ? Cette action est irréversible.',
+        confirmText: 'Supprimer',
+        color: 'warn'
+      }
+    });
+    const ok = await ref.afterClosed().toPromise();
+    if (!ok) return;
+    try {
+      await this.horizonService.remove(horizonId);
+      this.horizons = (this.horizons || []).filter(h => +((h as any).id || 0) !== +horizonId);
+      this.snackBar.open('Horizon supprimé', 'Fermer', { duration: 3000 });
+    } catch (e: any) {
+      this.error = e?.message || 'Erreur lors de la suppression de l\'horizon.';
+    }
   }
 
   print() {
