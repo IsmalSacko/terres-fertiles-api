@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import axios from 'axios';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-activate',
@@ -15,14 +16,14 @@ export class ActivateComponent implements OnInit {
   error: string | null = null;
 
   constructor(private route: ActivatedRoute, private router: Router) {}
-
+  private readonly base = environment.apiUrl;
   async ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
     const token = this.route.snapshot.paramMap.get('token');
 
     if (uid && token) {
       try {
-        await axios.post('http://127.0.0.1:8000/api/auth/users/activation/', {
+        await axios.post(`${this.base}/auth/users/activation/`, {
           uid,
           token
         });

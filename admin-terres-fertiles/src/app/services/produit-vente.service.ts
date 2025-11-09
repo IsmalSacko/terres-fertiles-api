@@ -76,9 +76,9 @@ export interface ProduitVenteResponse {
   providedIn: 'root'
 })
 export class ProduitVenteService {
-  private apiUrl = 'http://127.0.0.1:8000/api/produits/';
-  private plateformeUrl = 'http://127.0.0.1:8000/api/plateformes/';
-
+  // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}produits`;
   constructor() {}
 
   private getHeaders() {

@@ -6,7 +6,7 @@ import { CreateSaisieVente, SaisieVenteResponse } from '../models/create-saisie-
   providedIn: 'root'
 })
 export class CreateSaisieVenteService {
-  private apiUrl = 'http://localhost:8000/api/saisies-vente/';
+  private apiUrl = 'https://terres-fertiles.ismael-dev.com/api/saisies-vente/';
   
   private getHeaders() {
     const token = localStorage.getItem('token');

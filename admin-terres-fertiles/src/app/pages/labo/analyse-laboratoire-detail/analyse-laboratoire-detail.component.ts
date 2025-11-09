@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AnalyseLaboratoireService, AnalyseLaboratoire } from '../../../services/analyse-laboratoire.service';
 import { ProduitVenteService, ProduitVente } from '../../../services/produit-vente.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-analyse-laboratoire-detail',
@@ -42,6 +43,7 @@ export class AnalyseLaboratoireDetailComponent implements OnInit {
   isEditMode = false;
   selectedFile: File | null = null;
 
+  private readonly base = environment.apiUrl;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -166,7 +168,7 @@ export class AnalyseLaboratoireDetailComponent implements OnInit {
     formData.append('fichier_pdf', this.selectedFile);
 
     try {
-      const response = await this.http.post('http://127.0.0.1:8000/api/analyse-pdf-parse/', formData).toPromise();
+      const response = await this.http.post(`${this.base}analyse-pdf-parse/`, formData).toPromise();
       
       if (response) {
         this.analyse = {

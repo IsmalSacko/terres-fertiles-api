@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
-
+import { environment } from '../../environments/environment';
 export interface AmendementOrganique {
   id?: number;
   nom: string;
@@ -20,7 +20,9 @@ export interface AmendementOrganique {
 })
 export class AmendementOrganiqueServiceTsService {
   constructor() { }
-  private apiUrl = 'http://127.0.0.1:8000/api/amendements-organiques/';
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}amendements-organiques/`
+  
 
   // Méthode pour les token et entête
   private getHeaders() {

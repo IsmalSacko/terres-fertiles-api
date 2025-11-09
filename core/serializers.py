@@ -88,7 +88,10 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         # Génération des éléments pour l'activation
         uid = urlsafe_base64_encode(force_bytes(user.pk)) # Encodage de l'ID utilisateur"
         token = default_token_generator.make_token(user) # Génération du token d'activation
-        activation_link = f"http://localhost:4200/activate/{uid}/{token}"  # ou domaine en prod
+        #activation_link = f"http://localhost:4200/activate/{uid}/{token}"  # ou domaine en prod
+        scheme = "http" if "localhost" in settings.DOMAIN else "https"
+        activation_link = f"{scheme}://{settings.DOMAIN}/activate/{uid}/{token}"
+
 
         if user.email and '@' in user.email:
             try:

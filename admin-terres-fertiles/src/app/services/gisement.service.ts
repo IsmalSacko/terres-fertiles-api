@@ -40,9 +40,11 @@ export type PartialGisement = Partial<Gisement>;
   providedIn: 'root'
 })
 export class GisementService {
-  private apiUrl = 'http://127.0.0.1:8000/api/gisements/';
-  private documentGisementApiUrl = 'http://127.0.0.1:8000/api/documents-gisements/'; // Add URL for documents
-
+      // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}gisements/`;
+  private readonly documentGisementApiUrl = `${this.base}documents-gisements/`; 
+  
   constructor() {}
 
   private getHeaders() {

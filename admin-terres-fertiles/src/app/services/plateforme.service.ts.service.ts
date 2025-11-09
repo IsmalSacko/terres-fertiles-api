@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
+import { environment } from '../../environments/environment';
 
 export interface Plateforme {
   id: number;
@@ -17,8 +18,8 @@ export class PlateformeServiceTsService {
 
   constructor() { }
 
-  private apiUrl = 'http://127.0.0.1:8000/api/plateformes/';
-
+ private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}plateformes/`;
   private getHeaders() {
     const token = localStorage.getItem('token');
     return { headers: { Authorization: `Token ${token}` } };

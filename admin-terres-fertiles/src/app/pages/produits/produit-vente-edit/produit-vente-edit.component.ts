@@ -13,6 +13,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-produit-vente-edit',
@@ -38,7 +39,12 @@ export class ProduitVenteEditComponent implements OnInit {
   errorMsg = '';
   produit: ProduitVente | null = null;
   melanges: { id: number; nom: string; }[] = [];
-
+  private readonly base = environment.apiUrl;
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private produitService: ProduitVenteService
+  ) {}
   // Modèle simple pour le formulaire (cohérent avec le backend et les infos disponibles)
   form = {
     utilisateur: '',
@@ -56,11 +62,6 @@ export class ProduitVenteEditComponent implements OnInit {
     pret_pour_vente: false,
   };
 
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private produitService: ProduitVenteService
-  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -105,7 +106,7 @@ export class ProduitVenteEditComponent implements OnInit {
   private async loadMelanges(): Promise<void> {
     try {
       const resp = await axios.get<{ id: number; nom: string; }[]>(
-        'http://127.0.0.1:8000/api/melanges/',
+        `${this.base}api/melanges/`,
         this.getHeaders()
       );
       this.melanges = resp.data || [];

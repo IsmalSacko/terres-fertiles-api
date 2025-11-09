@@ -2,13 +2,15 @@ import axios from 'axios';
 import { Injectable } from '@angular/core';
 import { FichePhoto } from '../../models/fiche-agropedodesol.model';
 import { ApiService } from '../api.service';
+import { environment } from '../../../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FichePhotoService {
-  private FICHE_PHOTO_URL = 'http://127.0.0.1:8000/api/fiches-photos/';
+  private readonly base = environment.apiUrl;
+  private readonly FICHE_PHOTO_URL = `${this.base}fiches-photos/`;
 
   constructor(private apiService: ApiService) {}
 
