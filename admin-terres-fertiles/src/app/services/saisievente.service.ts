@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { SaisieVente } from '../models/saisie-vente.model';
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class SaisieventeService {
-  private apiUrl = 'http://localhost:8000/api/saisies-vente/';
-
+    // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}saisies-ventes/`;
   private getHeaders() {
     const token = localStorage.getItem('token');
     return { headers: { Authorization: `Token ${token}` } };

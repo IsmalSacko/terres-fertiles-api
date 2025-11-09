@@ -20,8 +20,14 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
+    "https://tf.ismael-dev.com",
+    "http://tf.ismael-dev.com",
 ]
-
+# ajoute seulement si tu rencontres un CSRF origin mismatch
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://tf.ismael-dev.com",
+#     "https://terres-fertiles.ismael-dev.com",
+# ]
 
 # Application definition
 
@@ -76,10 +82,30 @@ AUTH_USER_MODEL = 'core.CustomUser' # Custom user models
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'terres_fertiles',
+#         'USER': 'root',  # ou ton utilisateur MySQL
+#         'PASSWORD': 'sacko',  # mot de passe si défini
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'terres_fertiles.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': config('DATABASENAME'),  # Nom de la base de données MySQL
+        'USER': config('DATABASEUSER'),  # Nom d'utilisateur MySQL
+        'PASSWORD': config('DATABASEPASSWORD'),  # Mot de passe MySQL
+        'HOST': 'localhost',  # Adresse de l'hôte, généralement localhost
+        'PORT': '3306',  # Port MySQL, par défaut 3306
     }
 }
 # DATABASES = {
@@ -92,7 +118,6 @@ DATABASES = {
 #         'PORT': '3306',
 #     }
 # }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -133,8 +158,11 @@ REST_FRAMEWORK = {
     ),
 }
 # settings.py
-SITE_NAME = "localhost"
-DOMAIN = "localhost:4200"
+# SITE_NAME=localhost   en dev
+# DOMAIN=localhost:4200  en dev
+SITE_NAME = config("SITE_NAME", default="Terres Fertiles")
+DOMAIN = config("DOMAIN", default="tf.ismael-dev.com")
+
 DJOSER = {
     'LOGIN_FIELD': 'username',
     'SEND_ACTIVATION_EMAIL': False,

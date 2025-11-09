@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 export interface User {
   id: number;
   username: string;
@@ -20,8 +21,10 @@ export interface User {
 })
 
 export class AuthService {
-  private loginUrl = 'http://127.0.0.1:8000/api/auth/'; // à adapter si besoin
-  private userProfileUrl = 'http://127.0.0.1:8000/api/user/me/';
+  private readonly base = environment.apiUrl;
+  private readonly loginUrl = `${this.base}auth/`;
+  private readonly userProfileUrl = `${this.base}user/me/`
+  
 
 
   private getHeadres(){

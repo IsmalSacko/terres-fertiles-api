@@ -9,6 +9,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import axios from 'axios';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -31,7 +32,7 @@ export class RegisterComponent {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   isSubmitting = false;
-
+  private readonly base = environment.apiUrl;
   constructor(private fb: FormBuilder, private router: Router, private cdr: ChangeDetectorRef) {
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
@@ -53,7 +54,7 @@ export class RegisterComponent {
         if (!data.siret_number) {
           delete data.siret_number;
         }
-        const response = await axios.post('http://127.0.0.1:8000/api/auth/users/', data);
+        const response = await axios.post(`${this.base}auth/users/`, data);
         this.successMessage = "Inscription réussie ! Redirection vers la connexion...";
         this.cdr.detectChanges();
         setTimeout(() => {

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
-
+import { environment } from '../../environments/environment';
 export interface Chantier {
   id: number;
   nom: string;
@@ -19,7 +19,9 @@ export type ChantierUpdatePayload = Partial<Pick<Chantier, 'localisation' | 'lat
   providedIn: 'root'
 })
 export class ChantierService {
-  private apiUrl = 'http://127.0.0.1:8000/api/chantiers/';
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}chantiers/`
+  //private apiUrl = 'https://terres-fertiles.ismael-dev.com/api/chantiers/';
   
   // Méthode pour les token et entête
   private getHeaders() {
