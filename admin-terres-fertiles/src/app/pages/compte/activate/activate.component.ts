@@ -23,7 +23,8 @@ export class ActivateComponent implements OnInit {
 
     if (uid && token) {
       try {
-        await axios.post(`${this.base}/auth/users/activation/`, {
+        // Eviter le double slash si `environment.apiUrl` se termine par `/`
+        await axios.post(`${this.base}auth/users/activation/`, {
           uid,
           token
         });
@@ -31,7 +32,9 @@ export class ActivateComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/login']), 3000);
         setTimeout(() => this.launchConfetti(), 200); // lance les confettis après succès
       } catch (err: any) {
-        this.error = err.response?.data?.detail || 'Lien invalide ou expiré.';
+        // Log complet pour diagnostiquer côté backend
+        console.error('Activation error response:', err.response || err);
+        this.error = err.response?.data?.detail || err.response?.data || 'Lien invalide ou expiré.';
       }
     } else {
       this.error = "Lien d'activation incomplet.";

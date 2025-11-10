@@ -78,7 +78,9 @@ export interface ProduitVenteResponse {
 export class ProduitVenteService {
   // 🔥 Base dynamique selon dev/prod
   private readonly base = environment.apiUrl;
-  private readonly apiUrl = `${this.base}produits`;
+  // IMPORTANT: ajouter le slash final ici. Django/DRF attend les endpoints avec a trailing slash
+  // (sinon POST vers /api/produits sans slash retourne 404 car Django ne redirige pas les POST).
+  private readonly apiUrl = `${this.base}produits/`;
   constructor() {}
 
   private getHeaders() {

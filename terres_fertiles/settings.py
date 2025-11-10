@@ -82,12 +82,12 @@ AUTH_USER_MODEL = 'core.CustomUser' # Custom user models
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'terres_fertiles.sqlite3',
+    }
+}
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
@@ -98,16 +98,16 @@ AUTH_USER_MODEL = 'core.CustomUser' # Custom user models
 #         'PORT': '3306',
 #     }
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': config('DATABASENAME'),  # Nom de la base de données MySQL
-        'USER': config('DATABASEUSER'),  # Nom d'utilisateur MySQL
-        'PASSWORD': config('DATABASEPASSWORD'),  # Mot de passe MySQL
-        'HOST': 'localhost',  # Adresse de l'hôte, généralement localhost
-        'PORT': '3306',  # Port MySQL, par défaut 3306
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': config('DATABASENAME'),  # Nom de la base de données MySQL
+#         'USER': config('DATABASEUSER'),  # Nom d'utilisateur MySQL
+#         'PASSWORD': config('DATABASEPASSWORD'),  # Mot de passe MySQL
+#         'HOST': 'localhost',  # Adresse de l'hôte, généralement localhost
+#         'PORT': '3306',  # Port MySQL, par défaut 3306
+#     }
+# }
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
@@ -145,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
 #     )
 # }
 REST_FRAMEWORK = {
-        'DEFAULT_PERMISSION_CLASSES': [
+    'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',  # Doit permettre accès libre à activation
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -177,8 +177,6 @@ DJOSER = {
         'user_create': 'core.serializers.CustomUserCreateSerializer',
     },
 }
-
-
 
 
 
@@ -267,8 +265,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'in-v3.mailjet.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-#EMAIL_HOST_USER = config('MAILJET_API_KEY')
-#EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
+EMAIL_HOST_USER = config('MAILJET_API_KEY')
+EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
 DEFAULT_FROM_EMAIL = 'ismaila.sacko@terres-fertiles.com'
 PASSWORD_RESET_TIMEOUT = 900  # 900 # 15 minutes
 

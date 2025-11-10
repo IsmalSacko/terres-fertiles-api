@@ -970,11 +970,6 @@ class ProduitVente(models.Model):
         volume_vendu = self.volume_vendu or Decimal(0)
         return volume_initial - volume_vendu
 
-    # def save(self, *args, **kwargs):
-    #     # Générer la référence produit à partir du nom du mélange en remplaçant 'MEL' par 'PRD'
-    #     if self.melange and self.melange.nom:
-    #         self.reference_produit = self.melange.nom.replace('MEL', 'PRD')
-    #     super().save(*args, **kwargs)
 
     def __str__(self):
         try:
@@ -1026,6 +1021,7 @@ class ProduitVente(models.Model):
             except Melange.DoesNotExist:
                 pass
         super().save(*args, **kwargs)
+
     class Meta:
         db_table = 'produit_vente'
         verbose_name = "Produit de vente"

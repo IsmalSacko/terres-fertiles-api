@@ -97,3 +97,20 @@ class IsExploitant(permissions.BasePermission):
                 user.is_superuser or user.role == 'entreprise'
             )
         )
+
+
+def build_absolute_link(path: str) -> str:
+    """Construit une URL absolue vers le frontend à partir d'un path relatif.
+
+    Choisit automatiquement le scheme (http pour localhost/127.0.0.1, https sinon)
+    et nettoie les slashes en trop.
+    Exemple:
+        build_absolute_link('reset-password-confirm/{uid}/{token}')
+    """
+    from django.conf import settings
+
+    domain = getattr(settings, 'DOMAIN', '') or ''
+    domain = str(domain).rstrip('/')
+    scheme = 'http' if ('localhost' in domain or '127.0.0.1' in domain) else 'https'
+    path = str(path).lstrip('/')
+    return f"{scheme}://{domain}/{path}"

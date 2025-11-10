@@ -39,7 +39,7 @@ def next_eap(request):
     next_num = max(nums) + 1 if nums else 1
     next_eap = f"EAP-25-{ville_code}-{next_num:03d}"
     return Response({"next_eap": next_eap})
-from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser
+from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, build_absolute_link
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, FicheAgroPedodeSol, FicheHorizon, FichePhoto, Gisement, AmendementOrganique,
     Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente,
@@ -332,7 +332,8 @@ def custom_reset_password(request):
         user = get_user_model().objects.get(email=email)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
-        reset_link = f"http://localhost:4200/reset-password-confirm/{uid}/{token}"
+        #reset_link = f"http://localhost:4200/reset-password-confirm/{uid}/{token}"
+        reset_link = build_absolute_link(f"reset-password-confirm/{uid}/{token}")
 
         context = {
             'user': user,
@@ -439,7 +440,7 @@ class SaisieVenteViewSet(viewsets.ModelViewSet):
         if not produit_id:
             raise ValueError("Le champ 'produit' est requis")
 
-        serializer.save(responsable=self.request.user, produit_id=produit_id)
+        serializer.save(responsable=self.request.user, produit_id=produit_id) 
 
 
 

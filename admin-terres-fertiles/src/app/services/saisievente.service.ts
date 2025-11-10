@@ -8,7 +8,7 @@ import { environment } from '../../environments/environment';
 export class SaisieventeService {
     // 🔥 Base dynamique selon dev/prod
   private readonly base = environment.apiUrl;
-  private readonly apiUrl = `${this.base}saisies-ventes/`;
+  private readonly apiUrl = `${this.base}saisies-vente/`;
   private getHeaders() {
     const token = localStorage.getItem('token');
     return { headers: { Authorization: `Token ${token}` } };

@@ -8,6 +8,7 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import date, datetime
+from djoser.serializers import ActivationSerializer
 
 from rest_framework import serializers
 
@@ -16,23 +17,6 @@ from .models import (
     Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire,
     FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
-
-# Exemple d'un serializer ProduitVenteDetailSerializer avec sécurisation de l'accès à la plateforme
-class ProduitVenteDetailSerializer(serializers.ModelSerializer):
-    plateforme = serializers.SerializerMethodField()
-    # ...existing code...
-
-    def get_plateforme(self, obj):
-        melange = getattr(obj, 'melange', None)
-        plateforme = getattr(melange, 'plateforme', None) if melange else None
-        if plateforme:
-            return {
-                'id': plateforme.id,
-                'nom': plateforme.nom,
-                'localisation': plateforme.localisation
-            }
-        return None
-
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -83,6 +67,7 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         validated_data['siret_number'] = validated_data.get('siret_number') or None
         user = CustomUser.objects.create_user(**validated_data)
         user.is_active = False
+        
         user.save()
 
         # Génération des éléments pour l'activation
@@ -120,16 +105,14 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
         return user
 
 
-
 class ChantierSerializer(serializers.ModelSerializer):
     utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
 
-   
-        
     class Meta:
         model = Chantier
         fields = '__all__'
         read_only_fields = ['utilisateur']  # On empêche la modification côté frontend
+
 
 class DocumentGisementSerializer(serializers.ModelSerializer):
     fichier = serializers.FileField(use_url=True, required=False, allow_null=True)
@@ -224,10 +207,6 @@ class MelangeAmendementSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
-    
 class MelangeSerializer(serializers.ModelSerializer):
 
     etat_display = serializers.CharField(source='get_etat_display', read_only=True)
@@ -246,13 +225,21 @@ class MelangeSerializer(serializers.ModelSerializer):
         read_only_fields = ['plateforme_nom', 'date_creation', 'utilisateur','amendements', 'nom_complet']  # On empêche la modification côté frontend
 
     def get_nom_complet(self, obj):
-        user = getattr(obj, 'utilisateur', None)
-        if user:
-            first_name = getattr(user, 'first_name', '') or ''
-            last_name = getattr(user, 'last_name', '') or ''
-            full_name = f"{first_name} {last_name}".strip()
-            return full_name if full_name else getattr(user, 'username', '')
-        return ''
+        # Accès sécurisé à la relation utilisateur : il se peut que la FK
+        # référence un user supprimé -> queryset.get() lèverait DoesNotExist.
+        try:
+            # Il se peut que l'utilisateur soit None ou supprimé
+            user = obj.utilisateur
+        except Exception:
+            return '' # Sécurité
+
+        if not user:
+            return ''
+
+        first_name = getattr(user, 'first_name', '') or ''
+        last_name = getattr(user, 'last_name', '') or ''
+        full_name = f"{first_name} {last_name}".strip()
+        return full_name if full_name else getattr(user, 'username', '')
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop("ingredients", [])
@@ -281,6 +268,8 @@ class MelangeSerializer(serializers.ModelSerializer):
       
 
         return instance
+
+
 
 class AmendementOrganiqueSerializer(serializers.ModelSerializer):
     utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
