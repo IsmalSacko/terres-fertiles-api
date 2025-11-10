@@ -142,7 +142,7 @@ async getAmendementsOrganiques(): Promise<AmendementOrganique[]>{
 }
 
  asyncgetMelangeByHttpClient(): Observable<Melange[]> {
-     return this.http.get<Melange[]>(`http://localhost:8000/api/melanges/`, this.getHeaders());
+     return this.http.get<Melange[]>(`${this.base}melanges/`, this.getHeaders());
   }
 
 

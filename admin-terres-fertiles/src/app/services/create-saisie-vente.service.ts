@@ -49,7 +49,7 @@ export class CreateSaisieVenteService {
   async checkProductAvailability(produitId: number, volumeDemande: number): Promise<boolean> {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/produits/${produitId}/`, 
+        `${this.base}produits/${produitId}/`, 
         this.getHeaders()
       );
       const produit = response.data;
