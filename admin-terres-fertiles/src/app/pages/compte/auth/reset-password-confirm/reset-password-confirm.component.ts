@@ -3,6 +3,7 @@ import { FormBuilder, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import axios from 'axios';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -15,7 +16,7 @@ export class ResetPasswordConfirmComponent {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-
+  private readonly base = environment.apiUrl;
   uid = this.route.snapshot.paramMap.get('uid')!;
   token = this.route.snapshot.paramMap.get('token')!;
 
@@ -52,7 +53,7 @@ export class ResetPasswordConfirmComponent {
     this.successMessage = '';
 
     try {
-      await axios.post('http://127.0.0.1:8000/api/auth/users/reset_password_confirm/', {
+      await axios.post(`${this.base}auth/users/reset_password_confirm/`, {
         uid: this.uid,
         token: this.token,
         new_password

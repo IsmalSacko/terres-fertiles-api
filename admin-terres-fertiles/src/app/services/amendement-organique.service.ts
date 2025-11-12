@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { AmendementOrganique, CreateAmendementOrganique } from '../models/amendement-organique.model';
-
+import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class AmendementOrganiqueService {
-  private apiUrl = 'http://127.0.0.1:8000/api/amendements-organiques/';
-  
+  //private apiUrl = 'https://terres-fertiles.ismael-dev.com/api/amendements-organiques/';
+    // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}amendements-organiques/`;
   // Méthode pour les token et entête
   private getHeaders() {
     const token = localStorage.getItem('token');

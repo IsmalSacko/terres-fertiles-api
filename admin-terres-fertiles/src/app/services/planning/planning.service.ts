@@ -1,15 +1,16 @@
 import axios from 'axios';
 import { Injectable } from '@angular/core';
 import { MelangeModel } from '../../pages/planning/melange.model';
-
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
 export class PlanningService {
-
-  private apiUrl = 'http://localhost:8000/api/plannings/'; // URL de l'API Django
-  private melangesUrl = 'http://localhost:8000/api/melanges/'; // URL de l'API Django pour les mélanges
-
+    // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}plannings/`;
+  private readonly melangesUrl = `${this.base}melanges/`;
+  
   private getHeaders() {
     const token = localStorage.getItem('token');
     return { headers: { Authorization: `Token ${token}` } };

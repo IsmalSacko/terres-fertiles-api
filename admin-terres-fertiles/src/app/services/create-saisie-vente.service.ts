@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { CreateSaisieVente, SaisieVenteResponse } from '../models/create-saisie-vente.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CreateSaisieVenteService {
-  private apiUrl = 'http://localhost:8000/api/saisies-vente/';
-  
+  private readonly base = environment.apiUrl;
+  private apiUrl = `${this.base}saisies-vente/`;
+
   private getHeaders() {
     const token = localStorage.getItem('token');
     return { headers: { Authorization: `Token ${token}` } };
@@ -47,7 +49,7 @@ export class CreateSaisieVenteService {
   async checkProductAvailability(produitId: number, volumeDemande: number): Promise<boolean> {
     try {
       const response = await axios.get(
-        `http://localhost:8000/api/produits/${produitId}/`, 
+        `${this.base}produits/${produitId}/`, 
         this.getHeaders()
       );
       const produit = response.data;

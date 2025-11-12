@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import axios from 'axios';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-activate',
@@ -15,14 +16,15 @@ export class ActivateComponent implements OnInit {
   error: string | null = null;
 
   constructor(private route: ActivatedRoute, private router: Router) {}
-
+  private readonly base = environment.apiUrl;
   async ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
     const token = this.route.snapshot.paramMap.get('token');
 
     if (uid && token) {
       try {
-        await axios.post('http://127.0.0.1:8000/api/auth/users/activation/', {
+        // Eviter le double slash si `environment.apiUrl` se termine par `/`
+        await axios.post(`${this.base}auth/users/activation/`, {
           uid,
           token
         });
@@ -30,7 +32,9 @@ export class ActivateComponent implements OnInit {
         setTimeout(() => this.router.navigate(['/login']), 3000);
         setTimeout(() => this.launchConfetti(), 200); // lance les confettis après succès
       } catch (err: any) {
-        this.error = err.response?.data?.detail || 'Lien invalide ou expiré.';
+        // Log complet pour diagnostiquer côté backend
+        console.error('Activation error response:', err.response || err);
+        this.error = err.response?.data?.detail || err.response?.data || 'Lien invalide ou expiré.';
       }
     } else {
       this.error = "Lien d'activation incomplet.";

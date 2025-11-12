@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { ProduitVente } from './produit-vente.service';
+import { environment } from '../../environments/environment';
 
 export interface AnalyseLaboratoire {
   id: number;
@@ -65,9 +66,11 @@ export interface AnalyseLaboratoire {
   providedIn: 'root'
 })
 export class AnalyseLaboratoireService {
-  private apiUrl = 'http://127.0.0.1:8000/api/analyses-laboratoire/'; // créer une analyse
-  private analyseUrl = 'http://127.0.1:8000/api/analyse-pdf-parse/'; // analyser un pdf
-
+    // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}analyses-laboratoire/`;
+  private readonly analyseUrl = `${this.base}analyse-pdf-parse/`
+  
   constructor() { }
 
   async getAll(): Promise<AnalyseLaboratoire[]> {

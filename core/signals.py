@@ -8,9 +8,18 @@ from django.db.models import Sum, F, Value
 from django.db.models.functions import Coalesce, Greatest
 from decimal import Decimal
 
+from django.dispatch import receiver
+from djoser.signals import user_activated
 
 from .models import (DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange, Chantier, Plateforme, SaisieVente, ProduitVente)
 
+@receiver(user_activated)
+def grant_staff_on_activation(sender, user, request, **kwargs):
+    # Ajuste la condition selon tes rôles
+    if getattr(user, "role", None) in ("exploitant", "entreprise"):
+        if not user.is_staff:
+            user.is_staff = True
+            user.save(update_fields=["is_staff"])
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:

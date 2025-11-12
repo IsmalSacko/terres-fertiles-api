@@ -119,12 +119,13 @@ export interface PartialMelange {
   providedIn: 'root'
 })
 export class MelangeService {
-  private apiUrl = 'http://127.0.0.1:8000/api/melanges/';
-  private ingredientsApiUrl = 'http://127.0.0.1:8000/api/melanges/';
- 
-  private plateformesApiUrl = 'http://127.0.0.1:8000/api/plateformes/';
-  private amendementsOrganiquesApiUrl = 'http://127.0.0.1:8000/api/amendements-organiques/';
-  private melangeAmendementsApiUrl = 'http://127.0.0.1:8000/api/melange-amendements/';
+  private readonly base = environment.apiUrl; // 🔥 dépend automatiquement de l'env
+
+  private apiUrl = `${this.base}melanges/`;
+  private ingredientsApiUrl = `${this.base}melanges/`;
+  private plateformesApiUrl = `${this.base}plateformes/`;
+  private amendementsOrganiquesApiUrl = `${this.base}amendements-organiques/`;
+  private melangeAmendementsApiUrl = `${this.base}melange-amendements/`;
 
 
   constructor(private http: HttpClient,) {}
@@ -141,7 +142,7 @@ async getAmendementsOrganiques(): Promise<AmendementOrganique[]>{
 }
 
  asyncgetMelangeByHttpClient(): Observable<Melange[]> {
-     return this.http.get<Melange[]>(`http://localhost:8000/api/melanges/`, this.getHeaders());
+     return this.http.get<Melange[]>(`${this.base}melanges/`, this.getHeaders());
   }
 
 
@@ -400,7 +401,7 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
       
       // Récupérer tous les produits de vente pour voir quels mélanges sont déjà utilisés
       const produitsResponse = await axios.get(
-        'http://127.0.0.1:8000/api/produits/',
+        `${this.base}produits/`,
         this.getHeaders()
       );
       
@@ -433,46 +434,5 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
     }
   }
 
-  async getMelangesSansStock(): Promise<Melange[]> {
-    try {
-      console.log('🔍 Récupération des mélanges disponibles (sans suivi de stock)...');
-      
-      // Récupérer tous les mélanges
-      const tousMelanges = await this.getAll();
-      console.log(`📊 Total mélanges: ${tousMelanges.length}`);
-      
-      // Récupérer tous les suivis de stock pour voir quels mélanges sont déjà utilisés
-      const stockResponse = await axios.get(
-        'http://127.0.0.1:8000/api/suivi-stock-plateforme/',
-        this.getHeaders()
-      );
-      
-      const suivis = stockResponse.data.results || stockResponse.data;
-      console.log(`📦 Total suivis de stock: ${suivis.length}`);
-      
-      // Extraire les IDs des mélanges déjà utilisés dans les suivis de stock
-      const melangesUtilises = new Set(
-        suivis.map((suivi: any) => suivi.melange?.id || suivi.melange).filter(Boolean)
-      );
-      
-      console.log(`🚫 Mélanges déjà utilisés dans le stock: ${Array.from(melangesUtilises).join(', ')}`);
-      
-      // Filtrer les mélanges disponibles (non utilisés dans le stock)
-      const melangesDisponibles = tousMelanges.filter(melange => 
-        melange.id && !melangesUtilises.has(melange.id)
-      );
-      
-      console.log(`✅ Mélanges disponibles pour le stock: ${melangesDisponibles.length}`);
-      melangesDisponibles.forEach(melange => {
-        console.log(`   - ${melange.nom} (ID: ${melange.id})`);
-      });
-      
-      return melangesDisponibles;
-    } catch (error) {
-      console.error('❌ Erreur lors de la récupération des mélanges sans stock:', error);
-      // Fallback : récupérer tous les mélanges si l'API stock échoue
-      console.log('🔄 Fallback: récupération de tous les mélanges');
-      return this.getAll();
-    }
-  }
+ 
 }

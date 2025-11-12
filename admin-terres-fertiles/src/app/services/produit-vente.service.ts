@@ -76,9 +76,11 @@ export interface ProduitVenteResponse {
   providedIn: 'root'
 })
 export class ProduitVenteService {
-  private apiUrl = 'http://127.0.0.1:8000/api/produits/';
-  private plateformeUrl = 'http://127.0.0.1:8000/api/plateformes/';
-
+  // 🔥 Base dynamique selon dev/prod
+  private readonly base = environment.apiUrl;
+  // IMPORTANT: ajouter le slash final ici. Django/DRF attend les endpoints avec a trailing slash
+  // (sinon POST vers /api/produits sans slash retourne 404 car Django ne redirige pas les POST).
+  private readonly apiUrl = `${this.base}produits/`;
   constructor() {}
 
   private getHeaders() {

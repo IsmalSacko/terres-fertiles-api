@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { Plateforme } from '../models/plateforme';
+import { environment } from '../../environments/environment';
 
 
 
@@ -8,9 +9,9 @@ import { Plateforme } from '../models/plateforme';
   providedIn: 'root'
 })
 export class PlateformeService {
-    //private apiUrl = 'http://127.0.0.1:8000/api/produits/';
-    private plateformeUrl = 'http://127.0.0.1:8000/api/plateformes/';
-
+ 
+  private readonly base = environment.apiUrl;
+  private readonly plateformeUrl = `${this.base}plateformes/`;
   constructor() {}
 
   private getHeaders() {

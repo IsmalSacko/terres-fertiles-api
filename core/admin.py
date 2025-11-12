@@ -1,18 +1,11 @@
-from django import forms
 from django.contrib import messages as messages
-from django.utils.html import format_html  
 from django.contrib import admin
-from django.core.exceptions import ValidationError
 from .models import (
     CustomUser, Gisement, Chantier, Melange, AmendementOrganique, Plateforme, 
     ProduitVente, MelangeIngredient, MelangeAmendement,
     DocumentProduitVente, SaisieVente, ChantierRecepteur, Planning,
     FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
-
-from django import forms
-
-
 
 
 
@@ -55,7 +48,7 @@ class AmendementOrganiqueAdmin(admin.ModelAdmin):
 
 @admin.register(ProduitVente)
 class ProduitVenteAdmin(admin.ModelAdmin):
-    list_display = ('reference_produit', 'melange', 'pret_pour_vente', 'date_creation')
+    list_display = ('reference_produit', 'melange', 'pret_pour_vente', 'date_creation','utilisateur')
     list_filter = ('pret_pour_vente', 'date_creation')
     search_fields = ('reference_produit', 'melange__nom')
 

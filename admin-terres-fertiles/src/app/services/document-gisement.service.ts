@@ -1,13 +1,15 @@
 import { Injectable } from '@angular/core';
 import axios from 'axios';
 import { DocumentGisement, Gisement } from './gisement.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentGisementService {
-  private apiUrl = 'http://127.0.0.1:8000/api/documents-gisements/';
-  private gisementApiUrl = 'http://127.0.0.1:8000/api/gisements/';
+  private readonly base = environment.apiUrl;
+  private readonly apiUrl = `${this.base}documents-gisements/`;
+  private readonly gisementApiUrl = `${this.base}gisements/`;
 
   constructor() {}
 

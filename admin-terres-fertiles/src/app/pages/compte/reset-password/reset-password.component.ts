@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-reset-password',
@@ -24,7 +25,7 @@ export class ResetPasswordComponent {
   loading = false;
   success = false;
   error: string | null = null;
-
+  private readonly base = environment.apiUrl;
   constructor(private fb: FormBuilder, private router: Router) {
     this.resetForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
@@ -37,7 +38,7 @@ export class ResetPasswordComponent {
     this.error = null;
     this.success = false;
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/users/custom-reset-password/', {
+      const response = await fetch(`${this.base}users/custom-reset-password/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: this.resetForm.value.email })

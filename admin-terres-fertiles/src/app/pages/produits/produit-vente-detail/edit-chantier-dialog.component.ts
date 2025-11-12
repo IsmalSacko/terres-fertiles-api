@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import axios from 'axios';
+import { environment } from '../../../../environments/environment';
 
 interface EditChantierData {
   id: number;
@@ -58,7 +59,7 @@ export class EditChantierDialogComponent {
   longitude: number | null;
   saving = false;
 
-  private apiUrl = 'http://127.0.0.1:8000/api/chantiers/';
+  private apiUrl = environment.apiUrl + '/chantiers/';
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: EditChantierData,
