@@ -338,13 +338,7 @@
               <div *ngIf="error" class="alert alert-danger mt-2">
                 <i class="bi bi-exclamation-triangle"></i> {{ error }}
               </div>
-              <!-- Save button for workflow mode -->
-              <div class="d-flex gap-2">
-                <button type="button" class="btn btn-success btn-lg w-100 w-md-auto" 
-                        (click)="saveAndNextStep()">
-                  <i class="bi bi-arrow-right-circle"></i> Étape suivante
-                </button>
-              </div>
+              
             </form>
           </div>
         </div>
@@ -1140,6 +1134,14 @@
         </div>
       </div>
     </div>
+    @if (melange!.etat !== MelangeEtat.VALIDATION) {
+      <div class="d-flex gap-2 justify-content-end mt-2 mb-4">
+      <button type="button" class="btn btn-success btn-lg w-100 w-md-auto" 
+          (click)="saveAndNextStep()">
+        <i class="bi bi-arrow-right-circle"></i> Étape suivante
+      </button>
+      </div>
+    }
   </div>
 </div>
 

@@ -165,6 +165,20 @@ export class ProduitVenteService {
     return produits.length;
   }
 
+  /**
+   * Compte le nombre de produits ayant un stock disponible (> 0 m³).
+   * Utile pour afficher le nombre d'éléments en stock dans le dashboard.
+   */
+  async getStockDisponibleCount(): Promise<number> {
+    const produits = await this.getAll();
+    const toNumber = (v: any) => {
+      if (v === null || v === undefined) return 0;
+      const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/\s/g, '').replace(/\u202F/g, ''));
+      return isNaN(n) ? 0 : n;
+    };
+    return produits.filter(p => toNumber(p.volume_disponible) > 0).length;
+  }
+
   async createProduitVente(produitData: CreateProduitVente): Promise<ProduitVente> {
     try {
       console.log('🚀 Envoi des données vers l\'API:', produitData);

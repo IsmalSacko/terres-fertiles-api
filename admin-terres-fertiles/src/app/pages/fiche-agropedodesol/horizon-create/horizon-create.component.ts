@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FicheHorizonService } from '../../../services/ficheAgroPedoServcices/fiche-horizon.service';
 import { FicheHorizon } from '../../../models/fiche-agropedodesol.model';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { FicheAgroService } from '../../../services/ficheAgroPedoServcices/fiche-agro-pedo.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-horizon-create',
@@ -31,21 +31,40 @@ import { Router } from '@angular/router';
   styleUrls: ['./horizon-create.component.css']
 })
 export class HorizonCreateComponent implements OnInit {
+  // Données du formulaire
   horizon: Partial<FicheHorizon> = {};
+  // Noms d'horizons  disponibles (pour sélection)
+  nomsDisponibles: readonly string[] = ['H1','H2','H3','H4','H5'];
+  humiditeDispo : readonly string[] = ['Sec','Humide', 'Très humide','Noyé', 'Autre' ];
+  hydromorphieDispo : readonly String[] = ['0','1','2','3','4','5','NA'];
+  htcDispo : readonly String[] = ['0','1','2','3','NA'];
+  porositeDispo : readonly String[] = ['0','1','2','3','NA'];
+  compaciteDispo : readonly string[] = ['Meuble','Peu compact', 'Assez compact','Compact', 'Autre' ];
   fiches: any[] = [];
   loading = false;
   success = false;
   lastCreatedHorizonId: number | null = null;
   error: string | null = null;
-  constructor(
-    private horizonService: FicheHorizonService, 
-    private ficheAgroService: FicheAgroService,
-    private router: Router  
-  ) {}
+
+  // services injectés et les autres injections nécessaires
+  private horizonService = inject(FicheHorizonService);
+  private ficheAgroService = inject(FicheAgroService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  constructor() {}
 
     // Au chargement du composant
   ngOnInit() {
     this.loadFiches();
+    // Pré-sélection de la fiche via query params (ex: ?fiche=123)
+    const ficheParam = this.route.snapshot.queryParamMap.get('fiche');
+    if (ficheParam) {
+      const ficheId = Number(ficheParam);
+      if (!isNaN(ficheId)) {
+        this.horizon.fiche = ficheId as any;
+      }
+    }
   }
 
  async loadFiches() {
