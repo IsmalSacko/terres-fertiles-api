@@ -5,7 +5,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
+  width: 100vw; /* ensure true viewport width */
   max-width: 100vw;
   z-index: 1000;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
@@ -213,6 +214,17 @@
   }
   .nav-links {
     display: flex !important;
+  }
+}
+
+/* For very small screens ensure the navbar spans full viewport width without rounded edges */
+@media (max-width: 607px) {
+  .navbar-glass {
+    left: 0;
+    right: 0;
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0 !important;
   }
 }
 

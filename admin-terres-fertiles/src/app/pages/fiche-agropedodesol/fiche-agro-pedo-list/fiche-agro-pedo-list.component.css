@@ -1,13 +1,5 @@
 
-.container.fiche-contenainer {
-	max-width: 1350px;
-	margin: 32px auto;
-	background: #fff;
-	border-radius: 10px;
-	box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-	padding: 24px;
-    position: relative;
-    top : 50px;
+.container.fiche-contenainer {max-width: 1350px;margin: 32px auto;background: #fff;border-radius: 10px;box-shadow: 0 2px 12px rgba(0,0,0,0.06);padding: 24px;position: relative;top : 50px;
 }
 
 .fiche-table {
@@ -45,6 +37,7 @@
 	border-radius: 8px;
 	display: grid;
 	grid-template-columns: 1fr auto;
+	grid-template-areas: 'header actions';
 	align-items: start;
 	gap: 12px;
 	width: 100%;
@@ -82,6 +75,7 @@
 .fiche-list-item .fiche-header {
 	display: grid;
 	grid-template-columns: 90px 1fr 420px;
+	grid-area: header;
 	align-items: stretch;
 	border: 1px solid #000;
 	border-bottom: 0;
@@ -117,4 +111,63 @@
 /* réduire la taille pour s'adapter en liste */
 .fiche-list-item .main-table .title { font-size: 13px; }
 .fiche-list-item .logo img { width: 56px; height: 56px; }
+
+/* ================= Responsive Tablette (>=600px et <=1024px) ================= */
+@media (max-width: 1024px) {
+	/* Réduction de la colonne droite pour gagner de la place */
+	.fiche-list-item .fiche-header { grid-template-columns: 70px 1fr 300px; }
+	.fiche-list-item .logo { font-size: 18px; }
+	.fiche-list-item .logo img { width: 50px; height: 50px; }
+	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding: 5px 6px; font-size: 12px; }
+	.fiche-list-item .main-table .title { font-size: 12px; }
+	.fiche-list-item .big { font-size: 16px; }
+}
+
+/* ================= Responsive Mobile (<=600px) ================= */
+@media (max-width: 600px) {
+	.fiche-list { gap: 28px; }
+	/* Passe le conteneur de l'item en une seule colonne et place les actions dessous */
+	.fiche-list-item {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+		  'header'
+		  'actions';
+	}
+	/* Empile: logo au-dessus, centre, puis bloc infos droites en plein largeur */
+	.fiche-list-item .fiche-header { 
+		grid-template-columns: 1fr; 
+		grid-template-areas: 
+		  'logo'
+		  'main'
+		  'right';
+	}
+	.fiche-list-item .logo { grid-area: logo; border-right: none; justify-content: flex-start; font-size:16px; }
+	.fiche-list-item .header-main { grid-area: main; }
+	.fiche-list-item .right-column { grid-area: right; border-left: none; margin-top: 4px; }
+	/* Tables plus compactes */
+	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding:4px 5px; font-size:11px; }
+	.fiche-list-item .main-table .title { font-size: 11px; }
+	.fiche-list-item .big { font-size: 14px; }
+	/* Actions horizontales en bas (zone 'actions') */
+	.fiche-actions { 
+		grid-area: actions; 
+		display: flex; 
+		flex-direction: row; 
+		justify-content: flex-start; 
+		gap: 10px;
+		margin-top: 6px;
+	}
+}
+
+/* Classes utilitaires pour basculer en mode "compact" sur tablette étroite */
+@media (max-width: 820px) and (min-width: 601px) {
+	.fiche-actions { flex-direction: row; gap: 10px; }
+	.fiche-list-item { grid-template-columns: 1fr; }
+	.fiche-list-item .fiche-header { grid-template-columns: 70px 1fr; grid-template-areas: 'logo main'; }
+	.fiche-list-item .right-column { display: none; } /* masque la colonne droite pour simplifier */
+}
+
+/* Amélioration accessibilité focus sur icônes d'action */
+.fiche-actions button:focus-visible { outline: 2px solid #1976d2; outline-offset: 2px; }
+
 

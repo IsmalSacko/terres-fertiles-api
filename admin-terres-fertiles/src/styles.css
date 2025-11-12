@@ -64,6 +64,22 @@ html, body {
   color: var(--text-primary);
 }
 
+/* Full-bleed breakout for footer: ensure it spans the entire viewport even if nested in a centered container */
+app-footer {
+  display: block;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  width: 100vw;
+  max-width: 100vw;
+  overflow: hidden; /* avoid horizontal scroll due to 100vw including scrollbar */
+}
+
+/* Optional: ensure body does not show a horizontal scrollbar from full-bleed sections */
+body { overflow-x: hidden; }
+
 /* Espacement global pour éviter que le contenu soit collé à la navbar */
 .container {
   margin-top: 90px; /* Hauteur navbar (68px) + marge (22px) */
