@@ -106,6 +106,17 @@
           <span class="notification-subtitle">de vente</span>
         </div>
       </div>
+
+      <div class="notification-item fiche-agro-notification" [routerLink]="['/fiches-agro-pedologiques']">
+        <div class="notification-icon">
+          <mat-icon>description</mat-icon>
+          <span class="notification-badge">{{ fichesAgro }}</span>
+        </div>
+        <div class="notification-content">
+          <span class="notification-title">Fiches agro</span>
+          <span class="notification-subtitle">disponibles</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -209,6 +220,18 @@
           Consultez et gérez toutes vos saisies de vente avec validation.
         </p>
         <button class="card-action">Voir les fiches</button>
+      </div>
+
+      <!-- Carte Fiches agro-pédologiques -->
+      <div class="modern-card card-fiches-agro" routerLink="/fiches-agro-pedologiques">
+        <div class="card-icon">
+          <mat-icon>description</mat-icon>
+        </div>
+        <h3 class="card-title">Fiches agro-pédologiques</h3>
+        <p class="card-description">
+          Liste, consultation et édition des fiches agro-pédologiques de sols.
+        </p>
+        <button class="card-action">Accéder aux fiches</button>
       </div>
     </div>
   </div>

@@ -12,6 +12,7 @@ import { MelangeService } from '../../services/melange.service';
 import { SaisieventeService } from '../../services/saisievente.service';
 import { ProduitVenteService } from '../../services/produit-vente.service';
 import { AmendementOrganiqueService } from '../../services/amendement-organique.service';
+import { FicheAgroService } from '../../services/ficheAgroPedoServcices/fiche-agro-pedo.service';
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 
 @Component({
@@ -32,6 +33,7 @@ export class DashboardComponent implements OnInit {
     private produitVenteService: ProduitVenteService,
     private saisiesVenteService: SaisieventeService,
     private amendementService: AmendementOrganiqueService,
+    private ficheAgroService: FicheAgroService,
     private router: Router
   ) {}
 
@@ -44,6 +46,7 @@ produitVente: number = 0;
 saisiesVente: number = 0;
 suiviStock: number = 0;
 stockDisponible: number = 0;
+fichesAgro: number = 0;
 loading: boolean = true;
 loadingGlobal: boolean = false;
 
@@ -64,6 +67,7 @@ async loadAllData() {
       this.loadProduitVenteCount(),
       this.loadSaisiesVenteCount(),
       this.loadStockDisponibleCount(),
+      this.loadFichesAgroCount(),
       
 
     ]);
@@ -127,9 +131,19 @@ async loadAmendementCount() {
   }
 }
 
+async loadFichesAgroCount() {
+  try {
+    const fiches = await this.ficheAgroService.getAll();
+    this.animateCounter('fichesAgro', Array.isArray(fiches) ? fiches.length : 0);
+  } catch (e) {
+    console.error('Erreur lors du chargement des fiches agro-pédologiques:', e);
+    this.animateCounter('fichesAgro', 0);
+  }
+}
+
 
 // Animation du compteur pour rendre les statistiques attractives
-private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente' | 'suiviStock' | 'stockDisponible', targetValue: number) {
+private animateCounter(property: 'chantierActifs' | 'gisements' | 'plannings' | 'melanges' | 'amendements' | 'fichesVente' | 'produitVente' | 'saisiesVente' | 'suiviStock' | 'stockDisponible' | 'fichesAgro', targetValue: number) {
   const duration = 1500; // 1.5 secondes
   const startTime = Date.now();
   const startValue = 0;

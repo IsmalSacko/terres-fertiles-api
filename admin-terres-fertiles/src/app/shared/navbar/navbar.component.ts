@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,7 +6,9 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import {Router, RouterModule} from '@angular/router';
 import { CommonModule, NgIf } from '@angular/common';
-import {AuthService} from '../../services/auth.service';
+import {AuthService, User} from '../../services/auth.service';
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -24,17 +26,45 @@ import {AuthService} from '../../services/auth.service';
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css']
 })
-export class NavbarComponent {
+export class NavbarComponent implements OnDestroy {
   isLoggedIn = false;
   userName: string | null = null;
   isSidenavOpen = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private router: Router, private authService: AuthService) {
+    // Initial state
     this.updateAuthState();
+
+    // React to auth state changes
+    this.authService.authState$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isAuth => {
+        this.isLoggedIn = isAuth;
+        this.updateUserFromStream();
+      });
+
+    // React to user info changes
+    this.authService.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.updateUserFromStream());
+
+    // Also update on route navigation end (useful after redirects)
+    this.router.events
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((e:any) => e?.constructor?.name === 'NavigationEnd')
+      )
+      .subscribe(() => this.updateAuthState());
   }
 
   ngOnInit() {
     this.updateAuthState();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   openSidenav() {
@@ -53,22 +83,23 @@ export class NavbarComponent {
 
   updateAuthState() {
     this.isLoggedIn = this.authService.isAuthenticated();
-    if (this.isLoggedIn) {
-      const user = localStorage.getItem('currentUser');
-      if (user) {
-        try {
-          const userObj = JSON.parse(user);
-          const userData = Array.isArray(userObj) ? userObj[0] : userObj;
-          this.userName = (userData.first_name && userData.last_name)
-            ? userData.first_name + ' ' + userData.last_name
-            : (userData.username || userData.email || null);
-        } catch {
-          this.userName = null;
-        }
-      } else {
-        this.userName = null;
-      }
-    } else {
+    this.updateUserFromStream();
+  }
+
+  private updateUserFromStream() {
+    if (!this.isLoggedIn) {
+      this.userName = null;
+      return;
+    }
+    const userRaw = localStorage.getItem('currentUser');
+    if (!userRaw) { this.userName = null; return; }
+    try {
+      const u = JSON.parse(userRaw) as User | any;
+      const userData: any = Array.isArray(u) ? u[0] : u;
+      this.userName = (userData.first_name && userData.last_name)
+        ? `${userData.first_name} ${userData.last_name}`
+        : (userData.username || userData.email || null);
+    } catch {
       this.userName = null;
     }
   }
@@ -76,9 +107,8 @@ export class NavbarComponent {
   logout() {
     this.authService.logout();
     this.updateAuthState();
-    this.router.navigate(['/']);
+    this.router.navigate(['/login'], { replaceUrl: true });
     this.closeSidenav();
-    window.location.reload();
   }
 
   login() {

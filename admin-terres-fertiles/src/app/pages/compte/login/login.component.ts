@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 
 @Component({
@@ -25,7 +26,8 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   togglePasswordVisibility() {
@@ -37,10 +39,11 @@ export class LoginComponent {
     this.loading = true;
     try {
       await this.authService.login(this.username, this.password);
-      this.router.navigate(['/dashboard']); // Redirige vers la page d'accueil ou celle de votre choix
-     setTimeout(() => {
-      window.location.reload();
-     }, 100);
+      // Valeur par défaut si returnUrl est null
+      const raw = this.route.snapshot.queryParamMap.get('returnUrl') || '/dashboard'; 
+      const returnUrl = raw.startsWith('/') ? raw : '/dashboard'; // Garantir que l'URL commence par '/'
+      // Navigation vers l'URL d'origine (ou dashboard par défaut) sans recharger la page
+      await this.router.navigateByUrl(returnUrl);
      
     } catch (err: any) {
       this.errorMsg = err;

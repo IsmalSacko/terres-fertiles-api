@@ -49,6 +49,7 @@ import { PhotoDetailComponent } from './pages/fiche-agropedodesol/photo-detail/p
 import { PhotoEditComponent } from './pages/fiche-agropedodesol/photo-edit/photo-edit.component';
 import { PhotoListComponent } from './pages/fiche-agropedodesol/photo-list/photo-list.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { authGuard } from './guards/auth.guard';
 // SuiviStock (lecture seule)
 
 
@@ -56,39 +57,37 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 export const routes: Routes = [
   // Route par défaut
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard', component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent, canActivate:[authGuard] },
   // Route pour l'authentification utilisateur
   { path: 'login', component: LoginComponent },
   // routes principales
-  { path: 'documents-gisement', component: DocumentGisementComponent },
+  { path: 'documents-gisement', component: DocumentGisementComponent, canActivate:[authGuard] },
   { path: 'register', component: RegisterComponent },
-  { path: 'profil',component: UserProfileComponent },
-  { path: 'chantiers', component: ChantierListComponent },
-  { path: 'chantiers/new', component: ChantierDetailComponent },
-  { path: 'chantiers/:id', component: ChantierDetailComponent },
-  { path: 'gisements', component: GisementListComponent },
-  { path: 'gisements/new', component: GisementCreateComponent },
-  { path: 'gisements/:id', component: GisementDetailComponent },
+  { path: 'profil',component: UserProfileComponent, canActivate:[authGuard] },
+  { path: 'chantiers', component: ChantierListComponent, canActivate:[authGuard] },
+  { path: 'chantiers/new', component: ChantierDetailComponent, canActivate:[authGuard] },
+  { path: 'chantiers/:id', component: ChantierDetailComponent, canActivate:[authGuard] },
+  { path: 'gisements', component: GisementListComponent, canActivate:[authGuard] },
+  { path: 'gisements/new', component: GisementCreateComponent, canActivate:[authGuard] },
+  { path: 'gisements/:id', component: GisementDetailComponent, canActivate:[authGuard] },
   // Routes pour les mélanges d'amendements
-  { path: 'melanges-amendements', component: MelangeAmendementListComponent },
-  { path: 'amendement-organique-create', component: AmendementOrganiqueCreateComponent},
+  { path: 'melanges-amendements', component: MelangeAmendementListComponent, canActivate:[authGuard] },
+  { path: 'amendement-organique-create', component: AmendementOrganiqueCreateComponent, canActivate:[authGuard] },
 
   // Routes pour les mélanges
-  { path: 'melanges', component: MelangeListComponent },
-  { path: 'melanges/new', component: MelangeDetailComponent },
-  { path: 'melanges/:id', component: MelangeDetailComponent },
+  { path: 'melanges', component: MelangeListComponent, canActivate:[authGuard] },
+  { path: 'melanges/new', component: MelangeDetailComponent, canActivate:[authGuard] },
+  { path: 'melanges/:id', component: MelangeDetailComponent, canActivate:[authGuard] },
   // Routes pour les produits de vente
-  { path: 'produits', component: ProduitVenteListComponent },
-  { path: 'produits/nouveau', component: CreateProduitVenteComponent },
-  { path: 'produits/edit/:id', component: ProduitVenteEditComponent },
-  { path: 'produits/:id', component: ProduitVenteDetailComponent },
+  { path: 'produits', component: ProduitVenteListComponent, canActivate:[authGuard] },
+  { path: 'produits/nouveau', component: CreateProduitVenteComponent, canActivate:[authGuard] },
+  { path: 'produits/edit/:id', component: ProduitVenteEditComponent, canActivate:[authGuard] },
+  { path: 'produits/:id', component: ProduitVenteDetailComponent, canActivate:[authGuard] },
   // Routes pour les saisies de vente
-  { path: 'saisies-vente', component: SaisieVenteComponent },
-  { path: 'saisies-vente/new', component: CreateSaisieVenteComponent },
-  { path: 'saisies-vente/edit/:id', component: EditSaisieVenteComponent },
+  { path: 'saisies-vente', component: SaisieVenteComponent, canActivate:[authGuard] },
+  { path: 'saisies-vente/new', component: CreateSaisieVenteComponent, canActivate:[authGuard] },
+  { path: 'saisies-vente/edit/:id', component: EditSaisieVenteComponent, canActivate:[authGuard] },
 
-  { path: 'analyses-laboratoire', component: AnalyseLaboratoireListComponent },
-  { path: 'analyses-laboratoire/:id', component: AnalyseLaboratoireDetailComponent },
 
   // Fiches de renseignement
   { path: 'activate/:uid/:token', component: ActivateComponent},
@@ -96,40 +95,40 @@ export const routes: Routes = [
   { path: 'reset-password', component: ResetPasswordComponent},
   { path: 'reset-password-confirm/:uid/:token', component:ResetPasswordConfirmComponent},
   // Routes pour la planification
-  {path: 'planning', component: PlanningComponent},
+  {path: 'planning', component: PlanningComponent, canActivate:[authGuard]},
 
-  { path: 'detail-saisie-vente/:id', component: DetailSaisieVenteComponent },
+  { path: 'detail-saisie-vente/:id', component: DetailSaisieVenteComponent, canActivate:[authGuard] },
   // Routes pour les plateformes
-  { path: 'plateformes/new', component: CreatePlateformeComponent },
-  { path: 'plateformes', component: ListPlateformeComponent },
-  { path: 'plateformes/:id', component: DetailPlateformeComponent },
-  { path: 'plateformes/edit/:id', component: EditPlateformeComponent },
+  { path: 'plateformes/new', component: CreatePlateformeComponent, canActivate:[authGuard] },
+  { path: 'plateformes', component: ListPlateformeComponent, canActivate:[authGuard] },
+  { path: 'plateformes/:id', component: DetailPlateformeComponent, canActivate:[authGuard] },
+  { path: 'plateformes/edit/:id', component: EditPlateformeComponent, canActivate:[authGuard] },
 
   // Routes pour les amendements organiques
-  { path: 'amendements', component: AmendementListComponent },
-  { path: 'amendements/new', component: AmendementCreateComponent },
-  { path: 'amendements/:id', component: AmendementDetailComponent },
-  { path: 'amendements/:id/edit', component: AmendementEditComponent },
+  { path: 'amendements', component: AmendementListComponent, canActivate:[authGuard] },
+  { path: 'amendements/new', component: AmendementCreateComponent, canActivate:[authGuard] },
+  { path: 'amendements/:id', component: AmendementDetailComponent, canActivate:[authGuard] },
+  { path: 'amendements/:id/edit', component: AmendementEditComponent, canActivate:[authGuard] },
 
  // Routes pour les fiches agro-pédologiques
-  { path: 'fiches-agro-pedologiques', component: FicheAgroPedoListComponent },
-  { path: 'fiches-agro-pedologiques/new', component: FicheAgroPedoCreateComponent },
-  { path: 'fiches-agro-pedologiques/:id', component: FicheAgroPedoDetailComponent },
-  { path: 'fiches-agro-pedologiques/:id/edit', component: FicheAgroPedoEditComponent },
+  { path: 'fiches-agro-pedologiques', component: FicheAgroPedoListComponent, canActivate:[authGuard] },
+  { path: 'fiches-agro-pedologiques/new', component: FicheAgroPedoCreateComponent, canActivate:[authGuard] },
+  { path: 'fiches-agro-pedologiques/:id', component: FicheAgroPedoDetailComponent, canActivate:[authGuard] },
+  { path: 'fiches-agro-pedologiques/:id/edit', component: FicheAgroPedoEditComponent, canActivate:[authGuard] },
 
   // Ajout de la route pour la création d'un horizon
-  { path: 'fiche-agropedodesol/horizons', component: FicheAgroPedoListComponent },
-  { path:'fiche-agropedodesol/horizon-create', component: HorizonCreateComponent },
-  { path:'fiche-agropedodesol/horizon-detail/:id', component: HorizonDetailComponent },
-  { path:'fiche-agropedodesol/horizon-edit/:id', component: HorizonEditComponent },
+  { path: 'fiche-agropedodesol/horizons', component: FicheAgroPedoListComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/horizon-create', component: HorizonCreateComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/horizon-detail/:id', component: HorizonDetailComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/horizon-edit/:id', component: HorizonEditComponent, canActivate:[authGuard] },
 
   // Routes pour les photos d'horizon
-  { path:'fiche-agropedodesol/photos', component: PhotoListComponent },
-  { path:'fiche-agropedodesol/photo-create', component: PhotoCreateComponent },
-  { path:'fiche-agropedodesol/photo-detail/:id', component: PhotoDetailComponent },
-  { path:'fiche-agropedodesol/photo-edit/:id', component: PhotoEditComponent },
+  { path:'fiche-agropedodesol/photos', component: PhotoListComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/photo-create', component: PhotoCreateComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/photo-detail/:id', component: PhotoDetailComponent, canActivate:[authGuard] },
+  { path:'fiche-agropedodesol/photo-edit/:id', component: PhotoEditComponent, canActivate:[authGuard] },
   
   // Suivi des stocks (lecture seule)
-  { path: 'suivistock', component: StockComponent },
+  { path: 'suivistock', component: StockComponent, canActivate:[authGuard] },
 
 ];
