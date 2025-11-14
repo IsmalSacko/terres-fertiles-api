@@ -13,8 +13,10 @@ declare var google: any;
 export class GisementsMapComponent implements OnInit{
   gisements: Gisement[] = [];
   
-  mapCenter = { lat: 46.603354, lng:1.888334}; 
-  mapZoom = 6;
+  // Centre par défaut sur Lyon pour visualiser directement les gisements locaux
+  mapCenter = { lat: 45.764043, lng: 4.835659 }; 
+  // Zoom plus large par défaut pour ressembler à la capture (plus petit = plus éloigné)
+  mapZoom = 10;
 constructor(private gisementService: GisementService,private router: Router){}
 
 async ngOnInit() {
@@ -30,12 +32,14 @@ initMap() {
     styles: [/* tu peux ajouter un style custom ici */]
   });
 
-  this.gisements.forEach(gis => {
-    const marker = new google.maps.Marker({
-      position: { lat: gis.latitude, lng: gis.longitude },
-      map,
-      title: gis.nom
-    });
+  // Ne créer des marqueurs que pour les gisements avec coordonnées valides
+  const validGisements = this.gisements.filter(g => typeof g.latitude === 'number' && typeof g.longitude === 'number');
+  const bounds = new google.maps.LatLngBounds();
+
+  validGisements.forEach(gis => {
+    const position = { lat: gis.latitude, lng: gis.longitude };
+    const marker = new google.maps.Marker({ position, map, title: gis.nom });
+    bounds.extend(position);
 
     const info = new google.maps.InfoWindow({
       content: `
@@ -65,5 +69,14 @@ initMap() {
     this.router.navigate(['/gisements', gis.id, { mode: 'view' }]);
     });
   });
+
+  // Si des marqueurs existent, ajuster la vue pour les inclure
+  if (!bounds.isEmpty()) {
+    map.fitBounds(bounds);
+    // Limiter un zoom trop proche après fitBounds pour garder une vue large
+    google.maps.event.addListenerOnce(map, 'idle', () => {
+      if (map.getZoom() > 11) map.setZoom(11);
+    });
+  }
 }
 }

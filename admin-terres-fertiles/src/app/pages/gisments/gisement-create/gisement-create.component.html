@@ -56,7 +56,7 @@
       <!-- Ligne 3: Matériau + Type de sol -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Environnement</mat-label>
+          <mat-label>Matériau</mat-label>
           <input matInput name="materiau" [(ngModel)]="materiau" required maxlength="255" />
           @if (gisementForm.form.get('materiau')?.errors?.['required']) {
             <mat-error>Le matériau est requis</mat-error>
@@ -67,7 +67,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Type d'environnement</mat-label>
+          <mat-label>Type de sol</mat-label>
           <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
             @for (option of environnementOptions; track option.value) {
               <mat-option [value]="option.value">

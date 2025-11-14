@@ -43,12 +43,12 @@ export class GisementCreateComponent implements OnInit {
   longitude: number | undefined = undefined;
   geolocLoading = false;
   geolocError = '';
+  // Affichage demandé côté UI
   type_de_sol = 'ouvert';
   environnementOptions = [
     { value: 'ouvert', viewValue: 'Ouvert' },
     { value: 'remanie', viewValue: 'Remanié' },
     { value: 'entropique', viewValue: 'Entropique' },
-    { value: 'autre', viewValue: 'Autre' },
   ];
   errorMsg = '';
   loading = false;
@@ -93,6 +93,8 @@ export class GisementCreateComponent implements OnInit {
       // Vider les champs si aucun chantier n'est sélectionné
       this.commune = '';
       this.localisation = '';
+      this.latitude = undefined;
+      this.longitude = undefined;
     }
   }
 
@@ -100,6 +102,9 @@ export class GisementCreateComponent implements OnInit {
   private updateFieldsFromChantier(chantier: Chantier) {
     this.commune = chantier.commune || '';
     this.localisation = chantier.localisation || '';
+    // Préremplir par défaut les coordonnées avec celles du chantier sélectionné
+    this.latitude = chantier.latitude ?? undefined;
+    this.longitude = chantier.longitude ?? undefined;
   }
 
   // Récupération de la position actuelle de l'utilisateur pour remplir latitude/longitude
@@ -147,6 +152,13 @@ export class GisementCreateComponent implements OnInit {
     this.errorMsg = '';
     this.loading = true;
     try {
+      // Mapping temporaire vers les valeurs backend valides
+      const backendTypeMap: Record<string, string> = {
+        ouvert: 'autre',
+        remanie: 'autre',
+        entropique: 'autre'
+      };
+
       await this.gisementService.create({
         chantier: this.selectedChantier,
         commune: this.commune,
@@ -156,11 +168,22 @@ export class GisementCreateComponent implements OnInit {
         localisation: this.localisation,
         latitude: this.latitude,
         longitude: this.longitude,
-        type_de_sol: this.type_de_sol
+        type_de_sol: backendTypeMap[this.type_de_sol] ?? 'autre'
       });
       this.router.navigate(['/gisements']);
     } catch (err: any) {
-      this.errorMsg = err.response?.data?.message || 'Erreur lors de la création du gisement.';
+      // Améliorer l'affichage d'erreur DRF: concaténer les messages de validation par champ
+      const data = err?.response?.data;
+      if (data && typeof data === 'object') {
+        try {
+          const messages = Object.entries(data).map(([k, v]) => `${k}: ${Array.isArray(v) ? v.join(', ') : v}`).join(' | ');
+          this.errorMsg = messages || 'Erreur lors de la création du gisement.';
+        } catch {
+          this.errorMsg = JSON.stringify(data);
+        }
+      } else {
+        this.errorMsg = err?.message || 'Erreur lors de la création du gisement.';
+      }
     } finally {
       this.loading = false;
     }
