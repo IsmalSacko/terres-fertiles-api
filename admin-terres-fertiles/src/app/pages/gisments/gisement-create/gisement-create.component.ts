@@ -41,12 +41,13 @@ export class GisementCreateComponent implements OnInit {
   localisation = '';
   latitude: number | undefined = undefined;
   longitude: number | undefined = undefined;
-  type_de_sol = 'limon';
-  typeSolOptions = [
-    { value: 'limon', viewValue: 'Limon' },
-    { value: 'sableux', viewValue: 'Sableux' },
-    { value: 'argileux', viewValue: 'Argileux' },
-    { value: 'caillouteux', viewValue: 'Caillouteux' },
+  geolocLoading = false;
+  geolocError = '';
+  type_de_sol = 'ouvert';
+  environnementOptions = [
+    { value: 'ouvert', viewValue: 'Ouvert' },
+    { value: 'remanie', viewValue: 'Remanié' },
+    { value: 'entropique', viewValue: 'Entropique' },
     { value: 'autre', viewValue: 'Autre' },
   ];
   errorMsg = '';
@@ -99,6 +100,42 @@ export class GisementCreateComponent implements OnInit {
   private updateFieldsFromChantier(chantier: Chantier) {
     this.commune = chantier.commune || '';
     this.localisation = chantier.localisation || '';
+  }
+
+  // Récupération de la position actuelle de l'utilisateur pour remplir latitude/longitude
+  getCurrentPosition() {
+    this.geolocError = '';
+    if (!('geolocation' in navigator)) {
+      this.geolocError = 'La géolocalisation n\'est pas supportée par ce navigateur.';
+      return;
+    }
+    this.geolocLoading = true;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.latitude = Number(pos.coords.latitude.toFixed(6));
+        this.longitude = Number(pos.coords.longitude.toFixed(6));
+        this.geolocLoading = false;
+        this.cdr.detectChanges();
+      },
+      (err) => {
+        switch (err.code) {
+          case err.PERMISSION_DENIED:
+            this.geolocError = 'Permission refusée pour accéder à la localisation.';
+            break;
+          case err.POSITION_UNAVAILABLE:
+            this.geolocError = 'Position indisponible.';
+            break;
+          case err.TIMEOUT:
+            this.geolocError = 'Délai dépassé lors de la récupération de la position.';
+            break;
+          default:
+            this.geolocError = 'Erreur inconnue lors de la géolocalisation.';
+        }
+        this.geolocLoading = false;
+        this.cdr.detectChanges();
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   }
 
   async createGisement() {

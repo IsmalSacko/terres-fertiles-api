@@ -5,7 +5,7 @@
       <!-- Ligne 1: Chantier + Commune -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Chantier *</mat-label>
+          <mat-label>Chantier</mat-label>
           <mat-select name="chantier" [(ngModel)]="selectedChantier" (selectionChange)="onChantierChange()" required>
 
             @for (chantier of chantiers; track chantier.id) {
@@ -20,7 +20,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Commune *</mat-label>
+          <mat-label>Commune</mat-label>
           <input matInput name="commune" [(ngModel)]="commune" required readonly placeholder="Rempli automatiquement depuis le chantier" />
           @if (!commune) {
             <mat-error>La commune est requise</mat-error>
@@ -31,7 +31,7 @@
       <!-- Ligne 2: Période terrassement + Volume terrasse -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Période terrassement *</mat-label>
+          <mat-label>Période terrassement</mat-label>
           <input matInput name="periode_terrassement" [(ngModel)]="periode_terrassement" required maxlength="100" />
           @if (gisementForm.form.get('periode_terrassement')?.errors?.['required']) {
             <mat-error>La période est requise</mat-error>
@@ -42,7 +42,7 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Volume terrasse (m³) *</mat-label>
+          <mat-label>Volume terrasse (m³)</mat-label>
           <input matInput name="volume_terrasse" [(ngModel)]="volume_terrasse" type="number" required min="0" step="0.01" />
           @if (gisementForm.form.get('volume_terrasse')?.errors?.['required']) {
             <mat-error>Le volume est requis</mat-error>
@@ -56,7 +56,7 @@
       <!-- Ligne 3: Matériau + Type de sol -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Matériau *</mat-label>
+          <mat-label>Environnement</mat-label>
           <input matInput name="materiau" [(ngModel)]="materiau" required maxlength="255" />
           @if (gisementForm.form.get('materiau')?.errors?.['required']) {
             <mat-error>Le matériau est requis</mat-error>
@@ -67,9 +67,9 @@
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Type de sol *</mat-label>
+          <mat-label>Type d'environnement</mat-label>
           <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
-            @for (option of typeSolOptions; track option.value) {
+            @for (option of environnementOptions; track option.value) {
               <mat-option [value]="option.value">
                 {{ option.viewValue }}
               </mat-option>
@@ -83,7 +83,7 @@
 
       <!-- Ligne 4: Localisation (pleine largeur) -->
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Localisation *</mat-label>
+        <mat-label>Localisation</mat-label>
         <input matInput name="localisation" [(ngModel)]="localisation" required readonly placeholder="Remplie automatiquement depuis le chantier sélectionné" />
         @if (gisementForm.form.get('localisation')?.errors?.['required']) {
           <mat-error>La localisation est requise</mat-error>
@@ -101,6 +101,19 @@
           <mat-label>Longitude</mat-label>
           <input matInput name="longitude" [(ngModel)]="longitude" type="number" step="0.000001" placeholder="Coordonnée longitude (optionnelle)" />
         </mat-form-field>
+      </div>
+
+      <div class="geoloc-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="getCurrentPosition()" [disabled]="geolocLoading">
+          <mat-icon fontIcon="my_location" aria-hidden="true"></mat-icon>
+          {{ geolocLoading ? 'Obtention de la position…' : (latitude && longitude ? 'Mettre à jour la position' : 'Obtenir ma position') }}
+        </button>
+        @if (geolocError) {
+          <span class="geoloc-error">{{ geolocError }}</span>
+        }
+        @if (!geolocError && latitude && longitude) {
+          <span class="geoloc-ok">Position enregistrée ✓</span>
+        }
       </div>
 
       @if (errorMsg) {
