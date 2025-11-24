@@ -69,15 +69,13 @@
         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Type de sol</mat-label>
           <mat-select name="type_de_sol" [(ngModel)]="type_de_sol" required>
-            @for (option of environnementOptions; track option.value) {
-              <mat-option [value]="option.value">
-                {{ option.viewValue }}
-              </mat-option>
-            }
+            <mat-option *ngFor="let option of environnementOptions" [value]="option.value">
+              {{ option.viewValue }}
+            </mat-option>
           </mat-select>
-          @if (gisementForm.form.get('type_de_sol')?.errors?.['required']) {
-            <mat-error>Le type de sol est requis</mat-error>
-          }
+          <mat-error *ngIf="gisementForm.form.get('type_de_sol')?.errors?.['required']">
+            Le type de sol est requis
+          </mat-error>
         </mat-form-field>
       </div>
 

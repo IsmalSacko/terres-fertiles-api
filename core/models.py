@@ -197,15 +197,12 @@ class Chantier(models.Model):
 
 class Gisement(models.Model):
     TYPE_SOL_CHOICES = [
-        ('limon', 'Limon'),
-        ('argile', 'Argile'),
-        ('terre', 'Terre'),
-        ('gravier', 'Gravier'),
-        ('sableux', 'Sableux'),
-        ('argileux', 'Argileux'),
-        ('caillouteux', 'Caillouteux'),
+        ('naturel', 'Naturel'),
+        ('remanie', 'Remanié'),
+        ('anthropique', 'Anthropique'),
         ('autre', 'Autre'),
     ]
+
 
     utilisateur = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -232,7 +229,7 @@ class Gisement(models.Model):
     localisation = models.CharField(max_length=255)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    type_de_sol = models.CharField(max_length=20, choices=TYPE_SOL_CHOICES, default='limon')
+    type_de_sol = models.CharField(max_length=20, choices=TYPE_SOL_CHOICES, default='naturel')
 
     def save(self, *args, **kwargs):
         regenerer = False

@@ -44,11 +44,12 @@ export class GisementCreateComponent implements OnInit {
   geolocLoading = false;
   geolocError = '';
   // Affichage demandé côté UI
-  type_de_sol = 'ouvert';
+  type_de_sol = 'naturel';
   environnementOptions = [
-    { value: 'ouvert', viewValue: 'Ouvert' },
+    { value: 'naturel', viewValue: 'Naturel' },
     { value: 'remanie', viewValue: 'Remanié' },
-    { value: 'entropique', viewValue: 'Entropique' },
+    { value: 'anthropique', viewValue: 'Anthropique' },
+    { value: 'autre', viewValue: 'Autre' },
   ];
   errorMsg = '';
   loading = false;
@@ -152,13 +153,7 @@ export class GisementCreateComponent implements OnInit {
     this.errorMsg = '';
     this.loading = true;
     try {
-      // Mapping temporaire vers les valeurs backend valides
-      const backendTypeMap: Record<string, string> = {
-        ouvert: 'autre',
-        remanie: 'autre',
-        entropique: 'autre'
-      };
-
+      // Suppression du mapping temporaire, utilisation directe des valeurs backend
       await this.gisementService.create({
         chantier: this.selectedChantier,
         commune: this.commune,
@@ -168,7 +163,7 @@ export class GisementCreateComponent implements OnInit {
         localisation: this.localisation,
         latitude: this.latitude,
         longitude: this.longitude,
-        type_de_sol: backendTypeMap[this.type_de_sol] ?? 'autre'
+        type_de_sol: this.type_de_sol // Utilisation directe
       });
       this.router.navigate(['/gisements']);
     } catch (err: any) {

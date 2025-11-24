@@ -69,9 +69,9 @@ export class GisementDetailComponent implements OnInit {
   markerPosition?: google.maps.LatLngLiteral;
 
   environnementOptions = [
-    { value: 'ouvert', viewValue: 'Ouvert' },
+    { value: 'naturel', viewValue: 'Naturel' },
     { value: 'remanie', viewValue: 'Remanié' },
-    { value: 'entropique', viewValue: 'Entropique' },
+    { value: 'anthropique', viewValue: 'Anthropique' },
     { value: 'autre', viewValue: 'Autre' },
   ];
 
