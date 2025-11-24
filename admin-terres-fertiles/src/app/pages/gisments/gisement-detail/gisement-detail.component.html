@@ -1,4 +1,4 @@
-<div class="modern-container" *ngIf="!loading; else loadingTemplate">
+<div class="container global-container" *ngIf="!loading; else loadingTemplate">
   <!-- Header moderne cohérent -->
   <div class="page-header">
     <div class="header-content">
@@ -22,14 +22,13 @@
           <mat-icon>edit</mat-icon>
           Modifier
         </button>
-        <button mat-raised-button color="danger"  (click)="deleteGisement()" class="delete-button">
+        <button mat-raised-button color="warn"  (click)="deleteGisement()" class="delete-button bg-danger">
           Supprimer
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Contenu principal organisé en 3 colonnes pour vue d'ensemble complète -->
   <div class="overview-layout" *ngIf="isViewOnly">
     <!-- 3 colonnes: Informations | Localisation | Documents -->
     <div class="three-column-row">
@@ -101,12 +100,12 @@
               [center]="mapCenter"
               [zoom]="mapZoom">
               <map-marker
-  [position]="markerPosition!"
-  [label]="{ text: gisement.nom || gisement.commune || 'Gisement', color: '#1976d2', fontSize: '14px', fontWeight: 'bold'}"
-  [options]="{ icon: markerIconOptions }"
-  (mapClick)="openGoogleMaps()">
-</map-marker>
-              </google-map>
+        [position]="markerPosition!"
+        [label]="{ text: gisement.nom || gisement.commune || 'Gisement', color: '#1976d2', fontSize: '14px', fontWeight: 'bold'}"
+        [options]="{ icon: markerIconOptions }"
+        (mapClick)="openGoogleMaps()">
+      </map-marker>
+        </google-map>
             </div>
             <div class="map-actions-column">
               <button mat-raised-button color="primary" (click)="openGoogleMaps()">
