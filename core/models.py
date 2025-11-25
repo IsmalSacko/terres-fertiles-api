@@ -217,7 +217,7 @@ class Gisement(models.Model):
         null=True,
         blank=True,
         help_text="Nom du gisement, généré automatiquement si vide.",
-        editable=False,
+        editable=True,
         unique=True
     )
     date_creation = models.DateField(default=today, help_text="Date de création du gisement")
@@ -238,48 +238,52 @@ class Gisement(models.Model):
             # Création
             regenerer = True
         else:
-            # Modification : vérifier si les champs clés ont changé
-            pattern = r"^GIS-\d{2}-[A-Z0-9]{2,6}-[A-Z0-9]{2,6}-\d{3}$"
-            if not re.match(pattern, self.nom or ""):
-                regenerer = True
-            else:
-                # Récupérer l'instance originale pour comparer les changements
-                try:
-                    original = Gisement.objects.get(pk=self.pk)
-                    
-                    # Vérifier si les champs utilisés pour générer le nom ont changé
-                    annee_actuelle = str(self.date_creation.year)[-2:]
-                    annee_originale = str(original.date_creation.year)[-2:]
-                    
-                    # Comparer les chantiers associés
-                    chantier_change = self.chantier != original.chantier
-                    
-                    # Si l'un des composants du nom a changé, régénérer
-                    if (annee_actuelle != annee_originale or chantier_change):
+            # Modification : ne pas écraser une modification MANUELLE du champ `nom`.
+            # On régénère seulement si : création (géré ci-dessus), changement d'année,
+            # changement de chantier, ou conflit d'unicité.
+            try:
+                original = Gisement.objects.get(pk=self.pk)
+                nom_modifie_par_utilisateur = bool(self.nom and original.nom and self.nom != original.nom)
+
+                annee_actuelle = str(self.date_creation.year)[-2:]
+                annee_originale = str(original.date_creation.year)[-2:]
+                chantier_change = self.chantier != original.chantier
+
+                # Si année ou chantier changent -> régénérer
+                if (annee_actuelle != annee_originale) or chantier_change:
+                    regenerer = True
+
+                # Si le nom a été modifié manuellement par l'utilisateur,
+                # on respecte sa valeur sauf s'il y a conflit d'unicité.
+                if nom_modifie_par_utilisateur:
+                    if Gisement.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                         regenerer = True
-                        
-                except Gisement.DoesNotExist:
-                    regenerer = True
-                
-                # Vérifier unicité
-                if Gisement.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
-                    regenerer = True
+                    else:
+                        regenerer = False
+                else:
+                    # Sinon (nom non modifié manuellement) vérifier unicité
+                    if Gisement.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+
+            except Gisement.DoesNotExist:
+                regenerer = True
+
+        # Ajout de journaux pour le diagnostic
+        print(f"DEBUG: regenerer={regenerer}, pk={self.pk}, nom={self.nom}")
 
         if regenerer and self.chantier:
             with transaction.atomic():
                 if self.pk:
-                    # Pour une modification, conserver le numéro séquentiel existant
                     self.nom = self._generate_nom_with_existing_suffix()
                 else:
-                    # Pour une création, générer un nouveau numéro
                     self.nom = self._generate_nom(reindex=True)
 
-        # Normalisation
         if self.commune:
             self.commune = self.commune.upper()
         if self.materiau:
             self.materiau = self.materiau.upper()
 
+        print(f"DEBUG: Final nom={self.nom}")
         super().save(*args, **kwargs)
 
 

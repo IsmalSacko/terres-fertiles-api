@@ -8,9 +8,9 @@
         </div>
         <div class="header-text">
           <h1 class="header-title">
-            {{ isEditMode ? 'Modifier' : (isViewOnly ? 'Détails du gisement' : 'Nouveau gisement') }}
+            {{ isEditMode ? 'Modifier le gisement' : (isViewOnly ? 'Détails du gisement' : 'Nouveau gisement') }}
           </h1>
-          <p class="header-subtitle">{{ gisement.commune || 'Gestion des gisements de terre' }}</p>
+          <p class="header-subtitle">{{gisement.nom}} - {{ gisement.commune }}</p>
         </div>
       </div>
       <div class="header-actions">
@@ -189,6 +189,13 @@
               <mat-icon matSuffix>calendar_today</mat-icon>
             </mat-form-field>
 
+            <!--Nom du gisement-->
+            <mat-form-field appearance="outline">
+              <mat-label>Nom du gisement</mat-label>
+              <input matInput [(ngModel)]="gisement.nom" name="nom" required>
+              <mat-icon matSuffix>terrain</mat-icon> <!-- Icône mise à jour pour refléter le contexte du gisement -->
+            </mat-form-field>
+
             <!-- Volume terrassé -->
             <mat-form-field appearance="outline">
               <mat-label>Volume terrassé (m³)</mat-label>
@@ -342,6 +349,11 @@
         </div>
       </mat-card-content>
     </mat-card>
+  </div>
+
+  <!-- Ajout du nom du gisement dans la vue -->
+  <div class="gisement-name">
+    <h2>{{ gisement.nom || 'Nom du gisement non défini' }}</h2>
   </div>
 </div>
 

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-fiche-agro-pedo-edit',
@@ -7,5 +8,15 @@ import { Component } from '@angular/core';
   styleUrl: './fiche-agro-pedo-edit.component.css'
 })
 export class FicheAgroPedoEditComponent {
+
+  formFicheAgroPedoEdit : FormGroup;
+
+  fb = inject(FormBuilder);
+
+   constructor() {
+    this.formFicheAgroPedoEdit = this.fb.group({
+      nom : ['', Validators.required],
+    });
+  }
 
 }

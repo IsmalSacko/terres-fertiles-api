@@ -136,7 +136,7 @@ class GisementSerializer(serializers.ModelSerializer):
             'commune', 'periode_terrassement', 'volume_terrasse', 'materiau',
             'localisation', 'latitude', 'longitude', 'type_de_sol','utilisateur'
         ]
-        read_only_fields = ['nom', 'date_creation'] # On empêche la modification côté frontend
+        read_only_fields = ['date_creation'] # `nom` est éditable depuis le frontend
 
 
 

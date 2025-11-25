@@ -271,7 +271,7 @@ export class GisementDetailComponent implements OnInit {
       } else if (this.gisement) {
         await this.gisementService.create(this.gisement);
       }
-      this.router.navigate(['/gisements']);
+      this.router.navigate([`/gisements/${this.gisement.id}`]); // Redirection vers la page de vue du gisement
     } catch (err: any) {
       this.errorMsg = err.response?.data?.message || 'Erreur lors de la sauvegarde du gisement.';
     } finally {
