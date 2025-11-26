@@ -347,6 +347,102 @@
   padding-right: 0.5rem;
 }
 
+/* New styles for document cards in edit mode */
+.existing-documents .documents-title {
+  margin: 0 0 0.75rem 0;
+  color: #2E7D32;
+  font-weight: 700;
+}
+
+.doc-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.doc-card {
+  background: linear-gradient(180deg, #ffffff, #f7f9f7);
+  border: 1px solid rgba(46,125,50,0.08);
+  border-radius: 10px;
+  padding: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: stretch;
+  min-height: 120px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.doc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(46,125,50,0.08);
+}
+
+.doc-thumb {
+  height: 80px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.doc-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 20px;
+  color: #fff !important;
+  line-height: 1 !important;
+}
+
+/* Icon background colors by file type */
+.icon-pdf { background: linear-gradient(180deg,#D32F2F,#B71C1C); }
+.icon-doc { background: linear-gradient(180deg,#1976D2,#0D47A1); }
+.icon-xls { background: linear-gradient(180deg,#388E3C,#1B5E20); }
+.icon-image { background: linear-gradient(180deg,#FFB74D,#FF8A65); color: #fff; }
+.icon-file { background: linear-gradient(180deg,#9E9E9E,#616161); }
+
+.doc-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.doc-title {
+  font-weight: 600;
+  color: #2E7D32;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-date {
+  font-size: 0.78rem;
+  color: #666;
+}
+
+.doc-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: auto;
+  justify-content: flex-end;
+}
+
+.doc-actions button mat-icon { font-size: 18px; }
+
+
 .document-item-column {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 251, 248, 0.9));
   border-radius: 12px;
@@ -672,6 +768,11 @@ html, body { width: 100%; overflow-x: hidden; }
     flex-direction: column;
     align-items: stretch;
     gap: 0.4rem;
+  }
+
+  /* Ensure card grid is single column on very small screens */
+  .doc-card-grid {
+    grid-template-columns: 1fr;
   }
 
   .document-name-column {

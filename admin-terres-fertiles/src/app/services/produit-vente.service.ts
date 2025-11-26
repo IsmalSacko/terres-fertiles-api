@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
-import axios from 'axios';
+import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { CreateProduitVente } from '../models/produit-vente.model';
+import { ApiService } from './api.service';
+import axios from 'axios';
 
 interface Chantier {
   id: number;
@@ -76,25 +77,20 @@ export interface ProduitVenteResponse {
   providedIn: 'root'
 })
 export class ProduitVenteService {
-  // 🔥 Base dynamique selon dev/prod
+  //  Base dynamique selon dev/prod
   private readonly base = environment.apiUrl;
   // IMPORTANT: ajouter le slash final ici. Django/DRF attend les endpoints avec a trailing slash
   // (sinon POST vers /api/produits sans slash retourne 404 car Django ne redirige pas les POST).
   private readonly apiUrl = `${this.base}produits/`;
   constructor() {}
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    const headres = { headers: { Authorization: `Token ${token}` } };
-  
-    return headres;
-  }
+  private apiService = inject(ApiService);
+
+
   async getProduits(page: number = 1, pageSize: number = 10): Promise<ProduitVenteResponse> {
-    console.log('Appel API getProduits avec headers:', this.getHeaders());
     try {
-      const response = await axios.get<ProduitVente[]>(
-        `${this.apiUrl}?page=${page}&page_size=${pageSize}`,
-        this.getHeaders()
+      const response = await this.apiService.get<ProduitVente[]>(
+        `${this.apiUrl}?page=${page}&page_size=${pageSize}`
       );
       console.log('Réponse API getProduits:', response.data);
       // Transformer la réponse en format ProduitVenteResponse
@@ -120,11 +116,10 @@ export class ProduitVenteService {
     console.log('URL API:', `${this.apiUrl}${id}/`);
     
     try {
-      const response = await axios.get<ProduitVente>(
-        `${this.apiUrl}${id}/`,
-        this.getHeaders()
+      const response = await this.apiService.get<ProduitVente>(
+        `${this.apiUrl}${id}/`
       );
-      console.log('Réponse API produit:', response.data);
+      
       return response.data;
     } catch (error) {
       console.error('Erreur lors de la récupération du produit:', error);
@@ -134,9 +129,8 @@ export class ProduitVenteService {
 
   async searchProduits(query: string): Promise<ProduitVenteResponse> {
     try {
-      const response = await axios.get<ProduitVente[]>(
-        `${this.apiUrl}?search=${query}`,
-        this.getHeaders()
+      const response = await this.apiService.get<ProduitVente[]>(
+        `${this.apiUrl}?search=${query}`
       );
       return {
         count: response.data.length,
@@ -152,9 +146,8 @@ export class ProduitVenteService {
 
   async getAll(): Promise<ProduitVente[]> {
     try {
-      const response = await axios.get<ProduitVente[]>(
-        this.apiUrl,
-        this.getHeaders()
+      const response = await this.apiService.get<ProduitVente[]>(
+        this.apiUrl
       );
       return response.data;
     } catch (error) {
@@ -183,13 +176,10 @@ export class ProduitVenteService {
 
   async createProduitVente(produitData: CreateProduitVente): Promise<ProduitVente> {
     try {
-      console.log('🚀 Envoi des données vers l\'API:', produitData);
-      const response = await axios.post<ProduitVente>(
+      const response = await this.apiService.post<ProduitVente>(
         this.apiUrl,
-        produitData,
-        this.getHeaders()
+        produitData
       );
-      console.log('✅ Réponse de l\'API:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Erreur lors de la création du produit:', error);
@@ -204,10 +194,9 @@ export class ProduitVenteService {
 
   async updateProduitVente(id: number, payload: Partial<ProduitVente>): Promise<ProduitVente> {
     try {
-      const response = await axios.patch<ProduitVente>(
+      const response = await this.apiService.patch<ProduitVente>(
         `${this.apiUrl}${id}/`,
-        payload,
-        this.getHeaders()
+        payload
       );
       return response.data;
     } catch (error) {
@@ -222,7 +211,7 @@ export class ProduitVenteService {
 
   async deleteProduitVente(id: any): Promise<void> {
     try {
-      await axios.delete(`${this.apiUrl}${id}/`, this.getHeaders());
+      await this.apiService.delete(`${this.apiUrl}${id}/`);
     } catch (error) {
       console.error('Erreur lors de la suppression du produit:', error);
       if (axios.isAxiosError(error)) {

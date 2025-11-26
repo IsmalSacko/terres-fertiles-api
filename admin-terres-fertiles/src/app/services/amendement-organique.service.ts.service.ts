@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 export interface AmendementOrganique {
   id?: number;
   nom: string;
@@ -22,21 +23,17 @@ export class AmendementOrganiqueServiceTsService {
   constructor() { }
   private readonly base = environment.apiUrl;
   private readonly apiUrl = `${this.base}amendements-organiques/`
+  private apiService = inject(ApiService);
   
 
-  // Méthode pour les token et entête
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return { headers: { Authorization: `Token ${token}` } };
-  }
   async create(amendement: AmendementOrganique): Promise<AmendementOrganique>{
-    const response = await axios.post<AmendementOrganique>(this.apiUrl, amendement, this.getHeaders());
+    const response = await this.apiService.post<AmendementOrganique>(this.apiUrl, amendement);
     return response.data;
   }
 
 
   async getAll(): Promise<AmendementOrganique[]>{
-    const response = await axios.get<AmendementOrganique[]>(this.apiUrl, this.getHeaders());
+    const response = await this.apiService.get<AmendementOrganique[]>(this.apiUrl);
     return response.data;
   }
 }

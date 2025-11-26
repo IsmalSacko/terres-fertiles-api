@@ -1,1 +1,40 @@
-<p>fiche-agro-pedo-edit works!</p>
+<div class="fiche-agro-pedo-edit-container container mb-4">
+  <h4>{{ isEdit ? 'Modifier fiche' : 'Nouvelle fiche' }}</h4>
+
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <div *ngFor="let field of [
+        {label:'EAP', key:'EAP', readonly:true},
+        {label:'Ville', key:'ville'},
+        {label:'Projet', key:'projet'},
+        {label:'Date', key:'date'},
+        {label:'Commanditaire', key:'commanditaire'},
+        {label:'Observateur', key:'observateur'},
+        {label:'Nom sondage *', key:'nom_sondage', required:true},
+        {label:'Coord X', key:'coord_x', type:'number'},
+        {label:'Coord Y', key:'coord_y', type:'number'},
+        {label:'Indication lieu', key:'indication_lieu'},
+        {label:'Antécédent climatique', key:'antecedent_climatique'},
+        {label:'État surface', key:'etat_surface'},
+        {label:'Couvert végétal', key:'couvert_vegetal'},
+        {label:'Synthèse', key:'synthese'}
+      ]">
+      <div class="mb-2">
+        <label>{{field.label}}</label>
+        <input class="form-control"
+               [type]="field.type || 'text'"
+               [formControlName]="field.key"
+               [readonly]="field.readonly" />
+        <div *ngIf="field.required && form.get(field.key)?.invalid && form.get(field.key)?.touched" class="text-danger small">
+          Requis.
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-3 d-flex gap-2">
+      <button class="btn btn-primary" type="submit" [disabled]="saving">
+        {{ saving ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+      <button class="btn btn-secondary" type="button" (click)="cancel()">Annuler</button>
+    </div>
+  </form>
+</div>

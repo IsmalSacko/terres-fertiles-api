@@ -243,19 +243,19 @@ class Gisement(models.Model):
             # changement de chantier, ou conflit d'unicité.
             try:
                 original = Gisement.objects.get(pk=self.pk)
-                nom_modifie_par_utilisateur = bool(self.nom and original.nom and self.nom != original.nom)
+                changement_de_nom = bool(self.nom and original.nom and self.nom != original.nom)
 
-                annee_actuelle = str(self.date_creation.year)[-2:]
-                annee_originale = str(original.date_creation.year)[-2:]
+                annee_actuelle = str(self.date_creation.year)[-2:] # année actuelle avec 2 chiffres (ex: "24")
+                annee_originale = str(original.date_creation.year)[-2:] # année originale avec 2 chiffres (ex: "23")
                 chantier_change = self.chantier != original.chantier
 
-                # Si année ou chantier changent -> régénérer
+                # Si année ou chantier changent -> régénérer le nom automatiquement à 
                 if (annee_actuelle != annee_originale) or chantier_change:
                     regenerer = True
 
                 # Si le nom a été modifié manuellement par l'utilisateur,
                 # on respecte sa valeur sauf s'il y a conflit d'unicité.
-                if nom_modifie_par_utilisateur:
+                if changement_de_nom:
                     if Gisement.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                         regenerer = True
                     else:
@@ -379,14 +379,15 @@ class FicheAgroPedodeSol(models.Model):
     antecedent_climatique = models.TextField(blank=True, null=True)
     etat_surface = models.TextField(blank=True, null=True)
     couvert_vegetal = models.TextField(blank=True, null=True)
-    test_beche = models.TextField(blank=True, null=True)
+    synthese = models.TextField(blank=True, null=True)
     # autres champs selon la fiche papier...
     def save(self, *args, **kwargs):
         if not self.EAP:
             ville_code = (self.ville or "").upper().replace("'", "").replace(" ", "-")[:10]
             # Compte le nombre de fiches existantes pour la ville
             count = FicheAgroPedodeSol.objects.filter(ville=self.ville).count() + 1
-            self.EAP = f"EAP-25-{ville_code}-{count:03d}"
+            annee = str(self.date.year)[-2:]
+            self.EAP = f"EAP-{annee}-{ville_code}-{count:03d}"
         super().save(*args, **kwargs)
     def __str__(self):
         return f"{self.nom_sondage} ({self.EAP})".upper()

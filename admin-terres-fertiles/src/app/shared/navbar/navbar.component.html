@@ -6,7 +6,7 @@
   <div class="mobile-menu-header">
     <div class="mobile-logo">
       <mat-icon>landscape</mat-icon>
-      <span>Terres Fertiles</span>
+      <span>TF</span>
     </div>
     <button mat-icon-button class="close-menu-btn" (click)="closeSidenav()">
       <mat-icon>close</mat-icon>
@@ -20,7 +20,7 @@
     <a (click)="navigateAndClose('/plateformes')"><mat-icon>home_work</mat-icon> PTF</a>
     <a (click)="navigateAndClose('/suivistock')"><mat-icon>inventory_2</mat-icon> STOCK</a>
     <a (click)="navigateAndClose('/amendements')"><mat-icon>eco</mat-icon> MAO</a>
-    <a (click)="navigateAndClose('/fiches-agro-pedologiques/new')"><mat-icon>description</mat-icon> Nouvelle fiche agro-pédologique</a>
+    <a (click)="navigateAndClose('/fiches-agro-pedologiques/new')"><mat-icon>description</mat-icon> Nouvelle fiche agro-pédo</a>
     <div class="mobile-menu-divider"></div>
     <button *ngIf="isLoggedIn" (click)="logout()"><mat-icon>logout</mat-icon> Déconnexion</button>
     <button *ngIf="!isLoggedIn" (click)="login()"><mat-icon>login</mat-icon> Connexion</button>
@@ -32,7 +32,9 @@
 <mat-toolbar class="navbar-glass">
   <span class="logo" routerLink="/">
     <mat-icon>landscape</mat-icon>
-    Terres Fertiles
+    <span>
+      <img src="/assets/tf.png" alt="Terres Fertiles Logo" class="logo-tf-img"/>
+    </span>
   </span>
   <span class="spacer"></span>
   <nav class="nav-links">

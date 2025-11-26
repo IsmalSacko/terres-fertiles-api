@@ -4,14 +4,12 @@ import { GisementDetailComponent } from './pages/gisments/gisement-detail/giseme
 import { GisementListComponent } from './pages/gisments/gisement-list/gisement-list.component';
 import { MelangeListComponent } from './pages/melanges/melange-list/melange-list.component';
 import { MelangeDetailComponent } from './pages/melanges/melange-detail/melange-detail.component';
-import { AnalyseLaboratoireListComponent } from './pages/labo/analyse-laboratoire-list/analyse-laboratoire-list.component';
-import { AnalyseLaboratoireDetailComponent } from './pages/labo/analyse-laboratoire-detail/analyse-laboratoire-detail.component';
 import { LoginComponent } from './pages/compte/login/login.component';
 import { GisementCreateComponent } from './pages/gisments/gisement-create/gisement-create.component';
 import { ChantierListComponent } from './pages/chantiers/chantier-list/chantier-list.component';
 import { ChantierDetailComponent } from './pages/chantiers/chantier-detail/chantier-detail.component';
 import { MelangeAmendementListComponent } from './pages/melanges/melange-amendement-list/melange-amendement-list.component.ts.component';
-import { AmendementOrganiqueCreateComponent } from './pages/labo/amendement-organique-create/amendement-organique-create.component';
+import { AmendementCreateComponent } from './pages/amendements/amendement-create/amendement-create.component';
 import { RegisterComponent } from './pages/compte/register/register.component';
 import { UserProfileComponent } from './pages/compte/user-profile/user-profile.component';
 import { ActivateComponent } from './pages/compte/activate/activate.component';
@@ -29,7 +27,6 @@ import { CreatePlateformeComponent } from './pages/plateformes/create-plateforme
 import { ProduitVenteListComponent } from './pages/produits/produit-vente-list/produit-vente-list.component';
 import { CreateProduitVenteComponent } from './pages/produits/create-produit-vente/create-produit-vente.component';
 import { AmendementListComponent } from './pages/amendements/amendement-list/amendement-list.component';
-import { AmendementCreateComponent } from './pages/amendements/amendement-create/amendement-create.component';
 import { AmendementDetailComponent } from './pages/amendements/amendement-detail/amendement-detail.component';
 import { AmendementEditComponent } from './pages/amendements/amendement-edit/amendement-edit.component';
 import { ProduitVenteDetailComponent } from './pages/produits/produit-vente-detail/produit-vente-detail.component';
@@ -72,7 +69,7 @@ export const routes: Routes = [
   { path: 'gisements/:id', component: GisementDetailComponent, canActivate:[authGuard] },
   // Routes pour les mélanges d'amendements
   { path: 'melanges-amendements', component: MelangeAmendementListComponent, canActivate:[authGuard] },
-  { path: 'amendement-organique-create', component: AmendementOrganiqueCreateComponent, canActivate:[authGuard] },
+  { path: 'amendement-organique-create', component: AmendementCreateComponent, canActivate:[authGuard] },
 
   // Routes pour les mélanges
   { path: 'melanges', component: MelangeListComponent, canActivate:[authGuard] },

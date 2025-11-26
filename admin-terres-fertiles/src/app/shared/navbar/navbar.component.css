@@ -18,12 +18,33 @@
   padding: 0 20px;
   overflow-x: hidden;
 }
+.logo-tf-img {
+
+  filter: drop-shadow(0 2px 8px rgba(46,125,50,0.12));
+  margin-right: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 1.2em !important;
+  width: 1.2em;
+  height: 1.2em;
+  color: var(--accent-color);
+ 
+  
+}
+
+.logo-tf-img:hover {
+  box-shadow: 0 0 0 4px rgba(255, 162, 0, 0.884), 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: scale(1.02);
+}
+
+
 
 .logo {
   font-size: 1.5em;
   font-weight: 800;
   display: flex;
   align-items: center;
+  cursor: pointer;
   gap: 12px;
   letter-spacing: 2px;
   text-shadow: 0 2px 12px rgba(0,0,0,0.10);
@@ -170,6 +191,12 @@
     font-size: 1.2em;
     gap: 8px;
   }
+  .logo-tf-img {
+  height: 28px;
+  filter: drop-shadow(0 2px 8px rgba(46,125,50,0.12));
+  margin-right: 8px;
+  cursor: pointer;
+}
   .avatar-img {
     width: 35px;
     height: 35px;
@@ -185,6 +212,17 @@
     min-height: 65px;
     border-radius: 0 0 20px 20px;
   }
+  .logo-tf-img {
+
+  filter: drop-shadow(0 2px 8px rgba(46,125,50,0.12));
+  margin-right: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  font-size: 1.1em !important;
+  width: 1.1em;
+  height: 1.1em;
+  color: var(--accent-color);
+}
   .logo {
     font-size: 1.1em;
     gap: 6px;

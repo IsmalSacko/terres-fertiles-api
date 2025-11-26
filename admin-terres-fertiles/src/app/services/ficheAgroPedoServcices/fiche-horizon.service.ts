@@ -12,26 +12,26 @@ export class FicheHorizonService {
   private readonly FICHE_HORIZON_URL = `${this.base}fiches-horizons/`;
 
   getAll = async (): Promise<FicheHorizon[]> => {
-    const res = await axios.get(this.FICHE_HORIZON_URL, this.apiService.getHeaders());
+    const res = await this.apiService.get(this.FICHE_HORIZON_URL);
     return res.data;
   };
 
   get = async (id: number): Promise<FicheHorizon> => {
-    const res = await axios.get(`${this.FICHE_HORIZON_URL}${id}/`, this.apiService.getHeaders());
+    const res = await this.apiService.get(`${this.FICHE_HORIZON_URL}${id}/`);
     return res.data;
   };
 
   create = async (horizon: Partial<FicheHorizon>): Promise<FicheHorizon> => {
-    const res = await axios.post(this.FICHE_HORIZON_URL, horizon, this.apiService.getHeaders());
+    const res = await this.apiService.post(this.FICHE_HORIZON_URL, horizon);
     return res.data;
   };
 
   update = async (id: number, horizon: Partial<FicheHorizon>): Promise<FicheHorizon> => {
-    const res = await axios.patch(`${this.FICHE_HORIZON_URL}${id}/`, horizon, this.apiService.getHeaders());
+    const res = await this.apiService.patch(`${this.FICHE_HORIZON_URL}${id}/`, horizon);
     return res.data;
   };
 
   remove = async (id: number): Promise<void> => {
-    await axios.delete(`${this.FICHE_HORIZON_URL}${id}/`, this.apiService.getHeaders());
+    await this.apiService.delete(`${this.FICHE_HORIZON_URL}${id}/`);
   };
 };

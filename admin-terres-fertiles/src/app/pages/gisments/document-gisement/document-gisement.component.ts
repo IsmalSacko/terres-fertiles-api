@@ -45,10 +45,9 @@ export class DocumentGisementComponent implements OnInit {
   showGisementForm = false;
 
   readonly typesDeSol = [
-    { value: 'limon', label: 'Limon' },
-    { value: 'sableux', label: 'Sableux' },
-    { value: 'argileux', label: 'Argileux' },
-    { value: 'caillouteux', label: 'Caillouteux' },
+    { value: 'naturel', label: 'Naturel' },
+    { value: 'remanie', label: 'Remanié' },
+    { value: 'anthropique', label: 'Anthropique' },
     { value: 'autre', label: 'Autre' }
   ];
 
@@ -73,7 +72,7 @@ export class DocumentGisementComponent implements OnInit {
       localisation: ['', [Validators.required, Validators.maxLength(255)]],
       latitude: [null],
       longitude: [null],
-      type_de_sol: ['limon', Validators.required]
+      type_de_sol: ['naturel', Validators.required]
     });
   }
 

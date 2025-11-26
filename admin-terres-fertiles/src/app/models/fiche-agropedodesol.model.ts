@@ -13,7 +13,7 @@ export interface FicheAgroPedodeSol {
   antecedent_climatique?: string;
   etat_surface?: string;
   couvert_vegetal?: string;
-  test_beche?: string;
+  synthese?: string;
   horizons?: FicheHorizon[];
   photos?: FichePhoto[];
 }

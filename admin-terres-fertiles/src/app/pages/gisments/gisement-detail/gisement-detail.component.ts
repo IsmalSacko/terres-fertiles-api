@@ -119,7 +119,7 @@ export class GisementDetailComponent implements OnInit {
         localisation: '',
         latitude: 48.8566,
         longitude: 2.3522,
-        type_de_sol: 'limon'
+        type_de_sol: 'naturel'
       };
       this.mapCenter = {
         lat: this.gisement.latitude!,
@@ -373,6 +373,34 @@ export class GisementDetailComponent implements OnInit {
       this.selectedFiles = [...this.selectedFiles, ...event.addedFiles];
       console.log('Fichiers sélectionnés:', this.selectedFiles.map(f => f.name));
     }
+  }
+
+  // Helpers pour icônes de fichier
+  private getFileExtension(path?: string | null): string {
+    if (!path) return '';
+    const parts = path.split('?')[0].split('.');
+    if (parts.length <= 1) return '';
+    return parts.pop()!.toLowerCase();
+  }
+
+  getIconForFile(path?: string | null): string {
+    const ext = this.getFileExtension(path);
+    if (!ext) return 'insert_drive_file';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image';
+    if (ext === 'pdf') return 'picture_as_pdf';
+    if (ext === 'doc' || ext === 'docx') return 'description';
+    if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return 'grid_on';
+    return 'insert_drive_file';
+  }
+
+  getIconClass(path?: string | null): string {
+    const ext = this.getFileExtension(path);
+    if (!ext) return 'icon-file';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'icon-image';
+    if (ext === 'pdf') return 'icon-pdf';
+    if (ext === 'doc' || ext === 'docx') return 'icon-doc';
+    if (ext === 'xls' || ext === 'xlsx' || ext === 'csv') return 'icon-xls';
+    return 'icon-file';
   }
 
   onRemove(event: any): void {

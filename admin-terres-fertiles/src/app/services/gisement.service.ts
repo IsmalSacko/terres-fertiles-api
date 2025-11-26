@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 
 export interface DocumentGisement {
   id: number;
@@ -47,22 +48,16 @@ export class GisementService {
   
   constructor() {}
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return { headers: { Authorization: `Token ${token}` } };
-  }
+  private apiService = inject(ApiService); 
 
   // Cette méthode récupère tous les gisements avec authentification (utilisée pour l'affichage sur la carte)
   async getAllGisementCart(): Promise<Gisement[]> {
-    const response = await axios.get<Gisement[]>(this.apiUrl, this.getHeaders());
+    const response = await this.apiService.get<Gisement[]>(this.apiUrl);
     return response.data;
   }
 
   async getAll(): Promise<Gisement[]> {
-    const response = await axios.get<Gisement[]>(
-      this.apiUrl,
-      this.getHeaders()
-    );
+    const response = await this.apiService.get<Gisement[]>(this.apiUrl);
     return response.data.map(gisement => ({
       ...gisement,
       volume_terrasse: Number(gisement.volume_terrasse)
@@ -71,8 +66,7 @@ export class GisementService {
 
   async getByChantierId(chantierId: number): Promise<Gisement[]> {
     const response = await axios.get<Gisement[]>(
-      `${this.apiUrl}?chantier=${chantierId}`,
-      this.getHeaders()
+      `${this.apiUrl}?chantier=${chantierId}`
     );
     return response.data.map(gisement => ({
       ...gisement,
@@ -81,9 +75,8 @@ export class GisementService {
   }
 
   async getById(id: number): Promise<Gisement> {
-    const response = await axios.get<Gisement>(
-      `${this.apiUrl}${id}/`,
-      this.getHeaders()
+    const response = await this.apiService.get<Gisement>(
+      `${this.apiUrl}${id}/`
     );
     return {
       ...response.data,
@@ -92,35 +85,32 @@ export class GisementService {
   }
 
   async create(gisement: PartialGisement): Promise<Gisement> {
-    const response = await axios.post<Gisement>(
+    const response = await this.apiService.post<Gisement>(
       this.apiUrl,
-      gisement,
-      this.getHeaders()
+      gisement
     );
     return response.data;
   }
 
   async update(id: number, gisement: PartialGisement): Promise<Gisement> {
-    const response = await axios.put<Gisement>(
+    const response = await this.apiService.put<Gisement>(
       `${this.apiUrl}${id}/`,
-      gisement,
-      this.getHeaders()
+      gisement
     );
     return response.data;
   }
 
   async delete(id: number): Promise<void> {
-    await axios.delete(
+    await this.apiService.delete(
       `${this.apiUrl}${id}/`,
-      this.getHeaders()
     );
   }
 
   // Method to get documents for a specific gisement
   async getDocumentsByGisementId(gisementId: number): Promise<DocumentGisement[]> {
-    const response = await axios.get<DocumentGisement[]>(
-      `${this.documentGisementApiUrl}?gisement=${gisementId}`, 
-      this.getHeaders());
+    const response = await this.apiService.get<DocumentGisement[]>(
+      `${this.documentGisementApiUrl}?gisement=${gisementId}`
+    );
     return response.data;
   }
 

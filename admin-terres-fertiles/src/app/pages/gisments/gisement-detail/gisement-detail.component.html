@@ -73,7 +73,7 @@
                 <mat-icon class="icon-small">terrain</mat-icon>
                 Type de sol
               </label>
-              <span>{{ getSolTypeName(gisement.type_de_sol || 'limon') }}</span>
+              <span>{{ getSolTypeName(gisement.type_de_sol || 'naturel') }}</span>
             </div>
             <div class="info-item" *ngIf="gisement.latitude && gisement.longitude">
               <label>
@@ -316,33 +316,33 @@
           </div>
         </div>
 
-        <!-- Liste des documents existants -->
+        <!-- Liste des documents existants (cartes responsives) -->
         <div class="existing-documents" *ngIf="gisement?.documents?.length">
           <h4 class="documents-title">Documents existants</h4>
-          <div class="documents-grid">
-            <div class="document-item" *ngFor="let doc of gisement.documents">
-              <div class="document-content">
-                <div class="document-info">
-                  <mat-icon class="document-icon">picture_as_pdf</mat-icon>
-                  <div class="document-text">
-                    <h4 class="document-name">{{ doc.nom_fichier }}</h4>
-                    <p class="document-date">{{ doc.date_ajout | date: 'dd/MM/yyyy' }}</p>
-                  </div>
-                </div>
-                <div class="document-actions">
-                  <button mat-button class="document-action-button" (click)="previewDocument(doc)">
-                    <mat-icon>visibility</mat-icon>
-                    Aperçu
-                  </button>
-                  <button mat-button class="document-action-button" (click)="downloadDocument(doc)">
-                    <mat-icon>download</mat-icon>
-                    Télécharger
-                  </button>
-                  <button mat-button class="document-delete-button" (click)="deleteDocument(doc)">
-                    <mat-icon>delete</mat-icon>
-                    Supprimer
-                  </button>
-                </div>
+          <div class="documents-grid doc-card-grid">
+            <div class="doc-card" *ngFor="let doc of gisement.documents">
+              <div class="doc-thumb" [ngClass]="{'is-image': doc.fichier && (doc.fichier.endsWith('.jpg') || doc.fichier.endsWith('.jpeg') || doc.fichier.endsWith('.png') || doc.fichier.endsWith('.gif'))}">
+                <ng-container *ngIf="doc.fichier && (doc.fichier.endsWith('.jpg') || doc.fichier.endsWith('.jpeg') || doc.fichier.endsWith('.png') || doc.fichier.endsWith('.gif'))">
+                  <img [src]="doc.fichier" alt="{{doc.nom_fichier}}" />
+                </ng-container>
+                <ng-container *ngIf="!doc.fichier || !(doc.fichier.endsWith('.jpg') || doc.fichier.endsWith('.jpeg') || doc.fichier.endsWith('.png') || doc.fichier.endsWith('.gif'))">
+                  <mat-icon class="doc-icon" [ngClass]="getIconClass(doc.fichier)">{{ getIconForFile(doc.fichier) }}</mat-icon>
+                </ng-container>
+              </div>
+              <div class="doc-meta">
+                <div class="doc-title" title="{{ doc.nom_fichier }}">{{ doc.nom_fichier }}</div>
+                <div class="doc-date">{{ doc.date_ajout | date: 'dd/MM/yyyy' }}</div>
+              </div>
+              <div class="doc-actions">
+                <button mat-icon-button matTooltip="Aperçu" (click)="previewDocument(doc)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Télécharger" (click)="downloadDocument(doc)">
+                  <mat-icon>download</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" matTooltip="Supprimer" (click)="deleteDocument(doc)">
+                  <mat-icon>delete</mat-icon>
+                </button>
               </div>
             </div>
           </div>

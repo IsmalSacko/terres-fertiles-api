@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 
 export interface Plateforme {
   id: number;
@@ -20,13 +21,10 @@ export class PlateformeServiceTsService {
 
  private readonly base = environment.apiUrl;
   private readonly apiUrl = `${this.base}plateformes/`;
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return { headers: { Authorization: `Token ${token}` } };
-  }
+  private apiService = inject(ApiService);
 
   async getAll(): Promise<Plateforme[]>{
-    const response = await axios.get<Plateforme[]>(this.apiUrl, this.getHeaders());
+    const response = await this.apiService.get<Plateforme[]>(this.apiUrl);
     return response.data;
   }
 }

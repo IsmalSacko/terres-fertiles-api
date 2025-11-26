@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import axios from 'axios';
 import { CreateSaisieVente, SaisieVenteResponse } from '../models/create-saisie-vente.model';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,6 +10,7 @@ import { environment } from '../../environments/environment';
 export class CreateSaisieVenteService {
   private readonly base = environment.apiUrl;
   private apiUrl = `${this.base}saisies-vente/`;
+  private apiService = inject(ApiService); 
 
   private getHeaders() {
     const token = localStorage.getItem('token');
@@ -18,7 +20,7 @@ export class CreateSaisieVenteService {
   async createSaisieVente(saisieVente: CreateSaisieVente): Promise<SaisieVenteResponse> {
     try {
       console.log('Données envoyées à l\'API:', saisieVente);
-      const response = await axios.post<SaisieVenteResponse>(this.apiUrl, saisieVente, this.getHeaders());
+      const response = await this.apiService.post<SaisieVenteResponse>(this.apiUrl, saisieVente);
       console.log('Réponse de l\'API:', response.data);
       return response.data;
     } catch (error) {
@@ -33,10 +35,9 @@ export class CreateSaisieVenteService {
 
   async validateSaisieVente(id: number): Promise<SaisieVenteResponse> {
     try {
-      const response = await axios.patch<SaisieVenteResponse>(
+      const response = await this.apiService.patch<SaisieVenteResponse>(
         `${this.apiUrl}${id}/`, 
-        { est_validee: true }, 
-        this.getHeaders()
+        { est_validee: true }
       );
       return response.data;
     } catch (error) {
@@ -48,9 +49,8 @@ export class CreateSaisieVenteService {
   // Méthode pour vérifier la disponibilité du produit
   async checkProductAvailability(produitId: number, volumeDemande: number): Promise<boolean> {
     try {
-      const response = await axios.get(
-        `${this.base}produits/${produitId}/`, 
-        this.getHeaders()
+      const response = await this.apiService.get(
+        `${this.base}produits/${produitId}/`
       );
       const produit = response.data;
       const volumeDisponible = parseFloat(produit.volume_disponible);
@@ -64,9 +64,8 @@ export class CreateSaisieVenteService {
   // Méthode pour récupérer une saisie de vente par ID
   async getSaisieVenteById(id: number): Promise<SaisieVenteResponse> {
     try {
-      const response = await axios.get<SaisieVenteResponse>(
-        `${this.apiUrl}${id}/`, 
-        this.getHeaders()
+      const response = await this.apiService.get<SaisieVenteResponse>(
+        `${this.apiUrl}${id}/`
       );
       return response.data;
     } catch (error) {
@@ -79,10 +78,9 @@ export class CreateSaisieVenteService {
   async updateSaisieVente(id: number, saisieVente: CreateSaisieVente): Promise<SaisieVenteResponse> {
     try {
       console.log('Données envoyées pour mise à jour:', saisieVente);
-      const response = await axios.put<SaisieVenteResponse>(
+      const response = await this.apiService.put<SaisieVenteResponse>(
         `${this.apiUrl}${id}/`, 
-        saisieVente, 
-        this.getHeaders()
+        saisieVente
       );
       console.log('Réponse de l\'API (mise à jour):', response.data);
       return response.data;

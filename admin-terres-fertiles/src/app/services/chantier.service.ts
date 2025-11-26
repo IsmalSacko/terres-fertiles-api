@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import axios from 'axios';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 export interface Chantier {
   id: number;
   nom: string;
@@ -21,7 +22,7 @@ export type ChantierUpdatePayload = Partial<Pick<Chantier, 'localisation' | 'lat
 export class ChantierService {
   private readonly base = environment.apiUrl;
   private readonly apiUrl = `${this.base}chantiers/`
-  //private apiUrl = 'https://terres-fertiles.ismael-dev.com/api/chantiers/';
+  private apiService = inject(ApiService);  
   
   // Méthode pour les token et entête
   private getHeaders() {
@@ -32,33 +33,33 @@ export class ChantierService {
   constructor() { }
 
   async getAll(): Promise<Chantier[]> {
-    const response = await axios.get<Chantier[]>(this.apiUrl, this.getHeaders() );
+    const response = await this.apiService.get<Chantier[]>(this.apiUrl);
     return response.data;
   }
 
   async getById(id: number): Promise<Chantier> {
-    const response = await axios.get<Chantier>(`${this.apiUrl}${id}/`, this.getHeaders());
+    const response = await this.apiService.get<Chantier>(`${this.apiUrl}${id}/`);
     return response.data;
   }
 
   async create(chantier: Chantier): Promise<Chantier> {
-    const response = await axios.post<Chantier>(this.apiUrl, chantier, this.getHeaders());
+    const response = await this.apiService.post<Chantier>(this.apiUrl, chantier);
     return response.data;
   }
 
   async update(id: number, payload: ChantierUpdatePayload): Promise<Chantier> {
-    const response = await axios.patch<Chantier>(`${this.apiUrl}${id}/`, payload, this.getHeaders());
+    const response = await this.apiService.patch<Chantier>(`${this.apiUrl}${id}/`, payload);
     return response.data;
   }
 
   async delete(id: number): Promise<void> {
     
-    await axios.delete(`${this.apiUrl}${id}/`, this.getHeaders());
+    await this.apiService.delete(`${this.apiUrl}${id}/`);
   }
 
   async getChantiersByUser(): Promise<Chantier[]> {
     
-    const response = await axios.get<Chantier[]>(`${this.apiUrl}user/`, this.getHeaders());
+    const response = await this.apiService.get<Chantier[]>(`${this.apiUrl}user/`);
     return response.data;
   }
 

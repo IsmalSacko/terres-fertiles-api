@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import axios from 'axios';
+import { inject, Injectable } from '@angular/core';
 import { Plateforme } from '../models/plateforme';
 import { environment } from '../../environments/environment';
+import { ApiService } from './api.service';
 
 
 
@@ -14,16 +14,11 @@ export class PlateformeService {
   private readonly plateformeUrl = `${this.base}plateformes/`;
   constructor() {}
 
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    const headres = { headers: { Authorization: `Token ${token}` } };
-  
-    return headres;
-  }
+  private apiService = inject(ApiService);
 
     async getPlateformes(): Promise<Plateforme[]> {
     try {
-      const response = await axios.get<Plateforme[]>(this.plateformeUrl, this.getHeaders());
+      const response = await this.apiService.get<Plateforme[]>(this.plateformeUrl);
       //console.log('Réponse API getPlateformes:', response.data);
       return response.data;
     } catch (error) {
@@ -34,7 +29,7 @@ export class PlateformeService {
 
   async createPlateforme(plateforme: Plateforme): Promise<Plateforme> {
     try {
-      const response = await axios.post<Plateforme>(this.plateformeUrl, plateforme, this.getHeaders());
+      const response = await this.apiService.post<Plateforme>(this.plateformeUrl, plateforme);
       return response.data;
     } catch (error) {
       console.error('Erreur dans createPlateforme:', error);
@@ -44,7 +39,7 @@ export class PlateformeService {
 
   async updatePlateforme(id: number, plateforme: Plateforme): Promise<Plateforme> {
     try {
-      const response = await axios.put<Plateforme>(`${this.plateformeUrl}${id}/`, plateforme, this.getHeaders());
+      const response = await this.apiService.put<Plateforme>(`${this.plateformeUrl}${id}/`, plateforme);
       return response.data;
     } catch (error) {
       console.error('Erreur dans updatePlateforme:', error);
@@ -54,7 +49,7 @@ export class PlateformeService {
 
   async getPlateformeById(id: number): Promise<Plateforme> {
     try {
-      const response = await axios.get<Plateforme>(`${this.plateformeUrl}${id}/`, this.getHeaders());
+      const response = await this.apiService.get<Plateforme>(`${this.plateformeUrl}${id}/`);
       return response.data;
     } catch (error) {
       console.error('Erreur dans getPlateformeById:', error);
@@ -64,7 +59,7 @@ export class PlateformeService {
 
   async deletePlateforme(id: number): Promise<void> {
     try {
-      await axios.delete(`${this.plateformeUrl}${id}/`, this.getHeaders());
+      await this.apiService.delete(`${this.plateformeUrl}${id}/`);
     } catch (error) {
       console.error('Erreur dans deletePlateforme:', error);
       throw error;
