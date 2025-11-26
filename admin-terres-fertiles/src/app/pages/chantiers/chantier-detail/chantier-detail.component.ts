@@ -12,6 +12,7 @@ import { GoogleMapsModule, MapInfoWindow, MapMarker } from '@angular/google-maps
 import { MatTabsModule } from '@angular/material/tabs';
 import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { GisementService, Gisement } from '../../../services/gisement.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-chantier-detail',
@@ -287,12 +288,43 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
   async deleteChantier(): Promise<void> {
     if (!this.chantier.id) return;
 
+    // Confirmation via SweetAlert2
+    const result = await Swal.fire({
+      title: 'Supprimer le chantier ?',
+      text: `Cette action est irréversible. Voulez-vous vraiment supprimer le chantier "${this.chantier.nom || ''}" ?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     this.loading = true;
+    this.errorMsg = '';
+
     try {
       await this.chantierService.delete(this.chantier.id);
       this.router.navigate(['/chantiers']);
-    } catch (err) {
-      this.errorMsg = 'Erreur lors de la suppression.';
+      await Swal.fire({
+        title: 'Supprimé !',
+        text: 'Le chantier a bien été supprimé.',
+        icon: 'success',
+        timer: 1600,
+        showConfirmButton: false
+      });
+    } catch (err: any) {
+      console.error('Erreur lors de la suppression du chantier:', err);
+      this.errorMsg = err?.response?.data?.message || 'Erreur lors de la suppression du chantier.';
+      await Swal.fire({
+        title: 'Erreur',
+        text: this.errorMsg,
+        icon: 'error'
+      });
     } finally {
       this.loading = false;
     }
