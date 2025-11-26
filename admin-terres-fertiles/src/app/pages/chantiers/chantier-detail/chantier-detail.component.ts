@@ -275,7 +275,7 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
         this.successMsg = 'Chantier créé avec succès.';
       }
       setTimeout(() => {
-        this.router.navigate(['/chantiers']);
+        this.router.navigate(['/chantiers/' + (this.chantier.id || '')]);
       }, 1500);
     } catch (err) {
       this.errorMsg = 'Erreur lors de la sauvegarde.';
