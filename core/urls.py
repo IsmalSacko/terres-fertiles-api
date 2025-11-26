@@ -14,7 +14,6 @@ from .views import (
     PlanningViewSet, 
     ProduitVenteViewSet, 
     DocumentTechniqueViewSet, 
-    AnalyseLaboratoireViewSet,
     AnalysePdfParseView,
     DocumentGisementViewSet,
     PlateformeViewSet,
@@ -37,7 +36,6 @@ router.register(r'melanges', MelangeViewSet, basename='melanges')  # basename po
 router.register(r'produits', ProduitVenteViewSet)
 router.register(r'documents-techniques', DocumentTechniqueViewSet)
 router.register(r'documents-produits-vente', DocumentProduitVenteViewSet, basename='documents-produits-vente')  # basename pour éviter les conflits de noms
-router.register(r'analyses-laboratoire', AnalyseLaboratoireViewSet)
 router.register(r'documents-gisements', DocumentGisementViewSet)
 router.register(r'plateformes', PlateformeViewSet)
 router.register(r'plannings', PlanningViewSet)

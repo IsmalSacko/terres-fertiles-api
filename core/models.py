@@ -41,7 +41,7 @@ class CustomUser(AbstractUser):
 
 
 class Chantier(models.Model):
-    nom = models.CharField("Nom du chantier", max_length=255, null=True, blank=True, help_text="Nom du chantier, généré automatiquement si vide.", editable=False, unique=True)
+    nom = models.CharField("Nom du chantier", max_length=255, null=True, blank=True, help_text="Nom du chantier, généré automatiquement si vide.", editable=True, unique=True)
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='chantiers', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
     maitre_ouvrage = models.CharField(max_length=255)
     commune = models.CharField(max_length=100, null=True, blank=True)
@@ -62,41 +62,43 @@ class Chantier(models.Model):
             self.commune = self.commune.upper()
 
         regenerer = False
-
         if not self.pk:
             # ➡️ Cas CREATION
             regenerer = True
         else:
-            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
-            if not re.match(pattern, self.nom or ""):
-                regenerer = True
-            else:
-                # Récupérer l'instance originale pour comparer les changements
-                try:
-                    original = Chantier.objects.get(pk=self.pk)
-                    
-                    # Vérifier si les champs utilisés pour générer le nom ont changé
-                    annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
-                    annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
-                    
-                    terrassier_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.entreprise_terrassement).upper())[:3]
-                    terrassier_original = re.sub(r'[^A-Z0-9]', '', slugify(original.entreprise_terrassement).upper())[:3]
-                    
-                    commune_actuelle = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
-                    commune_originale = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
-                    
-                    # Si l'un des composants du nom a changé, régénérer
-                    if (annee_actuelle != annee_originale or 
-                        terrassier_actuel != terrassier_original or 
-                        commune_actuelle != commune_originale):
+            # ➡️ Cas MODIFICATION - respecter modification MANUELLE du champ `nom`
+            try:
+                original = Chantier.objects.get(pk=self.pk)
+                changement_de_nom = bool(self.nom and original.nom and self.nom != original.nom)
+
+                annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+                annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
+
+                terrassier_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.entreprise_terrassement).upper())[:3]
+                terrassier_original = re.sub(r'[^A-Z0-9]', '', slugify(original.entreprise_terrassement).upper())[:3]
+
+                commune_actuelle = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+                commune_originale = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
+
+                # Si année / terrassier / commune changent -> régénérer
+                if (annee_actuelle != annee_originale or 
+                    terrassier_actuel != terrassier_original or 
+                    commune_actuelle != commune_originale):
+                    regenerer = True
+
+                # Si nom modifié manuellement, respecter sauf conflit
+                if changement_de_nom:
+                    if Chantier.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                         regenerer = True
-                        
-                except Chantier.DoesNotExist:
-                    regenerer = True
-                
-                # Si nom déjà utilisé par un autre chantier → régénérer
-                if Chantier.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
-                    regenerer = True
+                    else:
+                        regenerer = False
+                else:
+                    # sinon vérifier unicité du nom actuel
+                    if Chantier.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+
+            except Chantier.DoesNotExist:
+                regenerer = True
 
         if regenerer:
             with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
@@ -476,7 +478,7 @@ class MelangeAmendement(models.Model):
 class AmendementOrganique(models.Model):
 
 
-    nom = models.CharField(max_length=255, unique=True, default="", help_text="Nom de l'émendent organique, généré automatiquement si vide.", editable=False)
+    nom = models.CharField(max_length=255, unique=True, default="", help_text="Nom de l'émendent organique, généré automatiquement si vide.", editable=True)
     numero_sequence = models.IntegerField(default=1, help_text="Numéro séquentiel pour le tri", editable=False)
     plateforme = models.ForeignKey('Plateforme', on_delete=models.CASCADE, null=True, blank=True, related_name='emendements', help_text="Plateforme de compostage ou d'émendement associée.")
     fournisseur = models.CharField(max_length=255, help_text="Fournisseur de l'émendent organique")
@@ -504,36 +506,38 @@ class AmendementOrganique(models.Model):
             # ➡️ Cas CREATION
             regenerer = True
         else:
-            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
-            if not re.match(pattern, self.nom or ""):
-                regenerer = True
-            else:
-                # Récupérer l'instance originale pour comparer les changements
-                try:
-                    original = AmendementOrganique.objects.get(pk=self.pk)
-                    
-                    # Vérifier si les champs utilisés pour générer le nom ont changé
-                    annee_actuelle = str(self.date_reception.year if self.date_reception else date.today().year)[-2:]
-                    annee_originale = str(original.date_reception.year if original.date_reception else date.today().year)[-2:]
-                    
-                    fournisseur_code_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.fournisseur).upper())[:3] if self.fournisseur else "XXX"
-                    fournisseur_code_original = re.sub(r'[^A-Z0-9]', '', slugify(original.fournisseur).upper())[:3] if original.fournisseur else "XXX"
-                    
-                    commune_code_actuel = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
-                    commune_code_original = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
-                    
-                    # Si l'un des composants du nom a changé, régénérer
-                    if (annee_actuelle != annee_originale or 
-                        fournisseur_code_actuel != fournisseur_code_original or 
-                        commune_code_actuel != commune_code_original):
+            # ➡️ Cas MODIFICATION - respecter modification MANUELLE du champ `nom`
+            try:
+                original = AmendementOrganique.objects.get(pk=self.pk)
+                changement_de_nom = bool(self.nom and original.nom and self.nom != original.nom)
+
+                annee_actuelle = str(self.date_reception.year if self.date_reception else date.today().year)[-2:]
+                annee_originale = str(original.date_reception.year if original.date_reception else date.today().year)[-2:]
+
+                fournisseur_code_actuel = re.sub(r'[^A-Z0-9]', '', slugify(self.fournisseur).upper())[:3] if self.fournisseur else "XXX"
+                fournisseur_code_original = re.sub(r'[^A-Z0-9]', '', slugify(original.fournisseur).upper())[:3] if original.fournisseur else "XXX"
+
+                commune_code_actuel = re.sub(r'[^A-Z0-9]', '', self.commune or "")[:3]
+                commune_code_original = re.sub(r'[^A-Z0-9]', '', original.commune or "")[:3]
+
+                # Si composantes changent -> régénérer
+                if (annee_actuelle != annee_originale or 
+                    fournisseur_code_actuel != fournisseur_code_original or 
+                    commune_code_actuel != commune_code_original):
+                    regenerer = True
+
+                # Si nom modifié manuellement, respecter sauf conflit
+                if changement_de_nom:
+                    if AmendementOrganique.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                         regenerer = True
-                        
-                except AmendementOrganique.DoesNotExist:
-                    regenerer = True
-                
-                # Si nom déjà utilisé par un autre amendement → régénérer
-                if AmendementOrganique.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
-                    regenerer = True
+                    else:
+                        regenerer = False
+                else:
+                    if AmendementOrganique.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+
+            except AmendementOrganique.DoesNotExist:
+                regenerer = True
 
         if regenerer:
             with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
@@ -629,7 +633,7 @@ class AmendementOrganique(models.Model):
 
 
 class Plateforme(models.Model):
-    nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, généré automatiquement si vide.", editable=False, unique=True)
+    nom = models.CharField(max_length=255, null=True, blank=True, help_text="Nom de la plateforme, généré automatiquement si vide.", editable=True, unique=True)
     numero_sequence = models.IntegerField(default=1, help_text="Numéro séquentiel pour le tri", editable=False)
     localisation = models.CharField(max_length=255)
     entreprise_gestionnaire = models.CharField(max_length=255)
@@ -654,36 +658,38 @@ class Plateforme(models.Model):
             # ➡️ Cas CREATION
             regenerer = True
         else:
-            # ➡️ Cas MODIFICATION - Vérifier si les champs clés ont changé
-            if not re.match(pattern, self.nom or ""):
-                regenerer = True
-            else:
-                # Récupérer l'instance originale pour comparer les changements
-                try:
-                    original = Plateforme.objects.get(pk=self.pk)
-                    
-                    # Vérifier si les champs utilisés pour générer le nom ont changé
-                    annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
-                    annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
-                    
-                    ent_actuelle = str(self.entreprise_gestionnaire).strip().upper()[:3]
-                    ent_originale = str(original.entreprise_gestionnaire).strip().upper()[:3]
-                    
-                    loc_actuelle = str(self.localisation).strip().upper()[:3]
-                    loc_originale = str(original.localisation).strip().upper()[:3]
-                    
-                    # Si l'un des composants du nom a changé, régénérer
-                    if (annee_actuelle != annee_originale or 
-                        ent_actuelle != ent_originale or 
-                        loc_actuelle != loc_originale):
+            # ➡️ Cas MODIFICATION - respecter modification MANUELLE du champ `nom`
+            try:
+                original = Plateforme.objects.get(pk=self.pk)
+                changement_de_nom = bool(self.nom and original.nom and self.nom != original.nom)
+
+                annee_actuelle = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
+                annee_originale = str(original.date_creation.year if original.date_creation else date.today().year)[-2:]
+
+                ent_actuelle = str(self.entreprise_gestionnaire).strip().upper()[:3]
+                ent_originale = str(original.entreprise_gestionnaire).strip().upper()[:3]
+
+                loc_actuelle = str(self.localisation).strip().upper()[:3]
+                loc_originale = str(original.localisation).strip().upper()[:3]
+
+                # Si composantes changent -> régénérer
+                if (annee_actuelle != annee_originale or 
+                    ent_actuelle != ent_originale or 
+                    loc_actuelle != loc_originale):
+                    regenerer = True
+
+                # Si nom modifié manuellement, respecter sauf conflit
+                if changement_de_nom:
+                    if Plateforme.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
                         regenerer = True
-                        
-                except Plateforme.DoesNotExist:
-                    regenerer = True
-                
-                # Si nom déjà utilisé par une autre plateforme → régénérer
-                if Plateforme.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
-                    regenerer = True
+                    else:
+                        regenerer = False
+                else:
+                    if Plateforme.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+
+            except Plateforme.DoesNotExist:
+                regenerer = True
 
         if regenerer:
             with transaction.atomic():  # sécurité multi-utilisateurs pour éviter les doublons
@@ -812,37 +818,46 @@ class Melange(models.Model):
 
     def save(self, *args, **kwargs):
         regenerer = False
-        
+
         if not self.pk:
             # Création
             regenerer = True
         else:
-            # Modification : vérifier si les champs clés ont changé
-            if not self.nom:
-                regenerer = True
-            else:
-                # Récupérer l'instance originale pour comparer les changements
-                try:
-                    original = Melange.objects.get(pk=self.pk)
-                    
-                    # Vérifier si les champs utilisés pour générer le nom ont changé
-                    annee_actuelle = self.date_creation.year % 100
-                    annee_originale = original.date_creation.year % 100
-                    
-                    fournisseur_code_actuel = (self.fournisseur or self.producteur)[:3].upper()
-                    fournisseur_code_original = (original.fournisseur or original.producteur)[:3].upper()
-                    
-                    plateforme_code_actuel = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
-                    plateforme_code_original = original.plateforme.nom[:3].upper() if original.plateforme else "XXX"
-                    
-                    # Si l'un des composants du nom a changé, régénérer
-                    if (annee_actuelle != annee_originale or 
-                        fournisseur_code_actuel != fournisseur_code_original or 
-                        plateforme_code_actuel != plateforme_code_original):
-                        regenerer = True
-                        
-                except Melange.DoesNotExist:
+            # Modification : respecter une modification MANUELLE du champ `nom`
+            try:
+                original = Melange.objects.get(pk=self.pk)
+                changement_de_nom = bool(self.nom and original.nom and self.nom != original.nom)
+
+                annee_actuelle = self.date_creation.year % 100
+                annee_originale = original.date_creation.year % 100
+
+                fournisseur_code_actuel = (self.fournisseur or self.producteur)[:3].upper()
+                fournisseur_code_original = (original.fournisseur or original.producteur)[:3].upper()
+
+                plateforme_code_actuel = self.plateforme.nom[:3].upper() if self.plateforme else "XXX"
+                plateforme_code_original = original.plateforme.nom[:3].upper() if original.plateforme else "XXX"
+
+                # Si l'un des composants du nom a changé, régénérer
+                if (annee_actuelle != annee_originale or 
+                    fournisseur_code_actuel != fournisseur_code_original or 
+                    plateforme_code_actuel != plateforme_code_original):
                     regenerer = True
+
+                # Si nom modifié manuellement, respecter sauf conflit
+                if changement_de_nom:
+                    if Melange.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+                    else:
+                        regenerer = False
+                else:
+                    # si nom non modifié manuellement, garder logique précédente
+                    if not self.nom:
+                        regenerer = True
+                    elif Melange.objects.exclude(pk=self.pk).filter(nom=self.nom).exists():
+                        regenerer = True
+
+            except Melange.DoesNotExist:
+                regenerer = True
         
         if regenerer:
             with transaction.atomic():
@@ -1114,66 +1129,6 @@ class DocumentGisement(models.Model):
         verbose_name_plural = "Documents de gisement"
         ordering = ['-date_ajout']
 
-
-class AnalyseLaboratoire(models.Model):
-    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='analyses_laboratoire', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
-    produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name='analyses')
-    laboratoire = models.CharField(max_length=255)
-    code_rapport = models.CharField(max_length=100)
-    date_reception = models.DateField()
-    date_analyse = models.DateField()
-    profondeur_prelevement = models.CharField(max_length=100, null=True, blank=True)
-    localisation_echantillon = models.CharField(max_length=255, null=True, blank=True)
-
-    ph_eau = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    ph_kcl = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    calcaire_total = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    calcaire_actif = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    conductivite = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-
-    matiere_organique = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    azote_total = models.DecimalField(max_digits=5, decimal_places=3, null=True, blank=True)
-    c_n = models.DecimalField("Rapport C/N", max_digits=5, decimal_places=2, null=True, blank=True)
-
-    cec = models.DecimalField("CEC (meq/100g)", max_digits=6, decimal_places=2, null=True, blank=True)
-    saturation = models.DecimalField("Taux de saturation (%)", max_digits=5, decimal_places=2, null=True, blank=True)
-
-    argile = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    limons_fins = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    limons_grossiers = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    sables_fins = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    sables_grossiers = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-
-    calcium = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    magnesium = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    potassium = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    phosphore = models.DecimalField("P2O5 (mg/kg)", max_digits=6, decimal_places=2, null=True, blank=True)
-    fer = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    cuivre = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    zinc = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-    manganese = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-
-    densite_apparente = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    porosite_totale = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    porosite_drainage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    eau_capillaire = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    permeabilite = models.DecimalField("Perméabilité (cm/h)", max_digits=6, decimal_places=2, null=True, blank=True)
-
-    iam = models.DecimalField("Intensité activité microbienne", max_digits=5, decimal_places=2, null=True, blank=True)
-    refus_gravier_2mm = models.DecimalField("Refus gravier (>2mm, %)", max_digits=5, decimal_places=2, null=True, blank=True)
-    fichier_pdf = models.FileField(upload_to='uploads/analyse_pdfs/', null=True, blank=True)
-
-
-    commentaires = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f"Analyse du {self.date_analyse} - {self.laboratoire}"
-
-    class Meta:
-        db_table = 'analyse_laboratoire'
-        verbose_name = "Analyse de laboratoire"
-        verbose_name_plural = "Analyses de laboratoire"
-        ordering = ['-date_analyse']
 
 
 class SaisieVente(models.Model):

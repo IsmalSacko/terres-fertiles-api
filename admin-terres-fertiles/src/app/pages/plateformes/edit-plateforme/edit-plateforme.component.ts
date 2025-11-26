@@ -83,5 +83,5 @@ export class EditPlateformeComponent implements OnInit{
       )
     }
 
-    goBack() {this.router.navigate(['/plateformes']);}
+    goBack() {this.router.navigate(['/plateformess/edit', this.plateformId])};
 }

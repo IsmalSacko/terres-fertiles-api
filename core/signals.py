@@ -11,7 +11,7 @@ from decimal import Decimal
 from django.dispatch import receiver
 from djoser.signals import user_activated
 
-from .models import (DocumentGisement, DocumentTechnique, AnalyseLaboratoire, Melange, Chantier, Plateforme, SaisieVente, ProduitVente)
+from .models import (DocumentGisement, DocumentTechnique, Melange, Chantier, Plateforme, SaisieVente, ProduitVente)
 
 @receiver(user_activated)
 def grant_staff_on_activation(sender, user, request, **kwargs):
@@ -80,9 +80,7 @@ def delete_document_gisement_file(sender, instance, **kwargs):
 def delete_document_technique_file(sender, instance, **kwargs):
     delete_file_field(instance, 'fichier')
 
-@receiver(post_delete, sender=AnalyseLaboratoire)
-def delete_analyse_pdf_file(sender, instance, **kwargs):
-    delete_file_field(instance, 'fichier_pdf')
+
 
 @receiver(post_delete, sender=Melange)
 def delete_melange_files(sender, instance, **kwargs):
@@ -144,26 +142,7 @@ def replace_document_technique_file(sender, instance, **kwargs):
             except Exception:
                 pass
 
-@receiver(pre_save, sender=AnalyseLaboratoire)
-def replace_analyse_pdf_file(sender, instance, **kwargs):
-    if not instance.pk:
-        return
-    try:
-        old_file = AnalyseLaboratoire.objects.get(pk=instance.pk).fichier_pdf
-    except AnalyseLaboratoire.DoesNotExist:
-        return
-    new_file = instance.fichier_pdf
-    if old_file and old_file != new_file:
-        if old_file.name and default_storage.exists(old_file.name):
-            file_path = old_file.path
-            old_file.delete(save=False)
-            # Supprimer le dossier parent s'il est vide
-            dir_path = os.path.dirname(file_path)
-            try:
-                if os.path.isdir(dir_path) and not os.listdir(dir_path):
-                    os.rmdir(dir_path)
-            except Exception:
-                pass
+
 
 @receiver(pre_save, sender=Melange)
 def replace_melange_files(sender, instance, **kwargs):

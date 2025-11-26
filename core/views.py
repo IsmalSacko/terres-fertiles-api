@@ -42,12 +42,12 @@ def next_eap(request):
 from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, build_absolute_link
 from .models import (
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, FicheAgroPedodeSol, FicheHorizon, FichePhoto, Gisement, AmendementOrganique,
-    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, AnalyseLaboratoire, SaisieVente,
+    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, SaisieVente,
    
 )
 from .serializers import (
     AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
-    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, AnalyseLaboratoireSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer,
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer,
     
 )
 
@@ -203,12 +203,6 @@ class DocumentTechniqueViewSet(viewsets.ModelViewSet):
         serializer.save(uploaded_by=self.request.user)
 
 
-class AnalyseLaboratoireViewSet(viewsets.ModelViewSet):
-    queryset = AnalyseLaboratoire.objects.all()
-    serializer_class = AnalyseLaboratoireSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    def perform_create(self, serializer):
-        serializer.save(uploaded_by=self.request.user)
 
 
 

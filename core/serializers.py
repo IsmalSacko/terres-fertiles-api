@@ -14,7 +14,7 @@ from rest_framework import serializers
 
 from .models import ( 
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
-    Melange, SaisieVente, ProduitVente, DocumentTechnique, AnalyseLaboratoire,
+    Melange, SaisieVente, ProduitVente, DocumentTechnique,
     FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
 
@@ -291,18 +291,6 @@ class DocumentTechniqueSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AnalyseLaboratoireSerializer(serializers.ModelSerializer):
-    produit = serializers.PrimaryKeyRelatedField(queryset=ProduitVente.objects.all())
-    uploaded_by = serializers.ReadOnlyField(source='uploaded_by.username')
-    utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
-
-    class Meta:
-        model = AnalyseLaboratoire
-        fields = '__all__'
-        read_only_fields = ['utilisateur']
-    def create(self, validated_data):
-        validated_data.pop('uploaded_by', None)
-        return super().create(validated_data)
     
 class PlateformeSerializer(serializers.ModelSerializer):
     responsable = serializers.ReadOnlyField(source='responsable.username')
@@ -324,7 +312,7 @@ class ProduitVenteDetailSerializer(serializers.ModelSerializer):
     utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
     melange = MelangeSerializer(read_only=True)
     documents = DocumentTechniqueSerializer(many=True, read_only=True)
-    analyses = AnalyseLaboratoireSerializer(many=True, read_only=True)
+    
     
     
     chantier_info = serializers.SerializerMethodField()
