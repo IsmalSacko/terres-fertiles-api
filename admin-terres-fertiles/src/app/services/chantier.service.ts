@@ -12,6 +12,7 @@ export interface Chantier {
   longitude: number | null;
   commune: string;
   is_active: boolean;
+  date_creation: string;
 }
 
 export type ChantierUpdatePayload = Partial<Pick<Chantier, 'localisation' | 'latitude' | 'longitude' | 'commune'>>;
@@ -67,4 +68,31 @@ export class ChantierService {
     const chantier = await this.getAll();
     return chantier.filter(c => c.is_active).length;
   }
+
+  // Méthode de filtrage des chantiers
+  async list(filters: Record<string, any> = {}): Promise<Chantier[]> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(filters)) {
+      if (!value) continue; // ignore null / undefined / ''
+      // Si date range
+      if (typeof value === 'object') {
+        if (value.after) params.append(`${key}_after`, this.formatDate(value.after));
+        if (value.before) params.append(`${key}_before`, this.formatDate(value.before));
+      } else {
+        params.append(key, String(value));
+      }
+    }
+    const url = params.toString() ? `${this.apiUrl}?${params.toString()}` : this.apiUrl;
+    const response = await this.apiService.get<Chantier[]>(url);
+    return response.data;
+  }
+
+  private formatDate(d: string | Date) {
+    const dt = (d instanceof Date) ? d : new Date(d);
+    const yyyy = dt.getFullYear();
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
 } 

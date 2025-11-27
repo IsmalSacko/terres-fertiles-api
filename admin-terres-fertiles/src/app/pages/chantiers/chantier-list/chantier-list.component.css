@@ -10,6 +10,25 @@
   padding: 2rem;
   padding-top: 90px !important; /* Éviter que le contenu soit caché sous la navbar */
 }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;      /* permet aux éléments de passer à la ligne si nécessaire */
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.filter-bar mat-form-field {
+  flex: 1 1 200px;     /* largeur min 200px, s’étire si possible */
+  min-width: 180px;
+}
+
+.filter-bar button {
+  height: 40px;
+}
+
+
+
 
 /* Header de la page */
 .page-header {
@@ -377,6 +396,18 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
+  }
+    /* Adaptation de la barre de filtres */
+    .filter-bar {
+    flex-direction: column;  /* empile les éléments */
+    align-items: stretch;    /* prennent toute la largeur */
+    gap: 8px;                /* optionnel, réduire l’espace vertical */
+  }
+
+  .filter-bar mat-form-field,
+  .filter-bar button {
+    width: 100%;            /* pleine largeur sur mobile */
+    flex: unset;             /* annule le flex-grow/shrink sur mobile */
   }
 }
 

@@ -12,6 +12,9 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import Swal from 'sweetalert2';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatFormFieldModule, MatLabel } from "@angular/material/form-field";
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-chantier-list',
@@ -23,8 +26,14 @@ import Swal from 'sweetalert2';
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
-    MatTooltipModule
-  ],
+    MatTooltipModule,
+    FormsModule,
+    MatFormField,
+    MatLabel,
+
+  MatFormFieldModule,   // <-- nécessaire pour <mat-form-field>
+  MatInputModule,       // <-- nécessaire pour <input matInput>
+],
   templateUrl: './chantier-list.component.html',
   styleUrl: './chantier-list.component.css'
 })
@@ -35,6 +44,15 @@ export class ChantierListComponent implements OnInit, OnDestroy {
   errorMsg = '';
   cols = 3; // Default columns
   rowHeight = '200px'; // Default row height
+
+  // filtrage des chantiers
+  filters = {
+  nom: '',
+  commune: '',
+  maitre_ouvrage: '',
+  entreprise_terrassement: ''  
+  };
+  originalChantiers: Chantier[] = [];
 
   private destroyed = new Subject<void>();
 
@@ -54,12 +72,37 @@ export class ChantierListComponent implements OnInit, OnDestroy {
     this.destroyed.next();
     this.destroyed.complete();
   }
+  // Appliquer les filtres aux chantiers affichés quand l'utilisateur clique sur "Filtrer"
+   applyFilter() {
+  this.chantiers = this.originalChantiers.filter(c => {
+    const matchesNom = this.filters.nom ? c.nom.toLowerCase().includes(this.filters.nom.toLowerCase()) : true;
+    const matchesCommune = this.filters.commune ? c.commune.toLowerCase().includes(this.filters.commune.toLowerCase()) : true;
+    const matchesMaitreOuvrage = this.filters.maitre_ouvrage ? c.maitre_ouvrage.toLowerCase().includes(this.filters.maitre_ouvrage.toLowerCase()) : true;
+    const matchesEntreprise = this.filters.entreprise_terrassement ? c.entreprise_terrassement.toLowerCase().includes(this.filters.entreprise_terrassement.toLowerCase()) : true;
+
+    return matchesNom && matchesCommune && matchesMaitreOuvrage && matchesEntreprise;
+  });
+}
+
+// Réinitialiser tous les filtres
+resetFilter() {
+  this.filters = {
+    nom: '',
+    commune: '',
+    maitre_ouvrage: '',
+    entreprise_terrassement: ''
+  };
+  this.chantiers = [...this.originalChantiers];
+}
+
+
 
   async loadChantiers() {
     this.loading = true;
     this.loadingGlobal = true;
     try {
       this.chantiers = await this.chantierService.getAll();
+      this.originalChantiers = [...this.chantiers];
         await new Promise(resolve => setTimeout(resolve, 700));
     } catch (err) {
       this.errorMsg = 'Erreur lors du chargement des chantiers.';

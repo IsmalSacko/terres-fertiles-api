@@ -1,6 +1,7 @@
 
 <div class="chantiers-container">
  
+ 
   <!-- Header moderne -->
   <div class="page-header">
     <div class="header-content">
@@ -17,6 +18,36 @@
       </button>
     </div>
   </div>
+ <!--Filtrage-->
+  <div class="filter-bar">
+  <mat-form-field appearance="outline">
+    <mat-label>Nom</mat-label>
+    <mat-icon matPrefix>badge</mat-icon>
+    <input matInput [(ngModel)]="filters.nom" (keyup.enter)="applyFilter()" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Commune</mat-label>
+    <mat-icon matPrefix>location_city</mat-icon>
+    <input matInput [(ngModel)]="filters.commune" (keyup.enter)="applyFilter()" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Maitre d'ouvrage</mat-label>
+    <mat-icon matPrefix>person</mat-icon>
+    <input matInput [(ngModel)]="filters.maitre_ouvrage" (keyup.enter)="applyFilter()" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Entreprise terrassement</mat-label>
+    <mat-icon matPrefix>engineering</mat-icon>
+    <input matInput [(ngModel)]="filters.entreprise_terrassement" (keyup.enter)="applyFilter()" />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" class="mb-3" (click)="applyFilter()">Filtrer</button>
+  <button mat-raised-button color="warn" class="mb-3" (click)="resetFilter()">Réinitialiser</button>
+</div>
+
 
   <!-- États de chargement et erreurs -->
   <div *ngIf="loading" class="loading-state">

@@ -16,11 +16,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 import re
 import fitz  # PyMuPDF
 from rest_framework import viewsets, permissions, generics
 from rest_framework.decorators import api_view
 from rest_framework.permissions import AllowAny
+from core.filters import ChantierFilter, GisementFilter, MelangeFilter
 from core.models import FicheAgroPedodeSol
 
 @api_view(['GET'])
@@ -46,8 +48,11 @@ from .models import (
    
 )
 from .serializers import (
-    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,
-    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, ProduitVenteDetailSerializer, DocumentTechniqueSerializer, SaisieVenteSerializer, ChantierRecepteurSerializer,
+    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, 
+    DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, 
+    GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,ChantierRecepteurSerializer,
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, 
+    ProduitVenteDetailSerializer, DocumentTechniqueSerializer, SaisieVenteSerializer, 
     
 )
 
@@ -78,6 +83,8 @@ class ChantierViewSet(viewsets.ModelViewSet):
     queryset = Chantier.objects.all()
     serializer_class = ChantierSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ChantierFilter
 
 
 # Vues pour le modèle DocumentGisement (gestion des documents liés aux gisements)   
@@ -93,6 +100,8 @@ class GisementViewSet(viewsets.ModelViewSet):
     queryset = Gisement.objects.all()
     serializer_class = GisementSerializer
     permission_classes = [permissions.AllowAny]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = GisementFilter
 
 
 
@@ -119,6 +128,9 @@ class MelangeViewSet(viewsets.ModelViewSet):
   
     serializer_class = MelangeSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = MelangeFilter
+   
 
     # → on pré-charge les ingrédients pour éviter le N+1
     def get_queryset(self):
