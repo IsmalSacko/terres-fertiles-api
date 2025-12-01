@@ -322,14 +322,27 @@
             </mat-error>
           </mat-form-field>
 
-          <mat-form-field appearance="outline" class="modern-field">
+          <mat-form-field appearance="outline" class="modern-field" style="position:relative;">
             <mat-label>Localisation</mat-label>
-            <input matInput name="localisation" [(ngModel)]="chantier.localisation" required
-                   placeholder="Ex: Zone industrielle de Villefranche">
+                 <input matInput name="localisation" [(ngModel)]="chantier.localisation" required
+                   placeholder="Ex: Zone industrielle de Villefranche ou '45.764043,4.835659'"
+                   (blur)="onLocalisationBlur()" (input)="onLocalisationInput($event.target.value)">
             <mat-icon matPrefix>place</mat-icon>
             <mat-error *ngIf="chantierForm.form.get('localisation')?.hasError('required')">
               La localisation est obligatoire
             </mat-error>
+            <mat-hint>Vous pouvez saisir une adresse.</mat-hint>
+
+            <!-- Suggestions autocomplete -->
+            <div class="suggestions-list" *ngIf="(suggestions.length || 0) > 0">
+              <div class="suggestion-item" *ngFor="let s of suggestions" (click)="selectSuggestion(s)">
+                <div class="suggestion-title">{{ s.display_name }}</div>
+                <div class="suggestion-sub">{{ s.type || (s.address?.county || s.address?.state) }}</div>
+              </div>
+            </div>
+            <div class="suggestions-loading" *ngIf="suggestionLoading">
+              <mat-progress-spinner diameter="24" mode="indeterminate"></mat-progress-spinner>
+            </div>
           </mat-form-field>
         </div>
       </div>
@@ -370,17 +383,17 @@
           <div class="coordinates-form">
             <h4>Coordonnées GPS</h4>
             <div class="coordinates-grid">
-              <mat-form-field appearance="outline" class="coordinate-field">
+                <mat-form-field appearance="outline" class="coordinate-field">
                 <mat-label>Latitude</mat-label>
                 <input matInput type="number" [(ngModel)]="chantier.latitude" name="latitude" 
-                       step="0.000001" placeholder="48.8566">
+                  step="0.000001" placeholder="45.764043" (ngModelChange)="onCoordsChange()">
                 <mat-icon matSuffix>north</mat-icon>
               </mat-form-field>
 
               <mat-form-field appearance="outline" class="coordinate-field">
                 <mat-label>Longitude</mat-label>
                 <input matInput type="number" [(ngModel)]="chantier.longitude" name="longitude" 
-                       step="0.000001" placeholder="2.3522">
+                       step="0.000001" placeholder="2.3522" (ngModelChange)="onCoordsChange()">
                 <mat-icon matSuffix>east</mat-icon>
               </mat-form-field>
             </div>

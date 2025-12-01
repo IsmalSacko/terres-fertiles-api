@@ -34,6 +34,35 @@ import Swal from 'sweetalert2';
 })
 export class ChantierDetailComponent implements OnInit, OnDestroy {
   /** Recharge les gisements du chantier après modification */
+   chantier: Partial<Chantier> = {};
+  loading = false;
+  errorMsg = '';
+  successMsg = '';
+  isEditMode = false;
+  isViewOnly = false;
+  gisements: Gisement[] = [];
+  google: any;
+  // Par défaut centré sur Lyon
+  mapCenter: google.maps.LatLngLiteral = { lat: 45.764043, lng: 4.835659 };
+  mapZoom = 16;
+  markerOptions: google.maps.MarkerOptions = { draggable: true };
+  markerPosition: google.maps.LatLngLiteral = { lat: 45.764043, lng: 4.835659 };
+
+  // Autocomplete / suggestions (Nominatim)
+  suggestions: Array<any> = [];
+  suggestionLoading = false;
+  private _searchTimer: any = null;
+  private readonly _minQueryLength = 3;
+
+  mapOptions: google.maps.MapOptions = {
+    mapTypeControl: false,
+    fullscreenControl: false,
+    zoomControl: true,
+    streetViewControl: true,
+    gestureHandling: 'cooperative', // Améliore la gestion des gestes
+    scrollwheel: true, // Active le scroll de la souris
+    disableDoubleClickZoom: false
+  };
   async onGisementModified() {
     if (this.chantier.id) {
       await this.loadGisements(this.chantier.id);
@@ -61,28 +90,7 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
       this.mapCenter = { lat: center.lat(), lng: center.lng() };
     }
   }
-  chantier: Partial<Chantier> = {};
-  loading = false;
-  errorMsg = '';
-  successMsg = '';
-  isEditMode = false;
-  isViewOnly = false;
-  gisements: Gisement[] = [];
-  google: any;
-  mapCenter: google.maps.LatLngLiteral = { lat: 48.8566, lng: 2.3522 }; 
-  mapZoom = 16;
-  markerOptions: google.maps.MarkerOptions = { draggable: true };
-  markerPosition: google.maps.LatLngLiteral = { lat: 48.8566, lng: 2.3522 };
-
-  mapOptions: google.maps.MapOptions = {
-    mapTypeControl: false,
-    fullscreenControl: false,
-    zoomControl: true,
-    streetViewControl: true,
-    gestureHandling: 'cooperative', // Améliore la gestion des gestes
-    scrollwheel: true, // Active le scroll de la souris
-    disableDoubleClickZoom: false
-  };
+ 
 
   mapTypeId: google.maps.MapTypeId = google.maps.MapTypeId.ROADMAP; // Default to 'Plan'
 
@@ -136,8 +144,8 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
     } else {
       this.chantier = {
         nom: '',
-        latitude: 48.8566,
-        longitude: 2.3522,
+        latitude: 45.764043,
+        longitude: 4.835659,
       };
       this.mapCenter = {
         lat: this.chantier.latitude!,
@@ -240,6 +248,8 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
     this.chantier.latitude = lat;
     this.chantier.longitude = lng;
     this.markerPosition = { lat, lng };
+    // Reverse geocode pour obtenir un nom de localité lisible
+    this.reverseGeocode(lat, lng);
   }
 
   onMarkerDragEnd(event: google.maps.MapMouseEvent): void {
@@ -249,6 +259,8 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
     this.chantier.latitude = lat;
     this.chantier.longitude = lng;
     this.markerPosition = { lat, lng };
+    // Reverse geocode pour obtenir un nom de localité lisible
+    this.reverseGeocode(lat, lng);
   }
 
   openGoogleMaps(): void {
@@ -362,6 +374,161 @@ export class ChantierDetailComponent implements OnInit, OnDestroy {
     } else {
       this.errorMsg = 'La géolocalisation n\'est pas supportée par votre navigateur.';
     }
+  }
+
+  // Tente de parser une chaîne de localisation au format "lat, lng"
+  parseLocalisationToCoords(value: string): { lat: number; lng: number } | null {
+    if (!value || typeof value !== 'string') return null;
+    const cleaned = value.trim();
+    const regex = /^\s*([+-]?\d+(?:\.\d+)?)\s*[, ]\s*([+-]?\d+(?:\.\d+)?)\s*$/;
+    const m = cleaned.match(regex);
+    if (!m) return null;
+    const lat = parseFloat(m[1]);
+    const lng = parseFloat(m[2]);
+    if (isNaN(lat) || isNaN(lng)) return null;
+    return { lat, lng };
+  }
+
+  // Appelé quand l'utilisateur quitte le champ localisation
+  async onLocalisationBlur(): Promise<void> {
+    if (!this.chantier || !this.chantier.localisation) return;
+    const value = String(this.chantier.localisation).trim();
+    const coords = this.parseLocalisationToCoords(value);
+    if (coords) {
+      this.chantier.latitude = coords.lat;
+      this.chantier.longitude = coords.lng;
+      this.markerPosition = { lat: coords.lat, lng: coords.lng };
+      this.mapCenter = { lat: coords.lat, lng: coords.lng };
+      this.suggestions = [];
+      return;
+    }
+    // Sinon, tenter une recherche et sélectionner la première suggestion
+    if (value.length >= this._minQueryLength) {
+      try {
+        const first = await this.quickGeocode(value);
+        if (first) this.applySuggestion(first);
+      } catch (err) {
+        console.warn('Quick geocode failed', err);
+      }
+    }
+  }
+
+  // Appelé quand l'utilisateur modifie les champs latitude / longitude
+  onCoordsChange(): void {
+    const lat = Number(this.chantier.latitude);
+    const lng = Number(this.chantier.longitude);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      this.markerPosition = { lat, lng };
+      this.mapCenter = { lat, lng };
+      // tenter un reverse-geocode pour avoir un nom lisible
+      this.reverseGeocode(lat, lng);
+    }
+  }
+
+  // Recherche d'autocomplete (déclenchée depuis le champ input)
+  onLocalisationInput(term: string): void {
+    const value = String(term || '').trim();
+    if (this._searchTimer) clearTimeout(this._searchTimer);
+    if (value.length < this._minQueryLength) {
+      this.suggestions = [];
+      return;
+    }
+    this._searchTimer = setTimeout(() => this.searchLocalisation(value), 300);
+  }
+
+  async searchLocalisation(query: string): Promise<void> {
+    this.suggestionLoading = true;
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=6&q=${encodeURIComponent(query)}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Recherche non OK');
+      const data = await res.json();
+      this.suggestions = Array.isArray(data) ? data : [];
+    } catch (err) {
+      console.error('Erreur recherche localisation', err);
+      this.suggestions = [];
+    } finally {
+      this.suggestionLoading = false;
+    }
+  }
+
+  async quickGeocode(query: string): Promise<any | null> {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=1&q=${encodeURIComponent(query)}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return Array.isArray(data) && data.length > 0 ? data[0] : null;
+    } catch (err) {
+      return null;
+    }
+  }
+
+  applySuggestion(s: any): void {
+    if (!s) return;
+    const lat = parseFloat(s.lat);
+    const lon = parseFloat(s.lon);
+    // Format compact d'adresse (ex: "9 rue Pierre Semard 69600")
+    this.chantier.localisation = this.formatAddress(s) || s.display_name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    this.chantier.latitude = lat;
+    this.chantier.longitude = lon;
+    this.markerPosition = { lat: lat, lng: lon } as any;
+    this.mapCenter = { lat: lat, lng: lon } as any;
+    this.suggestions = [];
+  }
+
+  selectSuggestion(s: any): void {
+    this.applySuggestion(s);
+  }
+
+  async reverseGeocode(lat: number, lon: number): Promise<void> {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&addressdetails=1&lat=${encodeURIComponent(String(lat))}&lon=${encodeURIComponent(String(lon))}`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Reverse non OK');
+      const data = await res.json();
+      const addr = data?.address || {};
+      // Format compact de l'adresse si possible
+      const compact = this.formatAddress(data) || this.formatAddress({ address: addr }) ;
+      const name = compact || addr.city || addr.town || addr.village || addr.hamlet || addr.suburb || addr.county || data?.display_name;
+      this.chantier.localisation = name || `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    } catch (err) {
+      console.warn('Reverse geocode échoué', err);
+      this.chantier.localisation = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+    }
+  }
+
+  // Retourne une version compacte et lisible d'une réponse Nominatim
+  formatAddress(item: any): string | null {
+    if (!item) return null;
+    // L'objet peut être soit l'élément Nominatim entier, soit { address: { ... } }
+    const addr = item.address ? item.address : (item || {});
+    const house = addr.house_number || addr.housenumber || addr.house_num;
+    const road = addr.road || addr.pedestrian || addr.footway || addr.cycleway || addr.residential || addr.street;
+    const postcode = addr.postcode || addr.postal_code;
+    const city = addr.city || addr.town || addr.village || addr.municipality || addr.county;
+
+    if (house && road && postcode) {
+      return `${house} ${this.capitalizeRoad(road)} ${postcode}`;
+    }
+    if (road && postcode && city) {
+      return `${this.capitalizeRoad(road)} ${postcode} ${city}`;
+    }
+    if (road && city) {
+      return `${this.capitalizeRoad(road)}, ${city}`;
+    }
+    if (postcode && city) {
+      return `${postcode} ${city}`;
+    }
+    return null;
+  }
+
+  // Normalise la casse d'un nom de voie (ex: "rue pierre semard" -> "Rue Pierre Semard")
+  capitalizeRoad(s: string): string {
+    return String(s)
+      .split(/\s+/)
+      .map(part => part.length ? (part[0].toUpperCase() + part.slice(1)) : '')
+      .join(' ');
   }
 
   // Méthode utilitaire pour le tooltip de survol

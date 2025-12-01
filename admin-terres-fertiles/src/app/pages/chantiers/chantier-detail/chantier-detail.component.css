@@ -227,6 +227,99 @@
   margin-right: 4px;
 }
 
+/* Suggestions autocomplete sous le champ localisation */
+.suggestions-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.12), 0 2px 6px rgba(2,6,23,0.06);
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 1400;
+  margin-top: 8px;
+  border: 1px solid rgba(15,23,42,0.06);
+  backdrop-filter: blur(6px);
+  padding: 6px 6px;
+}
+.suggestion-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease;
+}
+.suggestion-item + .suggestion-item {
+  margin-top: 6px;
+}
+.suggestion-item:hover,
+.suggestion-item:focus,
+.suggestion-item.active {
+  background: linear-gradient(90deg, rgba(99,102,241,0.06), rgba(99,102,241,0.03));
+  transform: translateY(-1px);
+}
+.suggestion-item .icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(16,185,129,0.06));
+  color: #374151;
+  flex-shrink: 0;
+  font-size: 18px;
+}
+.suggestion-content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.suggestion-title {
+  font-size: 14px;
+  color: #0f172a;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggestion-sub {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.suggestions-loading {
+  position: absolute;
+  right: 8px;
+  top: 10px;
+}
+
+/* Custom scrollbar pour la liste */
+.suggestions-list::-webkit-scrollbar {
+  width: 8px;
+}
+.suggestions-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(15,23,42,0.12), rgba(15,23,42,0.06));
+  border-radius: 8px;
+}
+.suggestions-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .suggestions-list { max-height: 220px; }
+  .suggestion-item .icon { width: 32px; height: 32px; }
+}
+
 /* ===========================
    HEADER DESIGN
    =========================== */
