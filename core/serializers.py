@@ -327,10 +327,10 @@ class ProduitVenteDetailSerializer(serializers.ModelSerializer):
             'id', 'reference_produit', 'fournisseur', 'volume_initial', 'volume_disponible', 'volume_restant',
             'date_disponibilite', 'volume_vendu', 'acheteur', 'date_achat', 'periode_destockage', 'localisation_projet',
             'commentaires_analyses',
-            'melange', 'documents', 'analyses', 'utilisateur',
+            'melange', 'documents', 'utilisateur',
             'chantier_info', 'plateforme', 'temps_sur_plateforme', 'delai_avant_disponibilite'
         ]
-        read_only_fields = ['melange', 'documents', 'analyses', 'utilisateur']  # On empêche la modification côté frontend
+        read_only_fields = ['melange', 'documents', 'utilisateur']  # On empêche la modification côté frontend
     def get_chantier_info(self, obj):
         """Retourne le chantier d'origine du produit.
         Règle: chantier du gisement dominant (plus fort pourcentage).

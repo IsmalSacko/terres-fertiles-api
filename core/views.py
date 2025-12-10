@@ -5,9 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Prefetch, Q, F
-from django.db import models
-from django.utils import timezone
+from django.db.models import Prefetch
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
 from rest_framework import status   

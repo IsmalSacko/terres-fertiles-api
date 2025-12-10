@@ -571,13 +571,13 @@
                 <label for="ordre_conformite_file" class="form-label">Document d'ordre de fabrication</label>
                 <div class="file-upload-container">
                   <input type="file" class="form-control" id="ordre_conformite_file" 
-                         accept=".pdf,.doc,.docx,.txt"
+                         accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
                          (change)="onFileSelected($event, 'ordre_conformite')"
                          #ordreConformiteFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['ordre_conformite']" class="alert alert-success mt-2">
@@ -605,13 +605,13 @@
                 <label for="consignes_melange_file" class="form-label">Document des consignes de mélange</label>
                 <div class="file-upload-container">
                   <input type="file" class="form-control" id="consignes_melange_file" 
-                         accept=".pdf,.doc,.docx,.txt"
+                         accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
                          (change)="onFileSelected($event, 'consignes_melange')"
                          #consignesMelangeFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['consignes_melange']" class="alert alert-success mt-2">
@@ -639,7 +639,7 @@
                 <label for="controle_1_file" class="form-label">Rapport de contrôle +1 mois</label>
                 <div class="file-upload-container">
                   <input type="file" class="form-control" id="controle_1_file" 
-                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png"
                          (change)="onFileSelected($event, 'controle_1')"
                          #controle1File>
                   <div class="file-upload-info">
@@ -724,7 +724,7 @@
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['controle_2']" class="alert alert-success mt-2">
@@ -978,13 +978,13 @@
                 <label for="fiche_technique_file" class="form-label">Fiche technique finale</label>
                 <div class="file-upload-container">
                   <input type="file" class="form-control" id="fiche_technique_file" 
-                         accept=".pdf,.doc,.docx,.txt"
+                         accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
                          (change)="onFileSelected($event, 'fiche_technique')"
                          #ficheTechniqueFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre fiche technique ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['fiche_technique']" class="alert alert-success mt-2">

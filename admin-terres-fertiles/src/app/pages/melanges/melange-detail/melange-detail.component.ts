@@ -1634,7 +1634,11 @@ constructor(
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'text/plain',
       'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      // accpeter les images 
+      'image/jpeg',
+      'image/png',
+      'image/gif'
     ];
     
     if (file.size > maxSize) {
@@ -1642,7 +1646,7 @@ constructor(
     }
     
     if (!allowedTypes.includes(file.type)) {
-      return 'Type de fichier non autorisé. Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX';
+      return 'Type de fichier non autorisé. Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPEG, PNG, GIF';
     }
     
     return null;

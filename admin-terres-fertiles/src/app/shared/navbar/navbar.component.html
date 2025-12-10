@@ -53,8 +53,11 @@
     <mat-icon>menu</mat-icon>
   </button>
   <button mat-icon-button class="avatar-btn" [matMenuTriggerFor]="userMenu">
-    <img src="https://i.pravatar.cc/40?img=3" alt="avatar" class="avatar-img"/>
-    <span *ngIf="isLoggedIn && userName" class="user-name-below">{{ userName }}</span>
+    <img src="assets/tf.png" alt="avatar" class="avatar-img"/>
+    
+    @if(isLoggedIn && userName) {
+      <span  class="user-name-below">{{ userName }}</span>
+    }
   </button>
   <mat-menu #userMenu="matMenu" class="user-menu-custom">
     <!-- Section utilisateur connecté -->

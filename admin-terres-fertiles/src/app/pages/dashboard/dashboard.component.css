@@ -475,10 +475,7 @@
   --card-gradient: linear-gradient(135deg, var(--fertile-mid) 0%, #388e3c 100%);
 }
 
-/* Carte Analyses */
-.card-analyses {
-  --card-gradient: linear-gradient(135deg, #1b3d1b 0%, #4caf50 100%);
-}
+
 
 /* Carte Vente */
 .card-vente {
