@@ -116,7 +116,7 @@ class Chantier(models.Model):
         # Prendre les 2 derniers chiffres de l'année
         annee = str(self.date_creation.year if self.date_creation else date.today().year)[-2:]
 
-        # ✅ Modification : prendre seulement les 3 premiers caractères du code terrassement
+        # Modification : prendre seulement les 3 premiers caractères du code terrassement
         terrassier = re.sub(r'[^A-Z0-9]', '', slugify(self.entreprise_terrassement).upper())[:3]
 
         # Code commune : 3 premiers caractères
