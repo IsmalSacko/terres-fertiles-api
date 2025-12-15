@@ -1,5 +1,11 @@
 
-.container.fiche-contenainer {max-width: 1350px;margin: 32px auto;background: #fff;border-radius: 10px;box-shadow: 0 2px 12px rgba(0,0,0,0.06);padding: 24px;position: relative;top : 50px;
+.container.fiche-contenainer {
+	max-width: 1350px;
+	margin: 32px auto;
+	background: #fff;
+	border-radius: 10px;
+	box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+	position: relative;top : 50px;
 }
 
 .fiche-table {
@@ -125,7 +131,8 @@
 
 /* ================= Responsive Mobile (<=600px) ================= */
 @media (max-width: 600px) {
-	.fiche-list { gap: 28px; }
+	.fiche-list { gap: 22px; }
+	.container.fiche-contenainer { padding: 0 8px; }
 	/* Passe le conteneur de l'item en une seule colonne et place les actions dessous */
 	.fiche-list-item {
 		grid-template-columns: 1fr;
@@ -144,8 +151,9 @@
 	.fiche-list-item .logo { grid-area: logo; border-right: none; justify-content: flex-start; font-size:16px; }
 	.fiche-list-item .header-main { grid-area: main; }
 	.fiche-list-item .right-column { grid-area: right; border-left: none; margin-top: 4px; }
-	/* Tables plus compactes */
-	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding:4px 5px; font-size:11px; }
+	/* Tables plus compactes et scroll si largeur insuffisante */
+	.fiche-list-item table.excel { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding:4px 5px; font-size:11px; word-break: break-word; hyphens: auto; }
 	.fiche-list-item .main-table .title { font-size: 11px; }
 	.fiche-list-item .big { font-size: 14px; }
 	/* Actions horizontales en bas (zone 'actions') */
@@ -158,6 +166,32 @@
 		margin-top: 6px;
 	}
 }
+
+/* ================= Smartphones moyens (<=480px) ================= */
+@media (max-width: 480px) {
+	.fiche-list { gap: 18px; }
+	.fiche-list-item { padding: 10px; }
+	.fiche-list-item .logo img { width: 44px; height: 44px; padding: 4px; }
+	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding: 3.5px 4px; font-size: 10.5px; }
+	.fiche-list-item .main-table .title { font-size: 10.5px; }
+	.fiche-list-item .big { font-size: 13px; }
+}
+
+/* ================= Extra-compact (iPhone SE et petits écrans <=380px) ================= */
+@media (max-width: 380px) {
+	.fiche-list { gap: 16px; }
+	.fiche-list-item { padding: 8px; }
+	.fiche-list-item .logo { font-size: 14px; }
+	.fiche-list-item .logo img { width: 40px; height: 40px; padding: 4px; }
+	.fiche-list-item .right-column { margin-top: 4px; }
+	/* Tables ultra compactes et scroll horizontal si besoin */
+	.fiche-list-item table.excel { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	.fiche-list-item table.excel th, .fiche-list-item table.excel td { padding: 3px 4px; font-size: 10px; word-break: break-word; }
+	.fiche-list-item .main-table .title { font-size: 10px; padding: 6px 4px; }
+	.fiche-list-item .big { font-size: 13px; }
+	.fiche-actions { gap: 8px; }
+}
+
 
 /* Classes utilitaires pour basculer en mode "compact" sur tablette étroite */
 @media (max-width: 820px) and (min-width: 601px) {

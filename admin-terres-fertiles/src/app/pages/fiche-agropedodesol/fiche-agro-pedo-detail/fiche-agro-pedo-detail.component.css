@@ -10,6 +10,7 @@
   max-width: 1250px; /* limite la largeur pour centrer le contenu sans occuper tout l'écran */
   margin: 20px auto; /* centre horizontalement avec un peu d'espace vertical */
 }
+.btn-group { margin-left: 0%; padding: 8px; width: 20% !important; box-sizing: border-box;}
 
 /* Grille 3 colonnes : logo | centre | droite */
 .fiche-header {
@@ -45,7 +46,6 @@
   display: flex;
   flex-direction: column;
 }
-
 /* Base Excel pour toutes les tables */
 table.excel {
   width: 100%;
@@ -131,12 +131,20 @@ table.excel td {
   padding: 6px 4px;
   width: 36px;
 }
-.horizon-table.full td.wide { width: 420px; }
+
+
 .horizon-table.full td.echant { width: 80px; text-align: center; }
 .rotate-vertical { writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; vertical-align: middle; padding: 6px 4px; }
 
 /* Ensure td content doesn't overflow when rotated */
 .horizon-table.full td.rotate-vertical { height: 120px; white-space: nowrap; overflow: hidden; }
+
+/* Actions column: visible on large screens, hidden on mobile/tablet */
+.horizon-table.full td.desktop-actions-col,
+.horizon-table.full th.desktop-actions-col { display: table-cell; }
+
+/* Hide horizon-actions div on large screens */
+.horizon-actions { display: none; }
 
 /* Print button area (visible on screen, hidden on print by existing rule) */
 .actions { margin-top: 18px; display: flex; gap: 12px; }
@@ -144,9 +152,80 @@ table.excel td {
 .actions button, .actions [mat-raised-button] { background: #1976d2; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
 .actions button:hover, .actions [mat-raised-button]:hover { background: #165fa8; }
 
-/* Important: cette règle responsive ne doit s'appliquer qu'à l'écran, pas à l'impression */
-@media screen and (max-width: 900px) {
-  .horizon-table.full thead th.vertical { writing-mode: horizontal-tb; transform: rotate(0); width: auto; }
+/* ================= Responsive Tablette (>=600px et <=1024px) ================= */
+@media (max-width: 1024px) {
+	.fiche-detail-container { padding: 16px; max-width: 100%; }
+	.fiche-header { grid-template-columns: 70px 1fr 300px; }
+	.logo { font-size: 18px; }
+	.logo img { width: 50px; height: 50px; }
+	table.excel th, table.excel td { padding: 5px 6px; font-size: 12px; }
+	.main-table .title { font-size: 12px; }
+	.big { font-size: 16px; }
+	.horizon-table.full th, .horizon-table.full td { padding: 4px; font-size: 11px; }
+  .horizon-table.full td.wide { width: 420px; }
+  .horizon-table.full td.desktop-actions-col,
+  .horizon-table.full th.desktop-actions-col { display: none; }
+  .horizon-actions { display: flex; }
+}
+
+/* ================= Responsive Mobile (<=600px) ================= */
+@media (max-width: 600px) {
+	.fiche-detail-container { padding: 12px 8px; top: 40px; }
+	.fiche-header { 
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			'logo'
+			'main'
+			'right';
+	}
+	.logo { grid-area: logo; border-right: none; border-bottom: 1px solid #000; justify-content: flex-start; font-size: 16px; }
+	.header-main { grid-area: main; }
+	.right-column { grid-area: right; border-left: none; border-top: 1px solid #000; }
+	table.excel { display: block; width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	table.excel th, table.excel td { padding: 4px 5px; font-size: 11px; word-break: break-word; hyphens: auto; }
+	.main-table .title { font-size: 11px; }
+	.big { font-size: 14px; }
+	.horizon-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+	.horizon-table.full { display: block;  }
+  .btn-group { margin-left: 10%; padding: 8px; width: 80% !important; box-sizing: border-box;}
+	.photo-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+	.photo-block img { height: 100px; }
+	.actions { flex-direction: column; gap: 8px; }
+	.actions button, .actions [mat-raised-button] { width: 100%; }
+  .horizon-table.full td.wide { width: 420px; }
+  .pdf-horizons .d-flex { flex-direction: column; gap: 12px; }
+  .pdf-horizons button { width: 100%; }
+}
+
+/* ================= Smartphones moyens (<=480px) ================= */
+@media (max-width: 480px) {
+	.fiche-detail-container { padding: 10px 6px; }
+	.logo img { width: 44px; height: 44px; padding: 4px; }
+	table.excel th, table.excel td { padding: 3.5px 4px; font-size: 10.5px; }
+	.main-table .title { font-size: 10.5px; }
+	.big { font-size: 13px; }
+	.horizon-table.full th, .horizon-table.full td { padding: 3px; font-size: 10px; }
+}
+
+/* ================= Extra-compact (iPhone SE et petits écrans <=380px) ================= */
+@media (max-width: 380px) {
+	.fiche-detail-container { padding: 8px 4px; }
+	.logo { font-size: 14px; }
+	.logo img { width: 40px; height: 40px; padding: 4px; }
+	table.excel th, table.excel td { padding: 3px 4px; font-size: 10px; }
+	.main-table .title { font-size: 10px; padding: 6px 4px; }
+	.big { font-size: 13px; }
+	.horizon-table.full th, .horizon-table.full td { padding: 2px 3px; font-size: 9px; }
+	.photo-grid { grid-template-columns: 1fr; }
+}
+
+/* Forcer l'affichage vertical des en-têtes sur tous les écrans */
+.horizon-table.full thead th.vertical {
+  writing-mode: vertical-rl !important;
+  transform: rotate(180deg) !important;
+  padding: 6px 4px !important;
+  width: 36px !important;
+  white-space: nowrap;
 }
 
 /* Photos grid */

@@ -61,3 +61,40 @@
 	margin: 24px 0;
 	text-align: center;
 }
+
+/* ================= Responsive Tablette (>=600px et <=1024px) ================= */
+@media (max-width: 1024px) {
+	.photo-list-container { padding: 24px 18px; margin: 30px 16px; }
+	.photo-cards { gap: 18px; }
+	.photo-card { width: 220px; padding: 14px; }
+	.photo-img { height: 140px; }
+}
+
+/* ================= Responsive Mobile (<=600px) ================= */
+@media (max-width: 600px) {
+	.photo-list-container { padding: 20px 12px; margin: 20px 8px; top: 30px; }
+	.photo-cards { gap: 16px; justify-content: center; }
+	.photo-card { width: 100%; max-width: 340px; padding: 12px; }
+	.photo-img { height: 180px; }
+	.photo-info { font-size: 0.92rem; }
+	.photo-actions { justify-content: center; gap: 10px; }
+}
+
+/* ================= Smartphones moyens (<=480px) ================= */
+@media (max-width: 480px) {
+	.photo-list-container { padding: 16px 10px; margin: 16px 6px; }
+	.photo-cards { gap: 14px; }
+	.photo-card { padding: 10px; }
+	.photo-img { height: 160px; }
+	.photo-info { font-size: 0.88rem; }
+}
+
+/* ================= Extra-compact (iPhone SE et petits écrans <=380px) ================= */
+@media (max-width: 380px) {
+	.photo-list-container { padding: 12px 8px; margin: 12px 4px; }
+	.photo-cards { gap: 12px; }
+	.photo-card { padding: 8px; }
+	.photo-img { height: 140px; }
+	.photo-info { font-size: 0.85rem; margin-bottom: 8px; }
+	.photo-actions { gap: 8px; }
+}

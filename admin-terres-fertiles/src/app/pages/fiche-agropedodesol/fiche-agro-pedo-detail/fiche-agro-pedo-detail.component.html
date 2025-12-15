@@ -84,84 +84,102 @@
       </button>
     </div>
   <div class="horizon-table-wrapper" *ngIf="horizons && horizons.length > 0; else noHorizons">
-      <table class="horizon-table full excel" aria-label="Table des horizons">
-        <colgroup>
-          <!-- 10 petites colonnes -->
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <col style="width:40px" />
-          <!-- large commentaires -->
-          <col style="width:420px" />
-          <!-- représentation et échantillon -->
-          <col style="width:48px" />
-          <col style="width:48px" />
-          <!-- actions -->
-          <col style="width:160px" />
-        </colgroup>
-        <thead>
-          <tr>
-            <th class="vertical">Horizon</th>
-            <th class="vertical">Profondeur</th>
-            <th class="vertical">Texture</th>
-            <th class="vertical">Humidité</th>
-            <th class="vertical">Couleur</th>
-            <th class="vertical">Hydromorphie</th>
-            <th class="vertical">Test HCL</th>
-            <th class="vertical">Porosité</th>
-            <th class="vertical">Compacité</th>
-            <th class="vertical">Activité biologique</th>
-            <th class="wide">Commentaires spécifiques de l'horizon</th>
-            <th class="vertical">Représentation du profil</th>
-            <th class="vertical">Echantillon</th>
-            <th class="vertical no-print">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let h of horizons">
-            <td class="rotate-vertical h3">{{ h.nom }}</td>
-            <td class="rotate-vertical">{{ h.profondeur }}</td>
-            <td class="rotate-vertical">{{ h.texture }}</td>
-            <td class="rotate-vertical">{{ h.humidite }}</td>
-            <td class="rotate-vertical">{{ h.couleur }}</td>
-            <td class="rotate-vertical">{{ h.hydromorphie }}</td>
-            <td class="rotate-vertical">{{ h.test_hcl }}</td>
-            <td class="rotate-vertical">{{ h.porosite }}</td>
-            <td class="rotate-vertical">{{ h.compacite }}</td>
-            <td class="rotate-vertical">{{ h.activite_bio }}</td>
-            <td class="wide">{{ h.commentaires }}</td>
-            <td>
-              <div class="rep-circles">
-                <!-- représentation simple: remplis/vides selon valeur (adapter si nécessaire) -->
-                <div class="circle" *ngIf="h.representation_profil">●</div>
-              </div>
-            </td>
-            <td class="rotate-vertical h4">{{ h.echantillon }}</td>
-            <td class="no-print">
-              <div class="btn-group btn-group-sm" role="group">
-                <button type="button" class="btn btn-outline-primary" (click)="goToHorizonDetail(h.id)">
-                  <i class="bi bi-eye"></i>
-                </button>
-                <button type="button" class="btn btn-outline-secondary" (click)="goToHorizonEdit(h.id)">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button type="button" class="btn btn-outline-success" (click)="goToAddPhotosForHorizon(h.id)" title="Ajouter des photos">
-                  <i class="bi bi-camera"></i>
-                </button>
-                <button type="button" class="btn btn-outline-danger" (click)="deleteHorizon(h.id)" title="Supprimer">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="horizon-item" *ngFor="let h of horizons">
+        <table class="horizon-table full excel" aria-label="Table des horizons">
+          <colgroup>
+            <!-- 10 petites colonnes -->
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <col style="width:30px" />
+            <!-- large commentaires -->
+            <col style="width:200px" />
+            <!-- représentation et échantillon -->
+            <col style="width:35px" />
+            <col style="width:35px" />
+            <!-- actions desktop only -->
+            <col style="width:100px" class="desktop-actions-col" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th class="vertical">Horizon</th>
+              <th class="vertical">Profondeur</th>
+              <th class="vertical">Texture</th>
+              <th class="vertical">Humidité</th>
+              <th class="vertical">Couleur</th>
+              <th class="vertical">Hydromorphie</th>
+              <th class="vertical">Test HCL</th>
+              <th class="vertical">Porosité</th>
+              <th class="vertical">Compacité</th>
+              <th class="vertical">Activité biologique</th>
+              <th class="wide">Commentaires spécifiques de l'horizon</th>
+              <th class="vertical">Représentation du profil</th>
+              <th class="vertical">Echantillon</th>
+              <th class="desktop-actions-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rotate-vertical h3">{{ h.nom }}</td>
+              <td class="rotate-vertical">{{ h.profondeur }}</td>
+              <td class="rotate-vertical">{{ h.texture }}</td>
+              <td class="rotate-vertical">{{ h.humidite }}</td>
+              <td class="rotate-vertical">{{ h.couleur }}</td>
+              <td class="rotate-vertical">{{ h.hydromorphie }}</td>
+              <td class="rotate-vertical">{{ h.test_hcl }}</td>
+              <td class="rotate-vertical">{{ h.porosite }}</td>
+              <td class="rotate-vertical">{{ h.compacite }}</td>
+              <td class="rotate-vertical">{{ h.activite_bio }}</td>
+              <td  class="wide">{{ h.commentaires }}</td>
+              <td>
+                <div class="rep-circles">
+                  <!-- représentation simple: remplis/vides selon valeur (adapter si nécessaire) -->
+                  <div class="circle" *ngIf="h.representation_profil">●</div>
+                </div>
+              </td>
+              <td class="rotate-vertical h4">{{ h.echantillon }}</td>
+              <td class="desktop-actions-col">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-primary" (click)="goToHorizonDetail(h.id)">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" (click)="goToHorizonEdit(h.id)">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-success" (click)="goToAddPhotosForHorizon(h.id)" title="Ajouter des photos">
+                    <i class="bi bi-camera"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-danger" (click)="deleteHorizon(h.id)" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="horizon-actions no-print">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary" (click)="goToHorizonDetail(h.id)">
+              <i class="bi bi-eye"></i>
+            </button>
+            <button type="button" class="btn btn-outline-secondary" (click)="goToHorizonEdit(h.id)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button type="button" class="btn btn-outline-success" (click)="goToAddPhotosForHorizon(h.id)" title="Ajouter des photos">
+              <i class="bi bi-camera"></i>
+            </button>
+            <button type="button" class="btn btn-outline-danger" (click)="deleteHorizon(h.id)" title="Supprimer">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <ng-template #noHorizons>
       <div class="empty">Aucun horizon enregistré.</div>

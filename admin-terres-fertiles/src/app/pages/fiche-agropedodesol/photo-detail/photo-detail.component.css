@@ -36,3 +36,33 @@
 	color: #d32f2f;
 	margin-bottom: 16px;
 }
+
+/* ================= Responsive Tablette (>=600px et <=1024px) ================= */
+@media (max-width: 1024px) {
+	.photo-detail-container { padding: 28px 20px; margin: 36px 16px; max-width: 480px; }
+	.photo-img { height: 200px; }
+}
+
+/* ================= Responsive Mobile (<=600px) ================= */
+@media (max-width: 600px) {
+	.photo-detail-container { padding: 24px 16px; margin: 30px 8px; top: 30px; max-width: 100%; }
+	.photo-img { height: 180px; margin-bottom: 16px; }
+	.photo-info { font-size: 0.98rem; margin-bottom: 16px; }
+	.photo-actions { flex-direction: column; gap: 12px; }
+	.photo-actions button, .photo-actions [mat-raised-button] { width: 100%; }
+}
+
+/* ================= Smartphones moyens (<=480px) ================= */
+@media (max-width: 480px) {
+	.photo-detail-container { padding: 20px 12px; margin: 24px 6px; }
+	.photo-img { height: 160px; margin-bottom: 14px; }
+	.photo-info { font-size: 0.95rem; }
+}
+
+/* ================= Extra-compact (iPhone SE et petits écrans <=380px) ================= */
+@media (max-width: 380px) {
+	.photo-detail-container { padding: 16px 10px; margin: 20px 4px; }
+	.photo-img { height: 140px; margin-bottom: 12px; }
+	.photo-info { font-size: 0.92rem; margin-bottom: 14px; }
+	.photo-actions { gap: 10px; }
+}
