@@ -25,11 +25,6 @@ export class ChantierService {
   private readonly apiUrl = `${this.base}chantiers/`
   private apiService = inject(ApiService);  
   
-  // Méthode pour les token et entête
-  private getHeaders() {
-    const token = localStorage.getItem('token');
-    return { headers: { Authorization: `Token ${token}` } };
-  }
 
   constructor() { }
 

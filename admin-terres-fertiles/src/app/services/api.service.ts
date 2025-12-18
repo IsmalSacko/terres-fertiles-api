@@ -37,6 +37,9 @@ export class ApiService {
     this.axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
+        // Diagnostic: log pour vérifier la présence du token au moment de la requête
+        // (retirer ou désactiver en production une fois validé)
+        console.debug('[ApiService] interceptor - token present:', !!token);
         if (token) {
           // Convertit / normalise headers en AxiosHeaders puis set la valeur
           config.headers = new AxiosHeaders(config.headers);
