@@ -6,7 +6,7 @@ export interface AmendementOrganique {
   fournisseur: string;
   date_reception: string;
   commune: string;
-  date_semis: string;
+  debut_date_fabrication: string;
   volume_disponible: number;
   localisation?: string | null;
   latitude?: number | null;
@@ -16,10 +16,11 @@ export interface AmendementOrganique {
 
 export interface CreateAmendementOrganique {
   plateforme?: number | null;
+  nom?: string;
   fournisseur: string;
   date_reception: string;
   commune: string;
-  date_semis: string;
+  debut_date_fabrication: string;
   volume_disponible: number;
   localisation?: string | null;
   latitude?: number | null;

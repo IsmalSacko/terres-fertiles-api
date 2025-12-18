@@ -41,7 +41,7 @@ export class AmendementCreateComponent implements OnInit {
   fournisseur = '';
   date_reception = new Date();
   commune = 'LYON';
-  date_semis = new Date();
+  debut_date_fabrication = new Date();
   volume_disponible = 0;
   localisation = '';
   latitude: number | null = null;
@@ -77,7 +77,7 @@ export class AmendementCreateComponent implements OnInit {
         fournisseur: this.fournisseur,
         date_reception: this.formatDate(this.date_reception),
         commune: this.commune,
-        date_semis: this.formatDate(this.date_semis),
+        debut_date_fabrication: this.formatDate(this.debut_date_fabrication),
         volume_disponible: this.volume_disponible,
         localisation: this.localisation || null,
         latitude: this.latitude,

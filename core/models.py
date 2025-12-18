@@ -484,7 +484,7 @@ class AmendementOrganique(models.Model):
     fournisseur = models.CharField(max_length=255, help_text="Fournisseur de l'émendent organique")
     date_reception = models.DateField(default=timezone.now)
     commune = models.CharField(max_length=100, help_text="Commune de provenance de l'émendent organique", default="LYON")
-    date_semis = models.DateField(default=timezone.now, help_text="Date de semis de l'émendent organique")
+    debut_date_fabrication = models.DateField(default=timezone.now, help_text="Date de fabrication de l'émendent organique")
     volume_disponible = models.DecimalField(max_digits=10, decimal_places=2, help_text="Volume disponible de l'émendent organique")
     localisation = models.CharField(max_length=255, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)

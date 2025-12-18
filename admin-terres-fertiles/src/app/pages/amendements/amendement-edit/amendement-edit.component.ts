@@ -43,9 +43,10 @@ export class AmendementEditComponent implements OnInit {
   // Données du formulaire
   selectedPlateforme: number | null = null;
   fournisseur = '';
+  nom = '';
   date_reception = new Date();
   commune = '';
-  date_semis = new Date();
+  debut_date_fabrication = new Date();
   volume_disponible = 0;
   localisation = '';
   latitude: number | null = null;
@@ -84,9 +85,10 @@ export class AmendementEditComponent implements OnInit {
       // Remplir le formulaire avec les données existantes
       this.selectedPlateforme = amendementData.plateforme || null;
       this.fournisseur = amendementData.fournisseur;
+      this.nom = amendementData.nom;
       this.date_reception = new Date(amendementData.date_reception);
       this.commune = amendementData.commune;
-      this.date_semis = new Date(amendementData.date_semis);
+      this.debut_date_fabrication = new Date(amendementData.debut_date_fabrication);
       this.volume_disponible = amendementData.volume_disponible;
       this.localisation = amendementData.localisation || '';
       this.latitude = amendementData.latitude || null;
@@ -113,9 +115,10 @@ export class AmendementEditComponent implements OnInit {
       const amendementData: Partial<CreateAmendementOrganique> = {
         plateforme: this.selectedPlateforme,
         fournisseur: this.fournisseur,
+        nom: this.nom,
         date_reception: this.formatDate(this.date_reception),
         commune: this.commune,
-        date_semis: this.formatDate(this.date_semis),
+        debut_date_fabrication: this.formatDate(this.debut_date_fabrication),
         volume_disponible: this.volume_disponible,
         localisation: this.localisation || null,
         latitude: this.latitude,

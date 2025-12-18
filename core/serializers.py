@@ -272,11 +272,24 @@ class MelangeSerializer(serializers.ModelSerializer):
 
 
 class AmendementOrganiqueSerializer(serializers.ModelSerializer):
-    utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
+    responsable = serializers.ReadOnlyField(source='responsable.username')
     class Meta:
         model = AmendementOrganique
         fields = '__all__'
-        read_only_fields = ['utilisateur']  # On empêche la modification côté frontend
+        read_only_fields = ['responsable']  # On empêche la modification côté frontend
+
+    def update(self, instance, validated_data):
+        # Si le frontend fournit explicitement `nom`, on le positionne
+        # avant l'appel à save() pour que la logique de génération
+        # respecte la modification manuelle (ou détecte les conflits).
+        if 'nom' in validated_data:
+            instance.nom = validated_data.pop('nom')
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 

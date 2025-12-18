@@ -47,10 +47,10 @@
       <!-- Ligne 3: Date semis + Volume -->
       <div class="form-row">
         <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Date de semis *</mat-label>
-          <input matInput [matDatepicker]="semisPicker" name="date_semis" [(ngModel)]="date_semis" required>
-          <mat-datepicker-toggle matIconSuffix [for]="semisPicker"></mat-datepicker-toggle>
-          <mat-datepicker #semisPicker></mat-datepicker>
+          <mat-label>Début de fabrication *</mat-label>
+          <input matInput [matDatepicker]="fabricationPicker" name="debut_date_fabrication" [(ngModel)]="debut_date_fabrication" required>
+          <mat-datepicker-toggle matIconSuffix [for]="fabricationPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fabricationPicker></mat-datepicker>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="half-width">

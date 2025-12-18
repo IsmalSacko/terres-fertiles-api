@@ -31,7 +31,7 @@ export class AmendementOrganiqueService {
   }
 
   async update(id: number, amendement: Partial<CreateAmendementOrganique>): Promise<AmendementOrganique> {
-    const response = await this.apiService.patch<AmendementOrganique>(`${this.apiUrl}${id}/`);
+    const response = await this.apiService.patch<AmendementOrganique>(`${this.apiUrl}${id}/`, amendement);
     return response.data;
   }
 
