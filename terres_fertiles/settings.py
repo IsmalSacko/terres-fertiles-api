@@ -20,8 +20,8 @@ ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
-    "https://tef.ismael-dev.com",
-    "http://tef.ismael-dev.com",
+    "https://tef.terres-fertiles.com",
+    "http://tef.terres-fertiles.com",
 ]
 # ajoute seulement si tu rencontres un CSRF origin mismatch
 # CSRF_TRUSTED_ORIGINS = [
