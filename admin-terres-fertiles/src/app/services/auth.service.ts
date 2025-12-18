@@ -43,16 +43,14 @@ export class AuthService {
   async login(username: string, password: string): Promise<any> {
     try {
       const response = await axios.post(`${this.loginUrl}token/login/`, { username, password });
-      // Accept multiple possible token field names returned by different auth backends
-      const token = response.data?.auth_token || response.data?.token || response.data?.key;
-      if (token) {
-        localStorage.setItem('token', token);
+      if (response.data.auth_token) {
+        localStorage.setItem('token', response.data.auth_token);
         console.log('Connexion réussie ! 🎉');
 
         // Récupérer et sauvegarder les informations de l'utilisateur connecté
         try {
           const userResponse = await axios.get(this.userProfileUrl, {
-            headers: { Authorization: `Token ${token}` }
+            headers: { Authorization: `Token ${response.data.auth_token}` }
           });
           localStorage.setItem('currentUser', JSON.stringify(userResponse.data));
           console.log('Informations utilisateur sauvegardées:', userResponse.data);
