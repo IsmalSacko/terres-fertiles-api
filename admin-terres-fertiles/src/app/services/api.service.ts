@@ -37,13 +37,23 @@ export class ApiService {
     this.axiosInstance.interceptors.request.use(
       (config: InternalAxiosRequestConfig) => {
         const token = localStorage.getItem('token');
-        // Diagnostic: log pour vérifier la présence du token au moment de la requête
-        // (retirer ou désactiver en production une fois validé)
-        console.debug('[ApiService] interceptor - token present:', !!token);
+        const shortToken = token ? `${String(token).slice(0, 12)}...` : null;
+        // Diagnostic: afficher token stocké et valeur du header Authorization (temporaire)
+        console.debug('[ApiService] interceptor - localStorage token present:', !!token, 'token:', shortToken);
         if (token) {
-          // Convertit / normalise headers en AxiosHeaders puis set la valeur
+          // Normalise headers en AxiosHeaders puis set la valeur
           config.headers = new AxiosHeaders(config.headers);
-          (config.headers as AxiosHeaders).set('Authorization', `Token ${token}`);
+          const authValue = `Token ${token}`;
+          (config.headers as AxiosHeaders).set('Authorization', authValue);
+          // Lire et afficher l'en-tête qui vient d'être défini
+          try {
+            const currentAuth = (config.headers as AxiosHeaders).get('Authorization');
+            console.debug('[ApiService] interceptor - Authorization header set:', currentAuth);
+          } catch (e) {
+            console.debug('[ApiService] interceptor - Authorization header set (read failed)');
+          }
+        } else {
+          console.debug('[ApiService] interceptor - no token, Authorization header not set');
         }
         return config;
       },
