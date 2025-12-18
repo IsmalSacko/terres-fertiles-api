@@ -25,6 +25,10 @@
     min-width: 0;
     margin: 0;
   }
+    .full-width {
+      width: 100% !important;
+    
+    }
 }
 
 button[mat-button], button[mat-raised-button][color="primary"] {
@@ -73,8 +77,8 @@ button[mat-button]:hover {
 }
 
 .full-width {
-  width: 100%;
-  margin-bottom: 1.5rem;
+  width: 49%;
+ 
 }
 
 /* Structure en lignes pour organiser les champs */

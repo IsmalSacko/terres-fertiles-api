@@ -62,15 +62,15 @@
         </mat-form-field>
       </div>
 
-      <!-- Ligne 4: Localisation (pleine largeur) -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Localisation</mat-label>
-        <input matInput name="localisation" [(ngModel)]="localisation" placeholder="Adresse ou description de la localisation" />
-      </mat-form-field>
-
-      <!-- Ligne 5: Coordonnées GPS -->
+      
       <div class="form-row">
-        <mat-form-field appearance="outline" class="half-width">
+          <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Localisation</mat-label>
+                <input matInput name="localisation" [(ngModel)]="localisation"
+                  placeholder="Adresse ou description de la localisation" />
+          </mat-form-field>
+          
+         <mat-form-field appearance="outline" class="half-width">
           <mat-label>Latitude</mat-label>
           <input matInput name="latitude" [(ngModel)]="latitude" type="number" step="0.000001" placeholder="Coordonnée latitude (optionnelle)" />
         </mat-form-field>
