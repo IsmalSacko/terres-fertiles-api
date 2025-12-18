@@ -169,14 +169,19 @@ export class AuthService {
   async login(username: string, password: string): Promise<any> {
     try {
       const response = await axios.post(`${this.loginUrl}token/login/`, { username, password });
-      if (response.data.auth_token) {
-        localStorage.setItem('token', response.data.auth_token);
+      // Debug: afficher le body retourné par l'endpoint d'auth (temporaire)
+      console.debug('[AuthService] login response:', response.data);
+      // Supporter plusieurs noms de champ possibles pour le token
+      const token = response.data?.auth_token || response.data?.token || response.data?.key;
+      if (token) {
+        localStorage.setItem('token', token);
         console.log('Connexion réussie ! 🎉');
+        console.debug('[AuthService] token stored:', !!localStorage.getItem('token'));
 
         // Récupérer et sauvegarder les informations de l'utilisateur connecté
         try {
           const userResponse = await axios.get(this.userProfileUrl, {
-            headers: { Authorization: `Token ${response.data.auth_token}` }
+            headers: { Authorization: `Token ${token}` }
           });
           localStorage.setItem('currentUser', JSON.stringify(userResponse.data));
           console.log('Informations utilisateur sauvegardées:', userResponse.data);
@@ -189,9 +194,8 @@ export class AuthService {
         this.authStateSubject.next(true);
 
         return response.data;
-      } else {
-        throw new Error('Échec de l\'authentification');
       }
+      throw new Error('Échec de l\'authentification');
     } catch (error: any) {
       console.error('Nom d\'utilisateur ou mot de passe incorrect ❌');
       throw error.response ? error.response.data.message : 'Erreur de connexion';

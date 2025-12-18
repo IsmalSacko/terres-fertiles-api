@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-import axios from 'axios';
 import { environment } from '../../environments/environment';
 import { ApiService } from './api.service';
 export interface Chantier {
