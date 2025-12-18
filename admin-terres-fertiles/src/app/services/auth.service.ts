@@ -46,6 +46,7 @@ export class AuthService {
       if (response.data.auth_token) {
         localStorage.setItem('token', response.data.auth_token);
         console.log('Connexion réussie ! 🎉');
+        console.log('Token sauvegardé dans le localStorage:', response.data.auth_token);
 
         // Récupérer et sauvegarder les informations de l'utilisateur connecté
         try {
