@@ -20,7 +20,8 @@
     <!-- Phase de création initiale (pour un nouveau mélange sans ID encore) -->
     <div *ngIf="isNew && !melange?.id" class="row justify-content-center">
       <div class="col-12 col-lg-8">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
           <div class="mb-3 mb-md-0">
             <h1 class="h2 h3-md mb-1">Créer un nouveau mélange</h1>
             <p class="text-muted mb-0">Informations générales</p>
@@ -39,26 +40,27 @@
               <div class="row">
                 <div class="col-12 col-md-6 mb-3">
                   <label for="nom" class="form-label">Nom du mélange</label>
-                  <input type="text" class="form-control form-control-lg" id="nom" 
-                         formControlName="nom"
-                         placeholder="Nom du mélange">
+                  <input type="text" class="form-control form-control-lg" id="nom" formControlName="nom"
+                    placeholder="Nom du mélange">
                   <small class="text-muted">Le nom sera généré automatiquement si laissé vide</small>
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="fournisseur" class="form-label">Fournisseur *</label>
                   <input type="text" class="form-control form-control-lg" id="fournisseur" formControlName="fournisseur"
-                         [class.is-invalid]="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)">
-                  <div *ngIf="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)"
+                    class="invalid-feedback">
                     Le fournisseur est requis.
                   </div>
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="producteur" class="form-label">Producteur *</label>
                   <input type="text" class="form-control form-control-lg" id="producteur" formControlName="producteur"
-                         [class.is-invalid]="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)">
-                  <div *ngIf="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('producteur')?.invalid && (melangeForm.get('producteur')?.dirty || melangeForm.get('producteur')?.touched)"
+                    class="invalid-feedback">
                     Le producteur est requis.
                   </div>
                 </div>
@@ -76,26 +78,30 @@
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="couverture_vegetale" class="form-label">Couverture végétale</label>
-                  <input type="text" class="form-control form-control-lg" id="couverture_vegetale" formControlName="couverture_vegetale">
+                  <input type="text" class="form-control form-control-lg" id="couverture_vegetale"
+                    formControlName="couverture_vegetale">
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-12 col-md-6 mb-3">
                   <label for="periode_melange" class="form-label">Période de mélange *</label>
-                  <input type="text" class="form-control form-control-lg" id="periode_melange" formControlName="periode_melange"
-                         [class.is-invalid]="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)">
-                  <div *ngIf="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)"
-                       class="invalid-feedback">
+                  <input type="text" class="form-control form-control-lg" id="periode_melange"
+                    formControlName="periode_melange"
+                    [class.is-invalid]="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)"
+                    class="invalid-feedback">
                     La période de mélange est requise.
                   </div>
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="date_semis" class="form-label">Date de semis *</label>
                   <input type="date" class="form-control form-control-lg" id="date_semis" formControlName="date_semis"
-                         [class.is-invalid]="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)">
-                  <div *ngIf="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)"
+                    class="invalid-feedback">
                     La date de semis est requise.
                   </div>
                 </div>
@@ -103,7 +109,8 @@
 
               <div class="mb-3">
                 <label for="references_analyses" class="form-label">Références d'analyses</label>
-                <textarea class="form-control" id="references_analyses" rows="3" formControlName="references_analyses"></textarea>
+                <textarea class="form-control" id="references_analyses" rows="3"
+                  formControlName="references_analyses"></textarea>
               </div>
 
               <div class="mb-3">
@@ -126,13 +133,12 @@
                         <td class="align-middle">{{ getSelectedGisementName(selection.gisementId) }}</td>
                         <td class="align-middle">
                           <input type="number" class="form-control form-control-sm" style="width: 80px;"
-                                 [(ngModel)]="selection.pourcentage"
-                                 min="0" max="100" step="0.01"
-                                 name="pourcentage-{{ selection.gisementId }}">
+                            [(ngModel)]="selection.pourcentage" min="0" max="100" step="0.01"
+                            name="pourcentage-{{ selection.gisementId }}">
                         </td>
                         <td class="align-middle">
                           <button type="button" class="btn btn-sm btn-outline-danger"
-                                  (click)="removeGisementFromSelection(selection.gisementId)">
+                            (click)="removeGisementFromSelection(selection.gisementId)">
                             <i class="bi bi-trash"></i>
                           </button>
                         </td>
@@ -141,15 +147,15 @@
                   </table>
                 </div>
 
-                <div class="alert mt-2"
-                     [class.alert-warning]="getTotalSelectedPercentage() > 100"
-                     [class.alert-info]="getTotalSelectedPercentage() <= 100">
+                <div class="alert mt-2" [class.alert-warning]="getTotalSelectedPercentage() > 100"
+                  [class.alert-info]="getTotalSelectedPercentage() <= 100">
                   <strong>Total : {{ getTotalSelectedPercentage() | number:'1.0-1' }}%</strong>
                   <span *ngIf="getTotalSelectedPercentage() > 100"> ⚠️ Le total dépasse 100%</span>
                 </div>
               </div>
 
-              <button type="button" class="btn btn-primary btn-lg w-100 w-md-auto" (click)="saveMelange()" [disabled]="melangeForm.invalid">
+              <button type="button" class="btn btn-primary btn-lg w-100 w-md-auto" (click)="saveMelange()"
+                [disabled]="melangeForm.invalid">
                 <i class="bi bi-arrow-right-circle"></i> Étape suivante
               </button>
             </form>
@@ -162,32 +168,27 @@
     <div *ngIf="!isNew || melange?.id || melange?.etat" class="row">
       <!-- Header -->
       <div class="col-12 mt-1">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <div
+          class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
           <div class="mb-3 mb-md-0">
             <h1 class="h2 h3-md mb-1 melange-title">{{ getDisplayName() }}</h1>
-            <p class="melange-reference mb-0">{{ melange.reference_produit }}</p>
+            <p class="melange-reference mb-0">{{ melange.nom }}</p>
           </div>
           <div class="d-flex gap-2">
             <!-- Bouton Fiche Technique (visible si workflow terminé) -->
-            <button *ngIf="isWorkflowCompleted()" 
-                    type="button" 
-                    class="btn btn-primary"
-                    (click)="openFicheTechniqueInNewTab()">
-              <i class="bi bi-file-text"></i> 
+            <button *ngIf="isWorkflowCompleted()" type="button" class="btn btn-primary"
+              (click)="openFicheTechniqueInNewTab()">
+              <i class="bi bi-file-text"></i>
               <span class="d-none d-md-inline">Fiche Technique</span>
             </button>
-            
+
             <button type="button" class="btn melange-btn-back" routerLink="/melanges">
               <i class="bi bi-arrow-left"></i> <span class="d-none d-sm-inline">Retour</span>
             </button>
-            
+
             <!-- Bouton pour activer/désactiver le mode d'édition -->
-            <button *ngIf="isWorkflowCompleted()" 
-                    type="button" 
-                    class="btn"
-                    [class.btn-warning]="isEditMode"
-                    [class.btn-success]="!isEditMode"
-                    (click)="isEditMode ? disableEditMode() : enableEditMode()">
+            <button *ngIf="isWorkflowCompleted()" type="button" class="btn" [class.btn-warning]="isEditMode"
+              [class.btn-success]="!isEditMode" (click)="isEditMode ? disableEditMode() : enableEditMode()">
               <i class="bi" [class.bi-pencil]="isEditMode" [class.bi-eye]="!isEditMode"></i>
               <span class="d-none d-sm-inline">{{ isEditMode ? 'Désactiver' : 'Activer' }} l'édition</span>
             </button>
@@ -200,10 +201,11 @@
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Progression du workflow</h5>
-            
+
             <!-- Progress bar -->
             <div class="mb-3">
-              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-2">
+              <div
+                class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-2">
                 <span class="badge bg-{{ getEtatColor(melange.etat!) }} fs-6 mb-2 mb-sm-0">
                   {{ getEtatLabel(melange.etat!) }}
                 </span>
@@ -213,9 +215,9 @@
                 </small>
               </div>
               <div class="progress" style="height: 12px;">
-                <div class="progress-bar bg-{{ getEtatColor(melange.etat!) }}" 
-                     [style.width.%]="melange.etat === 1 ? getTotalSelectedPercentage() : getProgressPercentage(melange.etat!)"
-                     role="progressbar">
+                <div class="progress-bar bg-{{ getEtatColor(melange.etat!) }}"
+                  [style.width.%]="melange.etat === 1 ? getTotalSelectedPercentage() : getProgressPercentage(melange.etat!)"
+                  role="progressbar">
                 </div>
               </div>
             </div>
@@ -227,13 +229,13 @@
             </div>
 
             <!-- Success message when workflow is completed -->
-            <div *ngIf="isWorkflowCompleted()" class="alert alert-success d-flex justify-content-between align-items-center">
+            <div *ngIf="isWorkflowCompleted()"
+              class="alert alert-success d-flex justify-content-between align-items-center">
               <div>
                 <i class="bi bi-check-circle"></i>
                 <strong>Félicitations !</strong> Le workflow est terminé. La fiche technique a été validée avec succès.
               </div>
-              <button type="button" class="btn btn-success btn-sm"
-                      (click)="openFicheTechniqueInNewTab()">
+              <button type="button" class="btn btn-success btn-sm" (click)="openFicheTechniqueInNewTab()">
                 <i class="bi bi-file-text"></i>
                 Voir la Fiche Technique
               </button>
@@ -241,9 +243,8 @@
 
             <!-- Navigation buttons -->
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-outline-secondary" 
-                      [disabled]="melange.etat! <= 1"
-                      (click)="previousStep()">
+              <button type="button" class="btn btn-outline-secondary" [disabled]="melange.etat! <= 1"
+                (click)="previousStep()">
                 <i class="bi bi-chevron-left"></i> Étape précédente
               </button>
               <button type="button" class="btn btn-success btn-lg" (click)="nextStep()">
@@ -266,27 +267,28 @@
               <div class="row">
                 <div class="col-12 col-md-4 mb-3">
                   <label for="nom" class="form-label">Nom du mélange</label>
-                  <input type="text" class="form-control form-control-lg" id="nom" 
-                         formControlName="nom"
-                         placeholder="Automatiquement généré si laissé vide">
+                  <input type="text" class="form-control form-control-lg" id="nom" formControlName="nom"
+                    placeholder="Automatiquement généré si laissé vide">
                   <small class="text-muted">Le nom sera généré automatiquement si laissé vide</small>
                 </div>
                 <div class="col-12 col-md-4 mb-3">
                   <label for="fournisseur" class="form-label">Fournisseur *</label>
                   <input type="text" class="form-control form-control-lg" id="fournisseur" formControlName="fournisseur"
-                         [class.is-invalid]="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)">
-                  <div *ngIf="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('fournisseur')?.invalid && (melangeForm.get('fournisseur')?.dirty || melangeForm.get('fournisseur')?.touched)"
+                    class="invalid-feedback">
                     Le fournisseur est requis.
                   </div>
                 </div>
 
-                  <div class="col-12 col-md-4 mb-3">
+                <div class="col-12 col-md-4 mb-3">
                   <label for="commune" class="form-label">Commune *</label>
                   <input type="text" class="form-control form-control-lg" id="commune" formControlName="commune"
-                         [class.is-invalid]="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)">
-                  <div *ngIf="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('commune')?.invalid && (melangeForm.get('commune')?.dirty || melangeForm.get('commune')?.touched)"
+                    class="invalid-feedback">
                     La commune est requise.
                   </div>
                 </div>
@@ -304,26 +306,30 @@
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="couverture_vegetale" class="form-label">Couverture végétale</label>
-                  <input type="text" class="form-control form-control-lg" id="couverture_vegetale" formControlName="couverture_vegetale">
+                  <input type="text" class="form-control form-control-lg" id="couverture_vegetale"
+                    formControlName="couverture_vegetale">
                 </div>
               </div>
 
               <div class="row">
                 <div class="col-12 col-md-6 mb-3">
                   <label for="periode_melange" class="form-label">Période de mélange *</label>
-                  <input type="text" class="form-control form-control-lg" id="periode_melange" formControlName="periode_melange"
-                         [class.is-invalid]="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)">
-                  <div *ngIf="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)"
-                       class="invalid-feedback">
+                  <input type="text" class="form-control form-control-lg" id="periode_melange"
+                    formControlName="periode_melange"
+                    [class.is-invalid]="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('periode_melange')?.invalid && (melangeForm.get('periode_melange')?.dirty || melangeForm.get('periode_melange')?.touched)"
+                    class="invalid-feedback">
                     La période de mélange est requise.
                   </div>
                 </div>
                 <div class="col-12 col-md-6 mb-3">
                   <label for="date_semis" class="form-label">Date de semis *</label>
                   <input type="date" class="form-control form-control-lg" id="date_semis" formControlName="date_semis"
-                         [class.is-invalid]="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)">
-                  <div *ngIf="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)"
-                       class="invalid-feedback">
+                    [class.is-invalid]="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)">
+                  <div
+                    *ngIf="melangeForm.get('date_semis')?.invalid && (melangeForm.get('date_semis')?.dirty || melangeForm.get('date_semis')?.touched)"
+                    class="invalid-feedback">
                     La date de semis est requise.
                   </div>
                 </div>
@@ -331,14 +337,15 @@
 
               <div class="mb-3">
                 <label for="references_analyses" class="form-label">Références d'analyses</label>
-                <textarea class="form-control" id="references_analyses" rows="3" formControlName="references_analyses"></textarea>
+                <textarea class="form-control" id="references_analyses" rows="3"
+                  formControlName="references_analyses"></textarea>
               </div>
 
               <!-- Affichage du message d'erreur spécifique étape -->
               <div *ngIf="error" class="alert alert-danger mt-2">
                 <i class="bi bi-exclamation-triangle"></i> {{ error }}
               </div>
-              
+
             </form>
           </div>
         </div>
@@ -378,20 +385,23 @@
                       <td>{{ getGisementName(ing.gisement) }}</td>
                       <td>{{ ing.pourcentage | number:'1.2-2' }}</td>
                       <td>
-                        <button type="button" class="btn btn-outline-primary btn-sm me-1" (click)="editIngredient(ing)"><i class="bi bi-pencil"></i></button>
-                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteIngredientByGisement(ing.gisement)"><i class="bi bi-trash"></i></button>
+                        <button type="button" class="btn btn-outline-primary btn-sm me-1"
+                          (click)="editIngredient(ing)"><i class="bi bi-pencil"></i></button>
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                          (click)="deleteIngredientByGisement(ing.gisement)"><i class="bi bi-trash"></i></button>
                       </td>
                     </tr>
                     <!-- Amendements -->
                     <tr *ngFor="let am of melange.amendements" class="row-amendement">
-                      <td >Amendement</td>
+                      <td>Amendement</td>
                       <td>{{ getAmendementName(am.amendementOrganique ?? 0) }}</td>
                       <td>{{ am.pourcentage | number:'1.2-2' }}</td>
                       <td>
                         <button type="button" class="btn btn-outline-primary btn-sm me-1" (click)="editAmendement(am)">
                           <i class="bi bi-pencil"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteAmendement(am)"><i class="bi bi-trash"></i></button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="deleteAmendement(am)"><i
+                            class="bi bi-trash"></i></button>
                       </td>
                     </tr>
                   </tbody>
@@ -399,7 +409,7 @@
               </div>
               <!-- Total des pourcentages -->
               <div class="alert" [class.alert-warning]="getTotalCompositionPercentage() > 100"
-                   [class.alert-info]="getTotalCompositionPercentage() <= 100">
+                [class.alert-info]="getTotalCompositionPercentage() <= 100">
                 <strong>Total: {{ getTotalCompositionPercentage() | number:'1.0-1' }}%</strong>
                 <span *ngIf="getTotalCompositionPercentage() > 100" class="ms-2">
                   ⚠️ Le total dépasse 100%
@@ -418,10 +428,9 @@
                   <div class="row">
                     <div *ngFor="let gisement of availableGisements" class="col-md-6 mb-2">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox" 
-                               [id]="'gisement-' + gisement.id"
-                               [checked]="isGisementSelected(gisement.id)"
-                               (change)="onGisementCheckboxChange(gisement.id, $event)">
+                        <input class="form-check-input" type="checkbox" [id]="'gisement-' + gisement.id"
+                          [checked]="isGisementSelected(gisement.id)"
+                          (change)="onGisementCheckboxChange(gisement.id, $event)">
                         <label class="form-check-label" [for]="'gisement-' + gisement.id">
                           {{ gisement.nom }} ({{ gisement.commune }})
                         </label>
@@ -447,13 +456,12 @@
                           <td>{{ getSelectedGisementName(selection.gisementId) }}</td>
                           <td class="align-middle">
                             <input type="number" class="form-control form-control-sm" style="width: 80px;"
-                                   [(ngModel)]="selection.pourcentage"
-                                   min="0" max="100" step="5"
-                                   name="pourcentage-{{ selection.gisementId }}">
+                              [(ngModel)]="selection.pourcentage" min="0" max="100" step="5"
+                              name="pourcentage-{{ selection.gisementId }}">
                           </td>
                           <td>
-                            <button type="button" class="btn btn-outline-danger btn-sm" 
-                                    (click)="removeGisementFromSelection(selection.gisementId)">
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                              (click)="removeGisementFromSelection(selection.gisementId)">
                               <i class="bi bi-trash"></i>
                             </button>
                           </td>
@@ -461,10 +469,10 @@
                       </tbody>
                     </table>
                   </div>
-                  
+
                   <!-- Total des pourcentages -->
-                  <div class="alert" [class.alert-warning]="getTotalSelectedPercentage() > 100" 
-                       [class.alert-info]="getTotalSelectedPercentage() <= 100">
+                  <div class="alert" [class.alert-warning]="getTotalSelectedPercentage() > 100"
+                    [class.alert-info]="getTotalSelectedPercentage() <= 100">
                     <strong>Total: {{ getTotalSelectedPercentage() | number:'1.0-1' }}%</strong>
                     <span *ngIf="getTotalSelectedPercentage() > 100" class="ms-2">
                       ⚠️ Le total dépasse 100%
@@ -473,9 +481,9 @@
                 </div>
 
                 <div class="d-flex gap-2">
-                  <button type="button" class="btn btn-primary" 
-                          [disabled]="selectedGisements.length === 0 || getTotalSelectedPercentage() > 100"
-                          (click)="saveMultipleIngredients()">
+                  <button type="button" class="btn btn-primary"
+                    [disabled]="selectedGisements.length === 0 || getTotalSelectedPercentage() > 100"
+                    (click)="saveMultipleIngredients()">
                     <i class="bi bi-plus-circle"></i> Ajouter les gisements
                   </button>
                   <button type="button" class="btn btn-secondary" (click)="resetIngredientForm()">
@@ -496,10 +504,9 @@
                   <div class="row">
                     <div *ngFor="let amendement of availableAmendements" class="col-md-6 mb-2">
                       <div class="form-check">
-                        <input class="form-check-input" type="checkbox"
-                               [id]="'amendement-' + amendement.id"
-                               [checked]="isAmendementSelected(amendement.id)"
-                               (change)="onAmendementCheckboxChange(amendement.id, $event)">
+                        <input class="form-check-input" type="checkbox" [id]="'amendement-' + amendement.id"
+                          [checked]="isAmendementSelected(amendement.id)"
+                          (change)="onAmendementCheckboxChange(amendement.id, $event)">
                         <label class="form-check-label" [for]="'amendement-' + amendement.id">
                           {{ amendement.nom }}
                         </label>
@@ -525,13 +532,12 @@
                           <td>{{ getSelectedAmendementName(selection.amendementId) }}</td>
                           <td class="align-middle">
                             <input type="number" class="form-control form-control-sm" style="width: 80px;"
-                                   [(ngModel)]="selection.pourcentage"
-                                   min="0" max="100" step="5"
-                                   name="pourcentage-amendement-{{ selection.amendementId }}">
+                              [(ngModel)]="selection.pourcentage" min="0" max="100" step="5"
+                              name="pourcentage-amendement-{{ selection.amendementId }}">
                           </td>
                           <td>
                             <button type="button" class="btn btn-outline-danger btn-sm"
-                                    (click)="removeAmendementFromSelection(selection.amendementId)">
+                              (click)="removeAmendementFromSelection(selection.amendementId)">
                               <i class="bi bi-trash"></i>
                             </button>
                           </td>
@@ -541,7 +547,7 @@
                   </div>
                   <!-- Total des pourcentages -->
                   <div class="alert" [class.alert-warning]="getTotalSelectedAmendementPercentage() > 100"
-                       [class.alert-info]="getTotalSelectedAmendementPercentage() <= 100">
+                    [class.alert-info]="getTotalSelectedAmendementPercentage() <= 100">
                     <strong>Total : {{ getTotalSelectedAmendementPercentage() | number:'1.0-1' }}%</strong>
                     <span *ngIf="getTotalSelectedAmendementPercentage() > 100"> ⚠️ Le total dépasse 100%</span>
                   </div>
@@ -549,8 +555,8 @@
 
                 <div class="d-flex gap-2">
                   <button type="button" class="btn btn-success"
-                          [disabled]="selectedAmendements.length === 0 || getTotalSelectedAmendementPercentage() > 100"
-                          (click)="saveMultipleAmendements()">
+                    [disabled]="selectedAmendements.length === 0 || getTotalSelectedAmendementPercentage() > 100"
+                    (click)="saveMultipleAmendements()">
                     <i class="bi bi-plus-circle"></i> Ajouter les amendements
                   </button>
                   <button type="button" class="btn btn-secondary" (click)="showAmendementForm = false">Annuler</button>
@@ -570,10 +576,9 @@
               <div class="mb-3">
                 <label for="ordre_conformite_file" class="form-label">Document d'ordre de fabrication</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="ordre_conformite_file" 
-                         accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
-                         (change)="onFileSelected($event, 'ordre_conformite')"
-                         #ordreConformiteFile>
+                  <input type="file" class="form-control" id="ordre_conformite_file"
+                    accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg" (change)="onFileSelected($event, 'ordre_conformite')"
+                    #ordreConformiteFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
@@ -583,13 +588,13 @@
                 <div *ngIf="uploadedFiles['ordre_conformite']" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
                   <strong>Document téléchargé:</strong> {{ uploadedFiles['ordre_conformite'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
-                          (click)="removeFile('ordre_conformite')">
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                    (click)="removeFile('ordre_conformite')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
               </div>
- 
+
             </form>
           </div>
         </div>
@@ -604,10 +609,9 @@
               <div class="mb-3">
                 <label for="consignes_melange_file" class="form-label">Document des consignes de mélange</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="consignes_melange_file" 
-                         accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
-                         (change)="onFileSelected($event, 'consignes_melange')"
-                         #consignesMelangeFile>
+                  <input type="file" class="form-control" id="consignes_melange_file"
+                    accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
+                    (change)="onFileSelected($event, 'consignes_melange')" #consignesMelangeFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
@@ -617,8 +621,8 @@
                 <div *ngIf="uploadedFiles['consignes_melange']" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
                   <strong>Document téléchargé:</strong> {{ uploadedFiles['consignes_melange'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
-                          (click)="removeFile('consignes_melange')">
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                    (click)="removeFile('consignes_melange')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -638,10 +642,9 @@
               <div class="mb-3">
                 <label for="controle_1_file" class="form-label">Rapport de contrôle +1 mois</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_1_file" 
-                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png"
-                         (change)="onFileSelected($event, 'controle_1')"
-                         #controle1File>
+                  <input type="file" class="form-control" id="controle_1_file"
+                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png" (change)="onFileSelected($event, 'controle_1')"
+                    #controle1File>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
@@ -651,8 +654,7 @@
                 <div *ngIf="uploadedFiles['controle_1']" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
                   <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_1'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
-                          (click)="removeFile('controle_1')">
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_1')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -664,14 +666,19 @@
                 <div class="row g-2 align-items-end">
                   <div class="col-md-4">
                     <label for="date_intervention" class="form-label mb-1">Date d'intervention</label>
-                    <input type="date" class="form-control" id="date_intervention" [(ngModel)]="nouvelleIntervention.date" name="date_intervention" [ngModelOptions]="{standalone: true}">
+                    <input type="date" class="form-control" id="date_intervention"
+                      [(ngModel)]="nouvelleIntervention.date" name="date_intervention"
+                      [ngModelOptions]="{standalone: true}">
                   </div>
                   <div class="col-md-6">
                     <label for="objet_intervention" class="form-label mb-1">Objet de l'intervention</label>
-                    <input type="text" class="form-control" id="objet_intervention" [(ngModel)]="nouvelleIntervention.objet" name="objet_intervention" placeholder="Ex : Prélèvement, retournement, etc." [ngModelOptions]="{standalone: true}">
+                    <input type="text" class="form-control" id="objet_intervention"
+                      [(ngModel)]="nouvelleIntervention.objet" name="objet_intervention"
+                      placeholder="Ex : Prélèvement, retournement, etc." [ngModelOptions]="{standalone: true}">
                   </div>
                   <div class="col-md-2">
-                    <button type="button" class="btn btn-primary w-100" (click)="ajouterIntervention()" [disabled]="!nouvelleIntervention.date || !nouvelleIntervention.objet">
+                    <button type="button" class="btn btn-primary w-100" (click)="ajouterIntervention()"
+                      [disabled]="!nouvelleIntervention.date || !nouvelleIntervention.objet">
                       <i class="bi bi-plus-circle"></i> Ajouter
                     </button>
                   </div>
@@ -682,7 +689,8 @@
               <div *ngIf="existingPlannings && existingPlannings.length > 0" class="mb-3">
                 <label class="form-label">Plannings existants pour ce mélange</label>
                 <ul class="list-group">
-                  <li *ngFor="let plan of existingPlannings" class="list-group-item d-flex justify-content-between align-items-center">
+                  <li *ngFor="let plan of existingPlannings"
+                    class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                       <strong>{{ plan.date_debut | date:'dd/MM/yyyy' }}</strong> : {{ plan.titre }}
                     </span>
@@ -694,11 +702,13 @@
               <div *ngIf="interventions && interventions.length > 0" class="mb-3">
                 <label class="form-label">Interventions enregistrées</label>
                 <ul class="list-group">
-                  <li *ngFor="let inter of interventions" class="list-group-item d-flex justify-content-between align-items-center">
+                  <li *ngFor="let inter of interventions"
+                    class="list-group-item d-flex justify-content-between align-items-center">
                     <span>
                       <strong>{{ inter.date | date:'dd/MM/yyyy' }}</strong> : {{ inter.objet }}
                     </span>
-                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="supprimerIntervention(inter)"><i class="bi bi-trash"></i></button>
+                    <button type="button" class="btn btn-sm btn-outline-danger"
+                      (click)="supprimerIntervention(inter)"><i class="bi bi-trash"></i></button>
                   </li>
                 </ul>
               </div>
@@ -707,7 +717,7 @@
           </div>
         </div>
 
-      
+
         <div class="card mb-4" *ngIf="melange.etat === MelangeEtat.CONTROLE_2">
           <div class="card-header">
             <h5 class="card-title mb-0">Établissement de fiche produit</h5>
@@ -717,21 +727,20 @@
               <div class="mb-3">
                 <label for="controle_2_file" class="form-label">Sélectionner la fiche produit</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_2_file" 
-                         accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
-                         (change)="onFileSelected($event, 'controle_2')"
-                         #controle2File>
+                  <input type="file" class="form-control" id="controle_2_file"
+                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png,.jpeg"
+                    (change)="onFileSelected($event, 'controle_2')" #controle2File>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPG, PNG, JPEG (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPG, PNG, JPEG (Max:
+                      10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['controle_2']" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
                   <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_2'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
-                          (click)="removeFile('controle_2')">
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_2')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -752,15 +761,15 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="nom_technique" class="form-label">Nom technique du mélange *</label>
-                  <input type="text" class="form-control" id="nom_technique" 
-                         formControlName="nom"
-                         placeholder="Nom technique du mélange">
+                  <input type="text" class="form-control" id="nom_technique" [value]="referenceTechnique$ | async"
+                    (input)="melangeForm.get('nom')?.setValue($any($event.target).value)"
+                    placeholder="Nom technique du mélange">
                   <small class="text-muted">Le nom technique sera utilisé pour identifier le mélange</small>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="reference_technique" class="form-label">Référence technique</label>
-                  <input type="text" class="form-control" id="reference_technique" 
-                         [value]="melange.reference_produit" readonly>
+                  <input type="text" class="form-control" id="reference_technique" [value]="referenceTechnique$ | async"
+                    readonly>
                   <small class="text-muted">Référence automatiquement générée</small>
                 </div>
               </div>
@@ -768,14 +777,14 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="fournisseur_technique" class="form-label">Fournisseur</label>
-                  <input type="text" class="form-control" id="fournisseur_technique" 
-                         formControlName="fournisseur" readonly>
+                  <input type="text" class="form-control" id="fournisseur_technique" formControlName="fournisseur"
+                    readonly>
                   <small class="text-muted">Fournisseur du mélange</small>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="periode_technique" class="form-label">Période de mélange</label>
-                  <input type="text" class="form-control" id="periode_technique" 
-                         formControlName="periode_melange" readonly>
+                  <input type="text" class="form-control" id="periode_technique" formControlName="periode_melange"
+                    readonly>
                   <small class="text-muted">Période de production du mélange</small>
                 </div>
               </div>
@@ -784,12 +793,11 @@
               <div class="mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                   <label class="form-label">Composition technique ({{ getTotalPercentage() | number:'1.0-1' }}%)</label>
-                  <button type="button" class="btn btn-primary btn-sm" 
-                          (click)="showIngredientForm = true">
+                  <button type="button" class="btn btn-primary btn-sm" (click)="showIngredientForm = true">
                     <i class="bi bi-plus"></i> Ajouter un gisement
                   </button>
                 </div>
-                
+
                 <div class="table-responsive">
                   <table class="table table-sm">
                     <thead>
@@ -805,12 +813,11 @@
                         <td>{{ ingredient.pourcentage }}%</td>
                         <td>
                           <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-outline-primary" 
-                                    (click)="editIngredient(ingredient)">
+                            <button type="button" class="btn btn-outline-primary" (click)="editIngredient(ingredient)">
                               <i class="bi bi-pencil"></i>
                             </button>
-                            <button type="button" class="btn btn-outline-danger" 
-                                    (click)="deleteIngredientByGisement(ingredient.gisement)">
+                            <button type="button" class="btn btn-outline-danger"
+                              (click)="deleteIngredientByGisement(ingredient.gisement)">
                               <i class="bi bi-trash"></i>
                             </button>
                           </div>
@@ -838,10 +845,9 @@
                     <div class="row">
                       <div *ngFor="let gisement of availableGisements" class="col-md-6 mb-2">
                         <div class="form-check">
-                          <input class="form-check-input" type="checkbox" 
-                                 [id]="'gisement-' + gisement.id"
-                                 [checked]="isGisementSelected(gisement.id)"
-                                 (change)="onGisementCheckboxChange(gisement.id, $event)">
+                          <input class="form-check-input" type="checkbox" [id]="'gisement-' + gisement.id"
+                            [checked]="isGisementSelected(gisement.id)"
+                            (change)="onGisementCheckboxChange(gisement.id, $event)">
                           <label class="form-check-label" [for]="'gisement-' + gisement.id">
                             {{ gisement.nom }} ({{ gisement.commune }})
                           </label>
@@ -867,13 +873,12 @@
                             <td>{{ getSelectedGisementName(selection.gisementId) }}</td>
                             <td class="align-middle">
                               <input type="number" class="form-control form-control-sm" style="width: 80px;"
-                                     [(ngModel)]="selection.pourcentage"
-                                     min="0" max="100" step="5"
-                                     name="pourcentage-{{ selection.gisementId }}">
+                                [(ngModel)]="selection.pourcentage" min="0" max="100" step="5"
+                                name="pourcentage-{{ selection.gisementId }}">
                             </td>
                             <td>
-                              <button type="button" class="btn btn-outline-danger btn-sm" 
-                                      (click)="removeGisementFromSelection(selection.gisementId)">
+                              <button type="button" class="btn btn-outline-danger btn-sm"
+                                (click)="removeGisementFromSelection(selection.gisementId)">
                                 <i class="bi bi-trash"></i>
                               </button>
                             </td>
@@ -881,10 +886,10 @@
                         </tbody>
                       </table>
                     </div>
-                    
+
                     <!-- Total des pourcentages -->
-                    <div class="alert" [class.alert-warning]="getTotalSelectedPercentage() > 100" 
-                         [class.alert-info]="getTotalSelectedPercentage() <= 100">
+                    <div class="alert" [class.alert-warning]="getTotalSelectedPercentage() > 100"
+                      [class.alert-info]="getTotalSelectedPercentage() <= 100">
                       <strong>Total: {{ getTotalSelectedPercentage() | number:'1.0-1' }}%</strong>
                       <span *ngIf="getTotalSelectedPercentage() > 100" class="ms-2">
                         ⚠️ Le total dépasse 100%
@@ -893,9 +898,9 @@
                   </div>
 
                   <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" 
-                            [disabled]="selectedGisements.length === 0 || getTotalSelectedPercentage() > 100"
-                            (click)="saveMultipleIngredients()">
+                    <button type="button" class="btn btn-primary"
+                      [disabled]="selectedGisements.length === 0 || getTotalSelectedPercentage() > 100"
+                      (click)="saveMultipleIngredients()">
                       <i class="bi bi-plus-circle"></i> Ajouter les gisements
                     </button>
                     <button type="button" class="btn btn-secondary" (click)="resetIngredientForm()">
@@ -908,14 +913,14 @@
               <div class="mb-3">
                 <label for="normes_conformite" class="form-label">Composition</label>
                 <div *ngIf="melange.ordre_conformite; else noNormesConformite">
-                  <a [href]="getFileUrl(melange.ordre_conformite)" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <a [href]="getFileUrl(melange.ordre_conformite)" target="_blank"
+                    class="btn btn-sm btn-outline-primary">
                     <i class="bi bi-file-pdf"></i> Voir le document
                   </a>
                 </div>
                 <ng-template #noNormesConformite>
-                  <textarea class="form-control" id="normes_conformite" rows="3" 
-                            formControlName="ordre_conformite"
-                            placeholder="Composition du mélange..."></textarea>
+                  <textarea class="form-control" id="normes_conformite" rows="3" formControlName="ordre_conformite"
+                    placeholder="Composition du mélange..."></textarea>
                 </ng-template>
               </div>
 
@@ -923,14 +928,14 @@
                 <div class="col-md-6 mb-3">
                   <label for="conditions_utilisation" class="form-label">Ordre fabrication</label>
                   <div *ngIf="melange.consignes_melange; else noConditionsUtilisation">
-                    <a [href]="getFileUrl(melange.consignes_melange)" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <a [href]="getFileUrl(melange.consignes_melange)" target="_blank"
+                      class="btn btn-sm btn-outline-primary">
                       <i class="bi bi-file-word"></i> Voir le document
                     </a>
                   </div>
                   <ng-template #noConditionsUtilisation>
-                    <textarea class="form-control" id="conditions_utilisation" rows="3" 
-                              formControlName="consignes_melange"
-                              placeholder="Ordre de fabrication..."></textarea>
+                    <textarea class="form-control" id="conditions_utilisation" rows="3"
+                      formControlName="consignes_melange" placeholder="Ordre de fabrication..."></textarea>
                   </ng-template>
                 </div>
               </div>
@@ -944,43 +949,43 @@
                     </a>
                   </div>
                   <ng-template #noControle1>
-                    <textarea class="form-control" id="controle_qualite_1" rows="3" 
-                              formControlName="controle_1"
-                              placeholder="Consignes de brassage et stockage..."></textarea>
+                    <textarea class="form-control" id="controle_qualite_1" rows="3" formControlName="controle_1"
+                      placeholder="Consignes de brassage et stockage..."></textarea>
                   </ng-template>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <label for="controle_qualite_2" class="form-label">Suivi des étapes de stockage et maturation (de 30 jours à 8 mois)</label>
+                  <label for="controle_qualite_2" class="form-label">Suivi des étapes de stockage et maturation (de 30
+                    jours à 8 mois)</label>
                   <div *ngIf="melange.controle_2; else noControle2">
                     <a [href]="getFileUrl(melange.controle_2)" target="_blank" class="btn btn-sm btn-outline-primary">
                       <i class="bi bi-file-excel"></i> Voir le document
                     </a>
                   </div>
                   <ng-template #noControle2>
-                    <textarea class="form-control" id="controle_qualite_2" rows="3" 
-                              formControlName="controle_2"
-                              placeholder="Suivi des étapes de stockage et maturation..."></textarea>
+                    <textarea class="form-control" id="controle_qualite_2" rows="3" formControlName="controle_2"
+                      placeholder="Suivi des étapes de stockage et maturation..."></textarea>
                   </ng-template>
                 </div>
               </div>
 
               <div class="alert alert-info">
                 <i class="bi bi-info-circle"></i>
-                <strong>Validation finale :</strong> Cette fiche technique sera utilisée comme document de référence pour la production et la commercialisation du mélange.
+                <strong>Validation finale :</strong> Cette fiche technique sera utilisée comme document de référence
+                pour la production et la commercialisation du mélange.
               </div>
 
               <div class="alert alert-success">
                 <i class="bi bi-check-circle"></i>
-                <strong>Dernière étape du workflow :</strong> Une fois validée, cette fiche technique marquera la fin du processus de création du mélange.
+                <strong>Dernière étape du workflow :</strong> Une fois validée, cette fiche technique marquera la fin du
+                processus de création du mélange.
               </div>
 
               <div class="mb-3">
                 <label for="fiche_technique_file" class="form-label">Fiche technique finale</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="fiche_technique_file" 
-                         accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
-                         (change)="onFileSelected($event, 'fiche_technique')"
-                         #ficheTechniqueFile>
+                  <input type="file" class="form-control" id="fiche_technique_file"
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg" (change)="onFileSelected($event, 'fiche_technique')"
+                    #ficheTechniqueFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre fiche technique ici ou cliquez pour sélectionner</p>
@@ -990,16 +995,15 @@
                 <div *ngIf="uploadedFiles['fiche_technique']" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
                   <strong>Fiche technique téléchargée:</strong> {{ uploadedFiles['fiche_technique'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" 
-                          (click)="removeFile('fiche_technique')">
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
+                    (click)="removeFile('fiche_technique')">
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
               </div>
 
               <div class="text-end">
-                <button type="button" class="btn btn-success" 
-                        (click)="saveAndNextStep(); onValiderFicheTechnique()">
+                <button type="button" class="btn btn-success" (click)="saveAndNextStep(); onValiderFicheTechnique()">
                   <i class="bi bi-check-circle"></i> Valider la fiche technique
                 </button>
               </div>
@@ -1022,27 +1026,25 @@
                   Félicitations ! La fiche technique a été générée avec succès
                 </h5>
                 <p class="text-muted mb-4">
-                  Votre mélange <strong>{{ melange.nom || 'MEL-25-PHV-PTP-M01' }}</strong> 
+                  Votre mélange <strong>{{ melange.nom || 'MEL-25-PHV-PTP-M01' }}</strong>
                   est maintenant prêt avec sa fiche technique complète.
                 </p>
-                
+
                 <!-- Boutons d'action -->
                 <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
                   <!-- Bouton principal - Voir la fiche technique -->
-                  <button type="button" class="btn btn-success btn-lg px-4"
-                          (click)="openFicheTechniqueInNewTab()">
+                  <button type="button" class="btn btn-success btn-lg px-4" (click)="openFicheTechniqueInNewTab()">
                     <i class="bi bi-file-text"></i>
                     Voir la Fiche Technique Complète
                   </button>
-                  
+
                   <!-- Bouton secondaire - Télécharger PDF -->
                   <button type="button" class="btn btn-outline-primary btn-lg px-4"
-                          (click)="downloadFicheTechniquePdf()"
-                          title="Génère un PDF via l'impression du navigateur">
+                    (click)="downloadFicheTechniquePdf()" title="Génère un PDF via l'impression du navigateur">
                     <i class="bi bi-file-pdf"></i>
                     Générer PDF
                   </button>
-                  
+
                   <!-- Bouton tertiaire - Retour à la liste -->
                   <a routerLink="/melanges" class="btn btn-outline-secondary px-4">
                     <i class="bi bi-arrow-left"></i>
@@ -1055,7 +1057,7 @@
                   <div class="row text-center">
                     <div class="col-md-4">
                       <small class="text-muted d-block">Référence</small>
-                      <span class="fw-bold">{{ melange.reference_produit || 'MEL-25-PHV-PTP-M01' }}</span>
+                      <span class="fw-bold">{{ melange.nom || melange.reference_produit }}</span>
                     </div>
                     <div class="col-md-4">
                       <small class="text-muted d-block">Statut</small>
@@ -1086,21 +1088,22 @@
               <dd class="col-sm-8">{{ melange.reference_produit }}</dd>
               <dt class="col-sm-4">Responsable</dt>
               <dd class="col-sm-8">{{ melange.nom_complet }}</dd>
-              
+
               <dt class="col-sm-4">Plateforme</dt>
               <dd class="col-sm-8">{{ getPlateformeName(melange.plateforme) }}</dd>
-              
+
               <dt class="col-sm-4">Fournisseur</dt>
               <dd class="col-sm-8">{{ melange.fournisseur }}</dd>
-              
+
               <dt class="col-sm-4">Période</dt>
               <dd class="col-sm-8">{{ melange.periode_melange }}</dd>
-              
+
               <dt class="col-sm-4">Date semis</dt>
               <dd class="col-sm-8">{{ melange.date_semis | date:'dd/MM/yyyy' }}</dd>
-              
+
               <dt class="col-sm-4">Ingrédients</dt>
-              <dd class="col-sm-8">{{ melange.ingredients.length || 0 }} gisements, {{ melange.amendements.length || 0 }} Amendements</dd>
+              <dd class="col-sm-8">{{ melange.ingredients.length || 0 }} gisements, {{ melange.amendements.length || 0
+                }} Amendements</dd>
               <dt class="col-sm-4">Total</dt>
               <dd class="col-sm-8">{{ getTotalCompositionPercentage() | number:'1.0-1' }}%</dd>
             </dl>
@@ -1114,19 +1117,18 @@
           </div>
           <div class="card-body p-0">
             <div class="list-group list-group-flush">
-              <div class="list-group-item d-flex justify-content-between align-items-center" 
-                   *ngFor="let etat of [1,2,3,4,5,6]"
-                   [class.active]="melange.etat === etat"
-                   [class.list-group-item-success]="melange.etat! > etat">
+              <div class="list-group-item d-flex justify-content-between align-items-center"
+                *ngFor="let etat of [1,2,3,4,5,6]" [class.active]="melange.etat === etat"
+                [class.list-group-item-success]="melange.etat! > etat">
                 <div>
                   <strong class="fs-6">{{ getEtatLabel(etat) }}</strong>
                   <br>
                   <small class="text-muted">{{ getTacheActuelle(etat) }}</small>
                 </div>
-                <span class="badge bg-{{ melange.etat! > etat ? 'success' : (melange.etat === etat ? getEtatColor(etat) : 'secondary') }} fs-6">
-                  <i class="bi" [class.bi-check-circle]="melange.etat! > etat" 
-                     [class.bi-circle]="melange.etat! < etat"
-                     [class.bi-arrow-right-circle]="melange.etat === etat"></i>
+                <span
+                  class="badge bg-{{ melange.etat! > etat ? 'success' : (melange.etat === etat ? getEtatColor(etat) : 'secondary') }} fs-6">
+                  <i class="bi" [class.bi-check-circle]="melange.etat! > etat" [class.bi-circle]="melange.etat! < etat"
+                    [class.bi-arrow-right-circle]="melange.etat === etat"></i>
                 </span>
               </div>
             </div>
@@ -1135,15 +1137,11 @@
       </div>
     </div>
     @if (melange!.etat !== MelangeEtat.VALIDATION) {
-      <div class="d-flex gap-2 justify-content-end mt-2 mb-4">
-      <button type="button" class="btn btn-success btn-lg w-100 w-md-auto" 
-          (click)="saveAndNextStep()">
+    <div class="d-flex gap-2 justify-content-end mt-2 mb-4">
+      <button type="button" class="btn btn-success btn-lg w-100 w-md-auto" (click)="saveAndNextStep()">
         <i class="bi bi-arrow-right-circle"></i> Étape suivante
       </button>
-      </div>
+    </div>
     }
   </div>
 </div>
-
-
-

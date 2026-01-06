@@ -27,109 +27,104 @@
     <div class="row g-4">
       <div *ngFor="let melange of melanges" class="col-12 col-md-6 col-lg-4 col-xl-3">
 
-      <div class="card h-100">
-        <div class="card-header">
-          <div class="d-flex justify-content-between align-items-start">
-            <h5 class="card-title">{{ melange.nom || 'Mélange sans nom' }}</h5>
-            <span class="badge bg-{{ getEtatColor(melange.etat) }}">
-              {{ getEtatLabelShort(melange.etat) }}
-            </span>
-          </div>
-        </div>
-        
-        <div class="card-body">
-          <div class="mb-3">
-            <div class="text-muted small mb-1">Référence</div>
-            <div class="fw-medium">{{ melange.reference_produit }}</div>
-          </div>
-          
-          <div class="mb-3">
-            <div class="text-muted small mb-1">Fournisseur</div>
-            <div>{{ melange.fournisseur }}</div>
-          </div>
-          
-          <div class="mb-3">
-            <div class="text-muted small mb-1">Période</div>
-            <div>{{ melange.periode_melange }}</div>
-          </div>
-          
-          <div class="mb-3">
-            <div class="text-muted small mb-1">
-              <i class="bi bi-calendar3 me-1"></i>Créé le
+        <div class="card h-100">
+          <div class="card-header">
+            <div class="d-flex justify-content-between align-items-start">
+              <h5 class="card-title">{{ melange.nom || 'Mélange sans nom' }}</h5>
+              <span class="badge bg-{{ getEtatColor(melange.etat) }}">
+                {{ getEtatLabelShort(melange.etat) }}
+              </span>
             </div>
-            <div>{{ melange.date_creation | date:'dd/MM/yyyy' }}</div>
-          </div>
-            
-          <div class="mb-3">
-            <div class="text-muted small mb-1">
-              <i class="bi bi-person me-1"></i>Créé par
-            </div>
-            <div>{{ melange.utilisateur }}</div>
           </div>
 
-          <!-- Progress bar -->
-          <div class="mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <span class="text-muted small p-2">Progression</span>
-              <span class="small fw-medium">{{ getProgressPercentageFormatted(melange) }}</span>
+          <div class="card-body">
+            <div class="mb-3">
+              <div class="text-muted small mb-1">Référence</div>
+              <div class="fw-medium">{{ melange.nom }}</div>
             </div>
-            <div class="progress melange-progress">
-              <div class="progress-bar melange-progress-bar" 
-                   [style.width.%]="getProgressPercentage(melange)"
-                   role="progressbar"
-                   [attr.aria-valuenow]="getProgressPercentage(melange)"
-                   aria-valuemin="0"
-                   aria-valuemax="100">
+
+            <div class="mb-3">
+              <div class="text-muted small mb-1">Fournisseur</div>
+              <div>{{ melange.fournisseur }}</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-muted small mb-1">Période</div>
+              <div>{{ melange.periode_melange }}</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-muted small mb-1">
+                <i class="bi bi-calendar3 me-1"></i>Créé le
+              </div>
+              <div>{{ melange.date_creation | date:'dd/MM/yyyy' }}</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-muted small mb-1">
+                <i class="bi bi-person me-1"></i>Créé par
+              </div>
+              <div>{{ melange.utilisateur }}</div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small p-2">Progression</span>
+                <span class="small fw-medium">{{ getProgressPercentageFormatted(melange) }}</span>
+              </div>
+              <div class="progress melange-progress">
+                <div class="progress-bar melange-progress-bar" [style.width.%]="getProgressPercentage(melange)"
+                  role="progressbar" [attr.aria-valuenow]="getProgressPercentage(melange)" aria-valuemin="0"
+                  aria-valuemax="100">
+                </div>
+              </div>
+            </div>
+
+            <!-- Current task -->
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle me-2"></i>
+              <span class="small">{{ getTacheActuelle(melange.etat) }}</span>
+            </div>
+
+            <!-- Ingredients summary -->
+            <div class="mb-3">
+              <div class="text-muted small mb-2">Ingrédients</div>
+              <div class="d-flex flex-wrap gap-1">
+                <span class="badge gis-amendement">
+                  {{ melange.ingredients.length || 0 }}
+                  {{ melange.ingredients.length > 1 ? 'gisements' : 'gisement' }}
+                </span>
+                <span class="badge gis-amendement">
+                  {{ melange.amendements.length || 0 }}
+                  {{ melange.amendements.length > 1 ? 'Matières organiques' : 'Matière organique' }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Current task -->
-          <div class="alert alert-info">
-            <i class="bi bi-info-circle me-2"></i>
-            <span class="small">{{ getTacheActuelle(melange.etat) }}</span>
-          </div>
+          <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+              <a [routerLink]="['/melanges', melange.id]" class="btn mel-btn btn-sm">
+                <i class="bi bi-eye"></i> détails
+              </a>
+              <button type="button" class="btn mel-btn btn-sm bg-danger" (click)="deleteMelange(melange.id)">
+                <i class="bi bi-trash"></i> Supprimer
+              </button>
 
-          <!-- Ingredients summary -->
-          <div class="mb-3">
-            <div class="text-muted small mb-2">Ingrédients</div>
-            <div class="d-flex flex-wrap gap-1">
-              <span class="badge gis-amendement">
-                {{ melange.ingredients.length || 0 }} 
-                {{ melange.ingredients.length > 1 ? 'gisements' : 'gisement' }}
-              </span>
-              <span class="badge gis-amendement">
-                {{ melange.amendements.length || 0 }}
-                {{ melange.amendements.length > 1 ? 'Matières organiques' : 'Matière organique' }}
-              </span>
+              <div class="btn-group" role="group">
+                <button type="button" class="btn mel-btn btn-sm" [disabled]="melange.etat === 1"
+                  (click)="previousStep(melange)">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" style="margin-left: 3px !important;" class="btn mel-btn btn-sm"
+                  [disabled]="melange.etat === 6" (click)="nextStep(melange)">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="card-footer">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <a  [routerLink]="['/melanges', melange.id]" class="btn mel-btn btn-sm">
-                      <i class="bi bi-eye"></i> détails
-                    </a>
-                    <button type="button" class="btn mel-btn btn-sm bg-danger" (click)="deleteMelange(melange.id)">
-                      <i class="bi bi-trash"></i> Supprimer
-                    </button>
-
-            <div class="btn-group" role="group">
-              <button type="button" class="btn mel-btn btn-sm" 
-                      [disabled]="melange.etat === 1"
-                      (click)="previousStep(melange)">
-                <i class="bi bi-chevron-left"></i>
-              </button>
-              <button type="button" style="margin-left: 3px !important;" class="btn mel-btn btn-sm"
-                      [disabled]="melange.etat === 6"
-                      (click)="nextStep(melange)">
-                <i class="bi bi-chevron-right"></i> 
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
       </div>
     </div>
   </div>

@@ -9,6 +9,8 @@ import { GisementService, Gisement } from '../../../services/gisement.service';
 import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { AuthService } from '../../../services/auth.service';
 import { PlanningService } from '../../../services/planning/planning.service';
+import { Observable, of, Subscription } from 'rxjs';
+import { startWith, map } from 'rxjs/operators';
 
 
 
@@ -37,7 +39,7 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   interventions: Intervention[] = [];
   nouvelleIntervention: Intervention = { date: '', objet: '' };
 
-constructor(
+  constructor(
     private melangeService: MelangeService,
     private gisementService: GisementService,
     private chantierService: ChantierService,
@@ -45,7 +47,7 @@ constructor(
     private planningService: PlanningService,
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
   ) {
     this.melangeForm = this.fb.group({
       nom: [''],
@@ -75,7 +77,7 @@ constructor(
 
     // Système de sauvegarde automatique supprimé
   }
- async ngOnInit(): Promise<void> {
+  async ngOnInit(): Promise<void> {
     this.getMelangeByHttpClient();
     await this.loadData();
     await this.loadExistingPlannings();
@@ -85,7 +87,22 @@ constructor(
       console.error('Erreur lors du chargement des amendements organiques:', e);
       this.availableAmendements = [];
     }
-    
+
+    // Setup live binding for reference technique: follow the 'nom' form control as user types
+    const nomCtrl = this.melangeForm.get('nom');
+    if (nomCtrl) {
+      this.referenceTechnique$ = nomCtrl.valueChanges.pipe(
+        startWith(nomCtrl.value || this.melange?.nom || ''),
+        map(v => v || this.melange?.nom || '')
+      );
+      // Synchroniser aussi la propriété `melange.nom` pour que toutes les références
+      // (par ex. affichages qui lisent `melange.nom`) se mettent à jour en direct.
+      const sub = nomCtrl.valueChanges.subscribe(v => {
+        this.melange.nom = v || '';
+      });
+      this._subscriptions.push(sub);
+    }
+
     // Chargement des brouillons supprimé
   }
 
@@ -131,11 +148,11 @@ constructor(
   }
   // Expose enum values to template
   MelangeEtat = MelangeEtat;
-  
+
   melange: Melange = {
     nom: '',
-    utilisateur:'',
-    nom_complet:'',
+    utilisateur: '',
+    nom_complet: '',
     date_creation: new Date().toISOString().split('T')[0],
     reference_produit: '',
     plateforme: null,
@@ -187,12 +204,16 @@ constructor(
   // Propriété pour contrôler le mode d'édition
   isEditMode = true;
 
+  // Observable pour suivre en direct le nom du mélange et l'afficher comme référence technique
+  referenceTechnique$: Observable<string> = of('');
+  private _subscriptions: Subscription[] = [];
+
   // Liste des amendements organiques disponibles (chargée dynamiquement)
   availableAmendements: { id: number, nom: string }[] = [];
 
   editingAmendement: any = null;
 
-  
+
 
   // === SYSTÈME DE BROUILLONS SUPPRIMÉ ===
   // Le système de sauvegarde automatique des brouillons a été complètement supprimé
@@ -208,7 +229,7 @@ constructor(
     });
   }
 
- 
+
   public getFicheTechniqueUrl(): string {
     // Pour l'instant, ouvrir dans une nouvelle fenêtre avec le contenu HTML
     const content = this.generateFicheTechniqueForPdf();
@@ -225,8 +246,8 @@ constructor(
     }
   }
 
-  getMelangeByHttpClient(){
-  this.melangeService.asyncgetMelangeByHttpClient().subscribe(data => {   
+  getMelangeByHttpClient() {
+    this.melangeService.asyncgetMelangeByHttpClient().subscribe(data => {
       console.log('Données récupérées par HttpClient:', data);
       this.mlgs = data;
     });
@@ -251,7 +272,7 @@ constructor(
         setTimeout(() => {
           printWindow.focus();
           printWindow.print();
-          
+
           // Instructions pour l'utilisateur
           setTimeout(() => {
             if (confirm('PDF généré avec succès!\n\nPour sauvegarder:\n1. Cliquez sur "Enregistrer au format PDF" dans la boîte de dialogue d\'impression\n2. Choisissez votre dossier de destination\n\nVoulez-vous fermer cette fenêtre ?')) {
@@ -685,7 +706,7 @@ constructor(
     `;
   }
 
- 
+
 
   // Charger les plannings existants pour ce mélange
   async loadExistingPlannings(): Promise<void> {
@@ -759,7 +780,7 @@ constructor(
       console.log('Chargement de l\'utilisateur connecté...');
       const userResponse = await this.authService.getCurrentUser();
       console.log('Réponse API utilisateur:', userResponse);
-      
+
       // L'API retourne un tableau, prendre le premier utilisateur
       if (Array.isArray(userResponse) && userResponse.length > 0) {
         this.currentUser = userResponse[0];
@@ -800,7 +821,7 @@ constructor(
 
   async loadMelange(id: number): Promise<void> {
     this.melange = await this.melangeService.getById(id);
-    
+
     this.updateAvailableGisements();
     this.patchForm();
   }
@@ -827,11 +848,11 @@ constructor(
       fiche_technique: null,
       ingredients: [],
       gisements: [],
-      amendements:  []
+      amendements: []
     };
-    
+
     // Restauration de brouillon supprimée
-    
+
     this.updateAvailableGisements();
     this.patchForm();
   }
@@ -923,50 +944,50 @@ constructor(
   generateFicheTechnique(): string {
     const formData = this.melangeForm.value;
     let ficheTechnique = '';
-    
+
     // Ajouter les spécifications techniques (étape 6) - seulement si c'est du nouveau contenu
     if (formData.fiche_technique && formData.fiche_technique.trim() !== '') {
       // Vérifier que ce n'est pas déjà le résumé complet
-      if (!formData.fiche_technique.includes('SPÉCIFICATIONS TECHNIQUES:') && 
-          !formData.fiche_technique.includes('NORMES DE CONFORMITÉ:') &&
-          !formData.fiche_technique.includes('CONDITIONS D\'UTILISATION:') &&
-          !formData.fiche_technique.includes('CONTRÔLE QUALITÉ')) {
+      if (!formData.fiche_technique.includes('SPÉCIFICATIONS TECHNIQUES:') &&
+        !formData.fiche_technique.includes('NORMES DE CONFORMITÉ:') &&
+        !formData.fiche_technique.includes('CONDITIONS D\'UTILISATION:') &&
+        !formData.fiche_technique.includes('CONTRÔLE QUALITÉ')) {
         ficheTechnique += `SPÉCIFICATIONS TECHNIQUES:\n${formData.fiche_technique}\n\n`;
       }
     }
-    
+
     // Ajouter les normes de conformité (étape 2)
     if (formData.ordre_conformite && formData.ordre_conformite.trim() !== '') {
       ficheTechnique += `NORMES DE CONFORMITÉ:\n${formData.ordre_conformite}\n\n`;
     }
-    
+
     // Ajouter les conditions d'utilisation (étape 3)
     if (formData.consignes_melange && formData.consignes_melange.trim() !== '') {
       ficheTechnique += `CONDITIONS D'UTILISATION:\n${formData.consignes_melange}\n\n`;
     }
-    
+
     // Ajouter les contrôles qualité (étapes 4 et 5)
     if (formData.controle_1 && formData.controle_1.trim() !== '') {
       ficheTechnique += `CONTRÔLE QUALITÉ +1 à 8MOIS:\n${formData.controle_1}\n\n`;
     }
-    
+
     if (formData.controle_2 && formData.controle_2.trim() !== '') {
       ficheTechnique += `CONTRÔLE QUALITÉ Établissement de la fiche produit:\n${formData.controle_2}\n\n`;
     }
-    
+
     // Ajouter la conclusion (étape 6 finale) - seulement le contenu de conclusion, pas le résumé complet
     const conclusionElement = document.getElementById('conclusion_validation') as HTMLTextAreaElement;
     if (conclusionElement && conclusionElement.value.trim() !== '') {
       // Vérifier que le contenu de conclusion ne contient pas déjà le résumé complet
       const conclusionValue = conclusionElement.value.trim();
-      if (!conclusionValue.includes('SPÉCIFICATIONS TECHNIQUES:') && 
-          !conclusionValue.includes('NORMES DE CONFORMITÉ:') &&
-          !conclusionValue.includes('CONDITIONS D\'UTILISATION:') &&
-          !conclusionValue.includes('CONTRÔLE QUALITÉ')) {
+      if (!conclusionValue.includes('SPÉCIFICATIONS TECHNIQUES:') &&
+        !conclusionValue.includes('NORMES DE CONFORMITÉ:') &&
+        !conclusionValue.includes('CONDITIONS D\'UTILISATION:') &&
+        !conclusionValue.includes('CONTRÔLE QUALITÉ')) {
         ficheTechnique += `CONCLUSION ET VALIDATION:\n${conclusionValue}\n\n`;
       }
     }
-    
+
     return ficheTechnique.trim();
   }
 
@@ -1010,7 +1031,7 @@ constructor(
     if (formName && formName.trim() !== '') {
       return formName.trim();
     }
-    
+
     // Sinon utiliser le nom du mélange
     return this.melange?.nom || 'Mélange sans nom';
   }
@@ -1095,20 +1116,20 @@ constructor(
 
       const formData = this.melangeForm.value;
       console.log('Données du formulaire à sauvegarder:', formData);
-      
+
       // Vérifier que les champs requis ne sont pas vides
       if (!formData.fournisseur || formData.fournisseur.trim() === '') {
         console.error('Le fournisseur est requis');
         this.error = 'Le fournisseur est requis';
         return;
       }
-      
+
       if (!formData.periode_melange || formData.periode_melange.trim() === '') {
         console.error('La période de mélange est requise');
         this.error = 'La période de mélange est requise';
         return;
       }
-      
+
       if (!formData.date_semis) {
         console.error('La date de semis est requise');
         this.error = 'La date de semis est requise';
@@ -1129,7 +1150,7 @@ constructor(
       // Pour les mélanges existants, ne pas envoyer les champs vides
       if (this.melange.id) {
         melangeData = {};
-        
+
         // Ajouter seulement les champs non vides
         if (formData.nom && formData.nom.trim() !== '') {
           melangeData.nom = formData.nom;
@@ -1171,7 +1192,7 @@ constructor(
           references_analyses: formData.references_analyses || null,
           ingredients: this.melange.ingredients || [] // Toujours inclure ingredients, même vide
         };
-        
+
         // Ajouter le nom seulement s'il a été explicitement saisi par l'utilisateur
         if (formData.nom && formData.nom.trim() !== '') {
           melangeData.nom = formData.nom.trim();
@@ -1194,23 +1215,23 @@ constructor(
         console.log('Mélange créé avec succès:', this.melange);
         console.log('État du mélange créé:', this.melange.etat);
         console.log('ID du mélange créé:', this.melange.id);
-        
+
         // Rediriger vers la page de détail du mélange créé
         if (this.melange.id) {
-        this.router.navigate(['/melanges', this.melange.id]);
+          this.router.navigate(['/melanges', this.melange.id]);
         }
       } else {
         // Mettre à jour un mélange existant
         if (this.melange.id) {
-        console.log('Mise à jour du mélange:', this.melange.id, melangeData);
-        this.melange = await this.melangeService.update(this.melange.id, melangeData);
-        console.log('Mélange mis à jour avec succès:', this.melange);
-        console.log('État du mélange mis à jour:', this.melange.etat);
+          console.log('Mise à jour du mélange:', this.melange.id, melangeData);
+          this.melange = await this.melangeService.update(this.melange.id, melangeData);
+          console.log('Mélange mis à jour avec succès:', this.melange);
+          console.log('État du mélange mis à jour:', this.melange.etat);
         }
       }
-      
+
       // Sauvegarde réussie
-      
+
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
       this.error = 'Erreur lors de la sauvegarde du mélange';
@@ -1219,7 +1240,7 @@ constructor(
 
   async saveCurrentStepData(): Promise<any> {
     const updateData: any = {};
-    
+
     // Traiter les fichiers uploadés selon l'étape actuelle
     switch (this.melange.etat) {
       case MelangeEtat.CONFORMITE:
@@ -1228,28 +1249,28 @@ constructor(
           updateData.ordre_conformite = this.uploadedFiles['ordre_conformite'];
         }
         break;
-        
+
       case MelangeEtat.CONSIGNE:
         if (this.uploadedFiles['consignes_melange']) {
           // Envoyer le fichier directement au backend Django
           updateData.consignes_melange = this.uploadedFiles['consignes_melange'];
         }
         break;
-        
+
       case MelangeEtat.CONTROLE_1:
         if (this.uploadedFiles['controle_1']) {
           // Envoyer le fichier directement au backend Django
           updateData.controle_1 = this.uploadedFiles['controle_1'];
         }
         break;
-        
+
       case MelangeEtat.CONTROLE_2:
         if (this.uploadedFiles['controle_2']) {
           // Envoyer le fichier directement au backend Django
           updateData.controle_2 = this.uploadedFiles['controle_2'];
         }
         break;
-        
+
       case MelangeEtat.VALIDATION:
         // Pour l'étape de validation, on traite fiche_technique comme un fichier uploadé
         if (this.uploadedFiles['fiche_technique']) {
@@ -1258,14 +1279,14 @@ constructor(
         }
         break;
     }
-    
+
     return updateData;
   }
 
   async saveAndNextStep(): Promise<void> {
     try {
       // Sauvegarde et passage à l'étape suivante
-      
+
       // --- CONTRÔLE FICHIER REQUIS PAR ÉTAPE ---
       let docField = '';
       let docLabel = '';
@@ -1408,27 +1429,27 @@ constructor(
       console.error('ID d\'ingrédient invalide:', ingredientId);
       return;
     }
-    
+
     if (!this.melange?.id) {
       console.error('Aucun mélange chargé');
       return;
     }
-    
+
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet ingrédient ?')) return;
-    
+
     try {
       // Supprimer l'ingrédient de la liste locale
       const updatedIngredients = this.melange.ingredients.filter(
         ing => ing.id !== ingredientId
       );
-      
+
       // Mettre à jour le mélange via l'API
       await this.melangeService.patch(this.melange.id, {
         ingredients: updatedIngredients
       });
-      
+
       // Recharger le mélange pour avoir les données à jour
-        await this.loadMelange(this.melange.id);
+      await this.loadMelange(this.melange.id);
     } catch (err) {
       console.error('Erreur lors de la suppression:', err);
     }
@@ -1474,20 +1495,20 @@ constructor(
 
   async saveMultipleIngredients(): Promise<void> {
     if (this.selectedGisements.length === 0) return;
-    
+
     try {
       // Convertir selectedGisements en format ingredients
       const ingredients: MelangeIngredientInput[] = this.selectedGisements.map(selection => ({
-          gisement: selection.gisementId,
-          pourcentage: selection.pourcentage
+        gisement: selection.gisementId,
+        pourcentage: selection.pourcentage
       }));
-      
+
       if (this.melange?.id) {
         // Pour un mélange existant, utiliser l'API
         await this.melangeService.patch(this.melange.id, {
           ingredients: ingredients
         } as any);
-        
+
         await this.loadMelange(this.melange.id);
       } else {
         // Pour un nouveau mélange, ajouter localement
@@ -1495,7 +1516,7 @@ constructor(
         this.melange.ingredients = [...(this.melange.ingredients || []), ...ingredients] as any;
         this.updateAvailableGisements();
       }
-      
+
       this.selectedGisements = [];
       this.showIngredientForm = false;
     } catch (err) {
@@ -1594,7 +1615,7 @@ constructor(
   // Méthode pour activer/désactiver les contrôles de formulaire
   updateFormControlsState(): void {
     const shouldDisable = this.isFormDisabled();
-    
+
     if (shouldDisable) {
       this.melangeForm.disable();
     } else {
@@ -1606,7 +1627,7 @@ constructor(
   onFileSelected(event: Event, fieldName: string): void {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    
+
     if (file) {
       // Validation du fichier
       const error = this.validateFile(file);
@@ -1615,13 +1636,13 @@ constructor(
         target.value = '';
         return;
       }
-      
+
       // Supprimer l'erreur précédente
       delete this.fileErrors[fieldName];
-      
+
       // Ajouter le fichier
       this.uploadedFiles[fieldName] = file;
-      
+
       console.log(`Fichier sélectionné pour ${fieldName}:`, file.name);
     }
   }
@@ -1640,22 +1661,22 @@ constructor(
       'image/png',
       'image/gif'
     ];
-    
+
     if (file.size > maxSize) {
       return 'Le fichier est trop volumineux. Taille maximale: 10MB';
     }
-    
+
     if (!allowedTypes.includes(file.type)) {
       return 'Type de fichier non autorisé. Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPEG, PNG, GIF';
     }
-    
+
     return null;
   }
 
   removeFile(fieldName: string): void {
     delete this.uploadedFiles[fieldName];
     delete this.fileErrors[fieldName];
-    
+
     // Réinitialiser l'input file
     const fileInput = document.getElementById(`${fieldName}_file`) as HTMLInputElement;
     if (fileInput) {
@@ -1681,10 +1702,10 @@ constructor(
       // Ici, vous devrez implémenter la logique d'upload vers votre backend
       // Pour l'instant, on simule un upload réussi
       console.log(`Upload du fichier ${file.name} pour ${fieldName}`);
-      
+
       // Simuler un délai d'upload
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Retourner l'URL du fichier uploadé (à adapter selon votre backend)
       return `uploads/${fieldName}/${file.name}`;
     } catch (error) {
@@ -1698,20 +1719,20 @@ constructor(
       console.error('ID de gisement invalide:', gisementId);
       return;
     }
-    
+
     if (!confirm('Êtes-vous sûr de vouloir supprimer cet ingrédient ?')) return;
-    
+
     try {
       if (this.melange?.id) {
         // Pour un mélange existant, utiliser l'API
         const updatedIngredients = this.melange.ingredients.filter(
           ing => ing.gisement !== gisementId
         );
-        
+
         await this.melangeService.patch(this.melange.id, {
           ingredients: updatedIngredients
         });
-        
+
         await this.loadMelange(this.melange.id);
       } else {
         // Pour un nouveau mélange, supprimer localement
@@ -1728,11 +1749,11 @@ constructor(
   getFicheTechniqueResume(): string {
     // Génère le résumé complet avec toutes les informations du mélange
     const lines: string[] = [];
-    
+
     // === INFORMATIONS DU MÉLANGE ===
     lines.push('=== FICHE TECHNIQUE DU MÉLANGE ===');
     lines.push('');
-    
+
     // Informations de base
     lines.push(`Référence: ${this.melange.reference_produit || 'Non définie'}`);
     lines.push(`Nom: ${this.melange.nom || 'Non défini'}`);
@@ -1743,7 +1764,7 @@ constructor(
     lines.push(`Couverture végétale: ${this.melange.couverture_vegetale || 'Non définie'}`);
     lines.push(`Références d'analyses: ${this.melange.references_analyses || 'Non définies'}`);
     lines.push('');
-    
+
     // Composition du mélange
     lines.push('=== COMPOSITION DU MÉLANGE ===');
     if (this.melange.ingredients && this.melange.ingredients.length > 0) {
@@ -1756,11 +1777,11 @@ constructor(
       lines.push('Aucun ingrédient défini');
     }
     lines.push('');
-    
+
     // === DOCUMENTS UPLOADÉS ===
     lines.push('=== DOCUMENTS UPLOADÉS ===');
     lines.push('');
-    
+
     lines.push('COMPOSITION:');
     if (this.melange.ordre_conformite) {
       lines.push(this.getFileUrl(this.melange.ordre_conformite));
@@ -1768,7 +1789,7 @@ constructor(
       lines.push('Non renseigné');
     }
     lines.push('');
-    
+
     lines.push('ORDRE FABRICATION:');
     if (this.melange.consignes_melange) {
       lines.push(this.getFileUrl(this.melange.consignes_melange));
@@ -1776,7 +1797,7 @@ constructor(
       lines.push('Non renseigné');
     }
     lines.push('');
-    
+
     lines.push('CONSIGNES DE BRASSAGE ET STOCKAGE:');
     if (this.melange.controle_1) {
       lines.push(this.getFileUrl(this.melange.controle_1));
@@ -1784,7 +1805,7 @@ constructor(
       lines.push('Non renseigné');
     }
     lines.push('');
-    
+
     lines.push('SUIVI DES ÉTAPES DE STOCKAGE ET MATURATION (DE 30 JOURS À 8 MOIS):');
     if (this.melange.controle_2) {
       lines.push(this.getFileUrl(this.melange.controle_2));
@@ -1792,14 +1813,14 @@ constructor(
       lines.push('Non renseigné');
     }
     lines.push('');
-    
+
     lines.push('ÉTABLISSEMENT DE FICHE PRODUIT:');
     if (this.melange.fiche_technique) {
       lines.push(this.getFileUrl(this.melange.fiche_technique));
     } else {
       lines.push('Non renseigné');
     }
-    
+
     return lines.join('\n');
   }
 
@@ -1813,99 +1834,99 @@ constructor(
   getFicheTechniqueResumeHtml(): string {
     // Génère le résumé complet avec le nouveau style
     const lines: string[] = [];
-    
+
     // === INFORMATIONS DU MÉLANGE ===
     lines.push('<div class="info-section">');
     lines.push('<h2 class="section-title"><i class="bi bi-info-circle"></i> INFORMATIONS GÉNÉRALES</h2>');
     lines.push('<div class="info-grid">');
-    
+
     // Première colonne
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Référence</div>');
     lines.push(`<div class="info-value">${this.melange.reference_produit || 'Mélange inconnu'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Nom</div>');
     lines.push(`<div class="info-value">${this.melange.nom || 'Mélange inconnu'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Plateforme</div>');
     lines.push(`<div class="info-value">${this.getPlateformeName(this.melange.plateforme)}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Fournisseur</div>');
     lines.push(`<div class="info-value">${this.melange.fournisseur || 'PHV'}</div>`);
     lines.push('</div>');
-    
+
     // Deuxième colonne
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Période de mélange</div>');
     lines.push(`<div class="info-value">${this.melange.periode_melange || 'oct-déc-2025'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Date de semis</div>');
     lines.push(`<div class="info-value">${this.melange.date_semis || '2025-10-02'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Couverture végétale</div>');
     lines.push(`<div class="info-value">${this.melange.couverture_vegetale || 'Trèfles'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Références d\'analyses</div>');
     lines.push(`<div class="info-value">${this.melange.references_analyses || 'Non définies'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('</div>'); // fin info-grid
     lines.push('</div>'); // fin info-section
-    
+
     // === RESPONSABLE DE LA PLATEFORME ===
     lines.push('<div class="responsable-section">');
     lines.push('<h2 class="section-title"><i class="bi bi-person-badge"></i> RESPONSABLE DE LA PLATEFORME</h2>');
     lines.push('<div class="info-grid">');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Responsable</div>');
     lines.push(`<div class="info-value">${this.getCurrentUserName()}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Entreprise</div>');
     lines.push(`<div class="info-value">${this.getCurrentUserCompany()}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Email</div>');
     lines.push(`<div class="info-value">${this.currentUser?.email || 'terres fertiles@gmail.com'}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Date de validation</div>');
     lines.push(`<div class="info-value">${new Date().toLocaleDateString('fr-FR')}</div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Rôle</div>');
     lines.push(`<div class="info-value"><span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85rem;">${this.getCurrentUserRole()}</span></div>`);
     lines.push('</div>');
-    
+
     lines.push('<div class="info-item">');
     lines.push('<div class="info-label">Statut</div>');
     lines.push(`<div class="info-value"><span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85rem;">Validé</span></div>`);
     lines.push('</div>');
-    
+
     lines.push('</div>'); // fin info-grid
     lines.push('</div>'); // fin responsable-section
-    
+
     // === COMPOSITION DU MÉLANGE ===
     lines.push('<div class="info-section">');
     lines.push('<h2 class="section-title"><i class="bi bi-list-ul"></i> COMPOSITION DU MÉLANGE</h2>');
-    
+
     // Gisements
     if (this.melange.ingredients && this.melange.ingredients.length > 0) {
       lines.push('<div class="composition-table">');
@@ -1915,11 +1936,11 @@ constructor(
       lines.push('</thead>');
       lines.push('<tbody>');
       this.melange.ingredients.forEach(ingredient => {
-  const gisementName = this.getGisementName(ingredient.gisement);
-  const gisement = this.gisements.find(g => g.id === ingredient.gisement);
-  const chantierId = gisement ? (typeof gisement.chantier === 'object' ? gisement.chantier.id : gisement.chantier) : null;
-  const chantierName = chantierId !== null && chantierId !== undefined ? this.getChantierName(chantierId) : 'Chantier inconnu';
-  lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="percentage-badge">${ingredient.pourcentage}%</span></td></tr>`);
+        const gisementName = this.getGisementName(ingredient.gisement);
+        const gisement = this.gisements.find(g => g.id === ingredient.gisement);
+        const chantierId = gisement ? (typeof gisement.chantier === 'object' ? gisement.chantier.id : gisement.chantier) : null;
+        const chantierName = chantierId !== null && chantierId !== undefined ? this.getChantierName(chantierId) : 'Chantier inconnu';
+        lines.push(`<tr><td>${gisementName}</td><td>${chantierName}</td><td><span class="percentage-badge">${ingredient.pourcentage}%</span></td></tr>`);
       });
       // Ligne total gisements
       lines.push(`<tr class="total-row"><td colspan="2"><strong>Total gisements</strong></td><td><strong>${this.getTotalPercentage()}%</strong></td></tr>`);
@@ -1929,7 +1950,7 @@ constructor(
     } else {
       lines.push('<p style="color: #6b7280; font-style: italic; text-align: center; padding: 20px;">Aucun gisement défini</p>');
     }
-    
+
     // Amendements (si présents)
     if (this.melange.amendements && this.melange.amendements.length > 0) {
       lines.push('<div style="margin-top: 25px;">');
@@ -1953,17 +1974,17 @@ constructor(
       lines.push('</div>');
       lines.push('</div>');
     }
-    
+
     // Total global avec style amélioré
     lines.push('<div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-radius: 10px; padding: 20px; margin-top: 25px; text-align: center; border-left: 5px solid #3b82f6;">');
     lines.push(`<h3 style="color: #1e40af; margin: 0; font-size: 1.5rem;"><strong>Total global (gisements + amendements): ${this.getTotalCompositionPercentage()}%</strong></h3>`);
     lines.push('</div>');
     lines.push('</div>'); // fin info-section
-    
+
     // === DOCUMENTS UPLOADÉS ===
     lines.push('<div class="documents-section">');
     lines.push('<h2 class="section-title"><i class="bi bi-file-earmark-text"></i> DOCUMENTS UPLOADÉS</h2>');
-    
+
     const documents = [
       { title: 'COMPOSITION', field: 'ordre_conformite', icon: 'bi-file-pdf' },
       { title: 'ORDRE FABRICATION', field: 'consignes_melange', icon: 'bi-file-word' },
@@ -1971,7 +1992,7 @@ constructor(
       { title: 'SUIVI DES ÉTAPES DE STOCKAGE ET MATURATION (DE 30 JOURS À 8 MOIS)', field: 'controle_2', icon: 'bi-file-excel' },
       { title: 'ÉTABLISSEMENT DE FICHE PRODUIT', field: 'fiche_technique', icon: 'bi-file-text' }
     ];
-    
+
     documents.forEach(doc => {
       const fileUrl = this.melange[doc.field as keyof typeof this.melange] as string;
       lines.push('<div class="document-item">');
@@ -1988,9 +2009,9 @@ constructor(
       }
       lines.push('</div>');
     });
-    
+
     lines.push('</div>');
-    
+
     return lines.join('');
   }
 
@@ -2025,10 +2046,12 @@ constructor(
   }
 
   // === NETTOYAGE ===
-  
+
   ngOnDestroy(): void {
     // Nettoyage lors de la destruction du composant
-    console.log('Destruction du composant mélange');
+    this._subscriptions.forEach(s => s.unsubscribe());
+    this._subscriptions = [];
+    console.log('Destruction du composant mélange - subscriptions unsubscribed');
   }
 
   // Méthode appelée lors de la finalisation de la fiche technique
