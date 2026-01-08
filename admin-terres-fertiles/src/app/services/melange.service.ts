@@ -238,9 +238,31 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
         Authorization: `Token ${token}` 
       } 
     };
-    
-    const response = await axios.patch<Melange>(`${this.apiUrl}${id}/`, formData, headers);
-    return response.data;
+
+    // Debug: afficher le contenu du FormData (utile pour diagnostiquer 500)
+    try {
+      const entries: any[] = [];
+      for (const pair of (formData as any).entries()) {
+        const [k, v] = pair;
+        entries.push([k, v instanceof File ? `(File) ${v.name}` : v]);
+      }
+      console.log('➡️ patchWithFiles formData entries:', entries);
+    } catch (e) {
+      console.warn('Impossible d' + "'" + 'énumérer FormData entries:', e);
+    }
+
+    try {
+      const response = await axios.patch<Melange>(`${this.apiUrl}${id}/`, formData, headers);
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Erreur dans patchWithFiles:', error?.message || error);
+      if (error.response) {
+        console.error('➡️ Réponse API:', error.response.status, error.response.data);
+        // Renvoyer une erreur enrichie pour que le composant puisse l'afficher
+        throw { message: 'Erreur API lors du patch avec fichiers', status: error.response.status, data: error.response.data };
+      }
+      throw error;
+    }
   }
 
   async delete(id: number): Promise<void> {
