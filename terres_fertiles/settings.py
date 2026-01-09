@@ -17,22 +17,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-# CORS configuration
-# Environnements dev/prod — préférez CORS_ALLOWED_ORIGINS en prod
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "https://tef.terres-fertiles.com",
     "http://tef.terres-fertiles.com",
-]
-
-# Autoriser l'envoi d'identifiants si nécessaire (cookies/token)
-CORS_ALLOW_CREDENTIALS = True
-
-# Origines approuvées pour CSRF (utile si vous utilisez session auth)
-CSRF_TRUSTED_ORIGINS = [
-    "https://tef.terres-fertiles.com",
-    "https://api.terres-fertiles.com",
 ]
 # ajoute seulement si tu rencontres un CSRF origin mismatch
 # CSRF_TRUSTED_ORIGINS = [
@@ -43,7 +32,6 @@ CSRF_TRUSTED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'corsheaders',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -116,8 +104,8 @@ DATABASES = {
         'NAME': config('DATABASENAME'),  # Nom de la base de données MySQL
         'USER': config('DATABASEUSER'),  # Nom d'utilisateur MySQL
         'PASSWORD': config('DATABASEPASSWORD'),  # Mot de passe MySQL
-        'HOST': config('HOST'),  # Adresse de l'hôte, généralement localhost
-        'PORT': config('PORT'),  # Port MySQL, par défaut 3306
+        'HOST': 'localhost',  # Adresse de l'hôte, généralement localhost
+        'PORT': '3306',  # Port MySQL, par défaut 3306
     }
 }
 
@@ -249,61 +237,6 @@ JAZZMIN_UI_TWEAKS = {
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-# -----------------
-# Logging (production-friendly)
-# -----------------
-LOG_DIR = config('LOG_DIR', default='/var/log/terres-fertiles')
-try:
-    os.makedirs(LOG_DIR, exist_ok=True)
-except Exception:
-    # If creation fails (permissions), fallback to BASE_DIR/logs
-    LOG_DIR = os.path.join(BASE_DIR, 'logs')
-    os.makedirs(LOG_DIR, exist_ok=True)
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)d %(message)s'
-        },
-        'simple': {'format': '%(levelname)s %(message)s'},
-    },
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'django.log'),
-            'maxBytes': 1024 * 1024 * 10,  # 10MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-        },
-        'errors_file': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(LOG_DIR, 'django_errors.log'),
-            'maxBytes': 1024 * 1024 * 10,
-            'backupCount': 10,
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        '': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-        },
-        'django.request': {
-            'handlers': ['errors_file'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -339,5 +272,3 @@ EMAIL_HOST_USER = config('MAILJET_API_KEY')
 EMAIL_HOST_PASSWORD = config('MAILJET_API_SECRET')
 DEFAULT_FROM_EMAIL = 'ismaila.sacko@terres-fertiles.com'
 PASSWORD_RESET_TIMEOUT = 900  # 900 # 15 minutes
-
-
