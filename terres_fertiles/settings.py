@@ -257,10 +257,6 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'  # 🔥 ajoute cette ligne
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Use a filesystem storage that normalises filenames to avoid Unicode encode
-# errors when the system locale is not UTF-8 or when filenames contain
-# non-ASCII characters.
-DEFAULT_FILE_STORAGE = 'core.storage.UnicodeSafeFileSystemStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
