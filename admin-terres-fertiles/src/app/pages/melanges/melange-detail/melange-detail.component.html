@@ -635,30 +635,10 @@
         <!-- Control 1 -->
         <div class="card mb-4" *ngIf="melange.etat === MelangeEtat.CONTROLE_1">
           <div class="card-header">
-            <h5 class="card-title mb-0">Contrôle +1 mois</h5>
+            <h5 class="card-title mb-0">Contrôles</h5>
           </div>
           <div class="card-body">
             <form [formGroup]="melangeForm">
-              <div class="mb-3">
-                <label for="controle_1_file" class="form-label">Rapport de contrôle +1 mois</label>
-                <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_1_file"
-                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png" (change)="onFileSelected($event, 'controle_1')"
-                    #controle1File>
-                  <div class="file-upload-info">
-                    <i class="bi bi-cloud-upload"></i>
-                    <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX (Max: 10MB)</small>
-                  </div>
-                </div>
-                <div *ngIf="uploadedFiles['controle_1']" class="alert alert-success mt-2">
-                  <i class="bi bi-check-circle"></i>
-                  <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_1'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_1')">
-                    <i class="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
 
               <!-- Ajout intervention utilisateur -->
               <div class="mb-3">
@@ -697,6 +677,31 @@
                   </li>
                 </ul>
               </div>
+
+              <!-- Upload rapport de contrôles -->
+              <div class="mb-3">
+                <label for="controle_1_file" class="form-label">Rapports de contrôles</label>
+                <div class="file-upload-container">
+                  <input type="file" class="form-control" id="controle_1_file"
+                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png" (change)="onFileSelected($event, 'controle_1')"
+                    #controle1File>
+                  <div class="file-upload-info">
+                    <i class="bi bi-cloud-upload"></i>
+                    <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX (Max: 10MB)</small>
+                  </div>
+                </div>
+                <div *ngIf="uploadedFiles['controle_1']" class="alert alert-success mt-2">
+                  <i class="bi bi-check-circle"></i>
+                  <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_1'].name }}
+                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_1')">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+
+
 
               <!-- Liste des interventions -->
               <div *ngIf="interventions && interventions.length > 0" class="mb-3">

@@ -49,7 +49,7 @@
 }
 
 .info-card:hover {
-  box-shadow: 0 8px 24px rgba(46,125,50,0.15);
+  box-shadow: 0 8px 24px rgba(46, 125, 50, 0.15);
   transform: translateY(-2px);
 }
 
@@ -57,13 +57,12 @@
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  color: var(--primary-color);
   font-size: 1.3rem;
   font-weight: 600;
 }
 
 .info-card mat-card-title mat-icon {
-  background: rgba(46,125,50,0.1);
+  background: rgba(46, 125, 50, 0.1);
   padding: 0.4rem;
   border-radius: 8px;
   color: var(--primary-color);
@@ -89,14 +88,14 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem;
-  background: rgba(46,125,50,0.03);
+  background: rgba(46, 125, 50, 0.03);
   border-radius: 12px;
   border-left: 4px solid var(--primary-light);
 }
 
 .info-item mat-icon {
   color: var(--primary-color);
-  background: rgba(46,125,50,0.1);
+  background: rgba(46, 125, 50, 0.1);
   padding: 0.5rem;
   border-radius: 8px;
   margin-top: 0.2rem;
@@ -199,30 +198,30 @@ button[color="warn"]:hover {
   .amendement-detail-container {
     padding: 1rem;
   }
-  
+
   .detail-header {
     flex-direction: column;
     gap: 1.5rem;
     align-items: stretch;
   }
-  
+
   .header-actions {
     justify-content: stretch;
   }
-  
+
   .header-actions button {
     flex: 1;
   }
-  
+
   .info-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .header-info h1 {
     font-size: 2rem;
   }
-  
+
   .info-card mat-card-title mat-icon,
   .info-item mat-icon {
     font-size: 18px !important;
