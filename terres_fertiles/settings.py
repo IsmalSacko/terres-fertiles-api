@@ -17,11 +17,22 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS configuration
+# Environnements dev/prod — préférez CORS_ALLOWED_ORIGINS en prod
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:4200",
     "https://tef.terres-fertiles.com",
     "http://tef.terres-fertiles.com",
+]
+
+# Autoriser l'envoi d'identifiants si nécessaire (cookies/token)
+CORS_ALLOW_CREDENTIALS = True
+
+# Origines approuvées pour CSRF (utile si vous utilisez session auth)
+CSRF_TRUSTED_ORIGINS = [
+    "https://tef.terres-fertiles.com",
+    "https://api.terres-fertiles.com",
 ]
 # ajoute seulement si tu rencontres un CSRF origin mismatch
 # CSRF_TRUSTED_ORIGINS = [
@@ -32,6 +43,7 @@ CORS_ALLOWED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -236,6 +248,61 @@ JAZZMIN_UI_TWEAKS = {
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
+
+# -----------------
+# Logging (production-friendly)
+# -----------------
+LOG_DIR = config('LOG_DIR', default='/var/log/terres-fertiles')
+try:
+    os.makedirs(LOG_DIR, exist_ok=True)
+except Exception:
+    # If creation fails (permissions), fallback to BASE_DIR/logs
+    LOG_DIR = os.path.join(BASE_DIR, 'logs')
+    os.makedirs(LOG_DIR, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s [%(levelname)s] %(name)s:%(lineno)d %(message)s'
+        },
+        'simple': {'format': '%(levelname)s %(message)s'},
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'django.log'),
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'errors_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(LOG_DIR, 'django_errors.log'),
+            'maxBytes': 1024 * 1024 * 10,
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['errors_file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
 
 LANGUAGE_CODE = 'en-us'
 
