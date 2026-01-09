@@ -114,3 +114,17 @@ def build_absolute_link(path: str) -> str:
     scheme = 'http' if ('localhost' in domain or '127.0.0.1' in domain) else 'https'
     path = str(path).lstrip('/')
     return f"{scheme}://{domain}/{path}"
+
+
+
+# utils.py ou directement dans models.py
+import unicodedata
+import re
+
+def normalize_filename(filename):
+    # transforme é à e, ç à c, etc.
+    filename = unicodedata.normalize('NFKD', filename).encode('ascii', 'ignore').decode('ascii')
+    # optionnel : remplacer tout caractère spécial par _
+    filename = re.sub(r'[^a-zA-Z0-9._-]', '_', filename)
+    return filename
+
