@@ -1,0 +1,14 @@
+venv
+.venv
+__pycache__
+*.pyc
+*.pyo
+.env
+.env.*
+node_modules
+admin-terres-fertiles/node_modules
+staticfiles
+media
+.git
+.DS_Store
+docker-compose*.yml

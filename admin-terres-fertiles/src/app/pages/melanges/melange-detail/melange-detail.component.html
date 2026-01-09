@@ -18,7 +18,7 @@
   <div *ngIf="!loading" style="margin-top: 60px;">
 
     <!-- Phase de création initiale (pour un nouveau mélange sans ID encore) -->
-    <div *ngIf="isNew && !melange?.id" class="row justify-content-center">
+    <div *ngIf="isNew && !melange.id" class="row justify-content-center">
       <div class="col-12 col-lg-8">
         <div
           class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
@@ -165,14 +165,14 @@
     </div>
 
     <!-- Phase de workflow/édition (pour un mélange existant ou nouvellement créé) -->
-    <div *ngIf="!isNew || melange?.id || melange?.etat" class="row">
+    <div *ngIf="!isNew || melange.id || melange.etat" class="row">
       <!-- Header -->
       <div class="col-12 mt-1">
         <div
           class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
           <div class="mb-3 mb-md-0">
             <h1 class="h2 h3-md mb-1 melange-title">{{ getDisplayName() }}</h1>
-            <p class="melange-reference mb-0">{{ melange.reference_produit }}</p>
+            <p class="melange-reference mb-0">{{ melange.nom }}</p>
           </div>
           <div class="d-flex gap-2">
             <!-- Bouton Fiche Technique (visible si workflow terminé) -->
@@ -197,7 +197,7 @@
       </div>
 
       <!-- Workflow Progress -->
-      <div class="col-12 mb-4" *ngIf="melange?.id && melange?.etat! >= 2">
+      <div class="col-12 mb-4" *ngIf="melange.id && melange.etat! >= 2">
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">Progression du workflow</h5>
@@ -576,12 +576,13 @@
               <div class="mb-3">
                 <label for="ordre_conformite_file" class="form-label">Document d'ordre de fabrication</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="ordre_conformite_file" accept=".pdf,.doc,.docx,.txt"
-                    (change)="onFileSelected($event, 'ordre_conformite')" #ordreConformiteFile>
+                  <input type="file" class="form-control" id="ordre_conformite_file"
+                    accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg" (change)="onFileSelected($event, 'ordre_conformite')"
+                    #ordreConformiteFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['ordre_conformite']" class="alert alert-success mt-2">
@@ -608,12 +609,13 @@
               <div class="mb-3">
                 <label for="consignes_melange_file" class="form-label">Document des consignes de mélange</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="consignes_melange_file" accept=".pdf,.doc,.docx,.txt"
+                  <input type="file" class="form-control" id="consignes_melange_file"
+                    accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
                     (change)="onFileSelected($event, 'consignes_melange')" #consignesMelangeFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre document ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['consignes_melange']" class="alert alert-success mt-2">
@@ -640,8 +642,9 @@
               <div class="mb-3">
                 <label for="controle_1_file" class="form-label">Rapport de contrôle +1 mois</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_1_file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
-                    (change)="onFileSelected($event, 'controle_1')" #controle1File>
+                  <input type="file" class="form-control" id="controle_1_file"
+                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png" (change)="onFileSelected($event, 'controle_1')"
+                    #controle1File>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
@@ -724,12 +727,14 @@
               <div class="mb-3">
                 <label for="controle_2_file" class="form-label">Sélectionner la fiche produit</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_2_file" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx"
+                  <input type="file" class="form-control" id="controle_2_file"
+                    accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png,.jpeg"
                     (change)="onFileSelected($event, 'controle_2')" #controle2File>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre rapport ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX, JPG, PNG, JPEG (Max:
+                      10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['controle_2']" class="alert alert-success mt-2">
@@ -756,13 +761,14 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label for="nom_technique" class="form-label">Nom technique du mélange *</label>
-                  <input type="text" class="form-control" id="nom_technique" formControlName="nom"
+                  <input type="text" class="form-control" id="nom_technique" [value]="referenceTechnique$ | async"
+                    (input)="melangeForm.get('nom')?.setValue($any($event.target).value)"
                     placeholder="Nom technique du mélange">
                   <small class="text-muted">Le nom technique sera utilisé pour identifier le mélange</small>
                 </div>
                 <div class="col-md-6 mb-3">
                   <label for="reference_technique" class="form-label">Référence technique</label>
-                  <input type="text" class="form-control" id="reference_technique" [value]="melange.reference_produit"
+                  <input type="text" class="form-control" id="reference_technique" [value]="referenceTechnique$ | async"
                     readonly>
                   <small class="text-muted">Référence automatiquement générée</small>
                 </div>
@@ -821,7 +827,7 @@
                   </table>
                 </div>
 
-                <div *ngIf="melange.ingredients?.length === 0" class="text-center py-3 text-muted">
+                <div *ngIf="melange.ingredients.length === 0" class="text-center py-3 text-muted">
                   <i class="bi bi-inbox"></i>
                   <p>Aucun ingrédient ajouté</p>
                 </div>
@@ -977,12 +983,13 @@
               <div class="mb-3">
                 <label for="fiche_technique_file" class="form-label">Fiche technique finale</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="fiche_technique_file" accept=".pdf,.doc,.docx,.txt"
-                    (change)="onFileSelected($event, 'fiche_technique')" #ficheTechniqueFile>
+                  <input type="file" class="form-control" id="fiche_technique_file"
+                    accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg" (change)="onFileSelected($event, 'fiche_technique')"
+                    #ficheTechniqueFile>
                   <div class="file-upload-info">
                     <i class="bi bi-cloud-upload"></i>
                     <p>Glissez-déposez votre fiche technique ici ou cliquez pour sélectionner</p>
-                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT (Max: 10MB)</small>
+                    <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
                 <div *ngIf="uploadedFiles['fiche_technique']" class="alert alert-success mt-2">
@@ -1050,7 +1057,7 @@
                   <div class="row text-center">
                     <div class="col-md-4">
                       <small class="text-muted d-block">Référence</small>
-                      <span class="fw-bold">{{ melange.reference_produit || 'MEL-25-PHV-PTP-M01' }}</span>
+                      <span class="fw-bold">{{ melange.nom || melange.reference_produit }}</span>
                     </div>
                     <div class="col-md-4">
                       <small class="text-muted d-block">Statut</small>
@@ -1104,7 +1111,7 @@
         </div>
 
         <!-- Workflow steps -->
-        <div class="card" *ngIf="melange?.id && melange?.etat! >= 2">
+        <div class="card" *ngIf="melange.id && melange.etat! >= 2">
           <div class="card-header">
             <h5 class="card-title mb-0">Étapes du workflow</h5>
           </div>

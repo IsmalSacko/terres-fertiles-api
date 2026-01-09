@@ -17,6 +17,44 @@ from .models import (
     Melange, SaisieVente, ProduitVente, DocumentTechnique,
     FicheAgroPedodeSol, FicheHorizon, FichePhoto
 )
+from django.conf import settings
+from django.templatetags.static import static
+
+class FlexibleFileField(serializers.Field):
+    """Accepte une URL/chemin en entrée (string) ou un upload; renvoie l'URL publique en sortie."""
+    def __init__(self, *args, **kwargs):
+        self.allow_blank = kwargs.pop('allow_blank', True)
+        super().__init__(*args, **kwargs)
+
+    def to_internal_value(self, data):
+        # Accepte soit une chaîne (chemin/URL), soit un fichier uploadé
+        if data is None:
+            return None
+        if isinstance(data, str):
+            return data
+        # pour les fichiers UploadedFile, on renvoie tel quel (le viewset/serializer create gèrera l'assignation)
+        return data
+
+    def to_representation(self, value):
+        try:
+            if not value:
+                return None
+            # si FileField, il a .url
+            url = getattr(value, 'url', None)
+            if url:
+                request = self.context.get('request') if hasattr(self, 'context') else None
+                if request:
+                    return request.build_absolute_uri(url)
+                return url
+            # sinon, si c'est une chaîne
+            if isinstance(value, str):
+                if value.startswith('/'):
+                    return value
+                return f"/media/{value}"
+            return None
+        except Exception:
+            return None
+
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -217,6 +255,11 @@ class MelangeSerializer(serializers.ModelSerializer):
     date_creation = serializers.DateField(format='%Y-%m-%d', read_only=True)
     utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
     nom_complet = serializers.SerializerMethodField()
+    ordre_conformite = FlexibleFileField(required=False)
+    consignes_melange = FlexibleFileField(required=False)
+    controle_1 = FlexibleFileField(required=False)
+    controle_2 = FlexibleFileField(required=False)
+    fiche_technique = FlexibleFileField(required=False)
 
 
     class Meta:
@@ -255,9 +298,31 @@ class MelangeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         ingredients_data = validated_data.pop("ingredients", None)
         amendements_data = validated_data.pop("amendements", None)
+        # Handle file fields: accept URL strings (http://.../media/...) or '/media/...' paths
+        file_fields = ['ordre_conformite', 'consignes_melange', 'controle_1', 'controle_2', 'fiche_technique']
+        from urllib.parse import urlparse
 
         for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+            if attr in file_fields and isinstance(value, str) and value:
+                # Extract path after '/media/' if present
+                try:
+                    parsed = urlparse(value)
+                    path = parsed.path
+                except Exception:
+                    path = value
+
+                if '/media/' in path:
+                    rel = path.split('/media/', 1)[1]
+                elif path.startswith('media/'):
+                    rel = path[len('media/'):]
+                else:
+                    # if it's just a filename or already relative, use as-is
+                    rel = path.lstrip('/')
+
+                # assign the relative path to the FileField (Django will treat it as the name)
+                setattr(instance, attr, rel)
+            else:
+                setattr(instance, attr, value)
         instance.save()
 
         if ingredients_data is not None:

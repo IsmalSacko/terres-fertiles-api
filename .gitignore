@@ -21,6 +21,10 @@ build/
 # Secrets et variables d’environnement
 .env
 .env.*
+# Fichiers docker-compose
+docker-compose*.yml
+Dockerfile
+entrypoint.sh
 
 # Logs et fichiers temporaires
 *.log
