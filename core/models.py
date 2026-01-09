@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models, transaction
+import os
+from .utils import normalize_filename
 
 # models.py
 from datetime import date
@@ -868,6 +870,20 @@ class Melange(models.Model):
                     # Pour une création, générer un nouveau numéro
                     self.nom, self.reference_produit = self._generate_nom_new()
         
+        # Normaliser les noms de fichiers uploadés pour éviter les erreurs
+        # d'encodage lors de la sauvegarde sur des systèmes sans locale UTF-8.
+        for field in ['ordre_conformite', 'consignes_melange', 'controle_1', 'controle_2', 'fiche_technique']:
+            file_field = getattr(self, field, None)
+            try:
+                if file_field and getattr(file_field, 'name', None):
+                    dirpath, basename = os.path.split(file_field.name)
+                    newbase = normalize_filename(basename)
+                    newname = f"{dirpath}/{newbase}" if dirpath else newbase
+                    file_field.name = newname
+            except Exception:
+                # Ne pas interrompre la sauvegarde en cas d'erreur de normalisation
+                pass
+
         super().save(*args, **kwargs)
 
 
