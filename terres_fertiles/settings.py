@@ -104,8 +104,8 @@ DATABASES = {
         'NAME': config('DATABASENAME'),  # Nom de la base de données MySQL
         'USER': config('DATABASEUSER'),  # Nom d'utilisateur MySQL
         'PASSWORD': config('DATABASEPASSWORD'),  # Mot de passe MySQL
-        'HOST': 'localhost',  # Adresse de l'hôte, généralement localhost
-        'PORT': '3306',  # Port MySQL, par défaut 3306
+        'HOST': config('HOST', default='localhost'),  # utilise la variable d'env HOST (ex: 'db' en docker)
+        'PORT': config('DATABASEPORT', default='3306'),  # permet d'overrider le port via DATABASEPORT
     }
 }
 
