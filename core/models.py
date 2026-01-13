@@ -968,6 +968,42 @@ class Melange(models.Model):
 """
 Modele pour les produits de vente dérivés des mélanges
 """
+class MelangeDocument(models.Model):
+    TYPE_CHOICES = [
+        ('ordre_conformite', 'Ordre de conformité'),
+        ('consignes_melange', 'Consignes de mélange'),
+        ('controle_1', 'Contrôle 1'),
+        ('controle_2', 'Contrôle 2'),
+        ('fiche_technique', 'Fiche technique'),
+        ('autre', 'Autre'),
+    ]
+
+    melange = models.ForeignKey('Melange', on_delete=models.CASCADE, related_name='documents')
+    type_document = models.CharField(max_length=50, choices=TYPE_CHOICES, default='autre')
+    fichier = models.FileField(upload_to='documents/melanges/')
+    nom_fichier = models.CharField(max_length=255, null=True, blank=True)
+    utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='melange_documents', help_text="Responsable automatiquement défini à l'utilisateur connecté.")
+    date_ajout = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        try:
+            return f"{self.get_type_document_display()} - {self.melange.nom}"
+        except Exception:
+            return f"MelangeDocument {getattr(self, 'id', 'n/a')}"
+
+    def delete(self, *args, **kwargs):
+        if self.fichier:
+            try:
+                self.fichier.delete(save=False)
+            except Exception:
+                pass
+        super().delete(*args, **kwargs)
+
+    class Meta:
+        db_table = 'melange_document'
+        verbose_name = 'Document de mélange'
+        verbose_name_plural = 'Documents de mélange'
+
 class ProduitVente(models.Model):
     utilisateur = models.ForeignKey(settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,

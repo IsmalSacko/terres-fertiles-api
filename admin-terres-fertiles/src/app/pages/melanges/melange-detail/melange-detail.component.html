@@ -576,7 +576,7 @@
               <div class="mb-3">
                 <label for="ordre_conformite_file" class="form-label">Document d'ordre de fabrication</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="ordre_conformite_file"
+                  <input type="file" multiple class="form-control" id="ordre_conformite_file"
                     accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg" (change)="onFileSelected($event, 'ordre_conformite')"
                     #ordreConformiteFile>
                   <div class="file-upload-info">
@@ -585,13 +585,27 @@
                     <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
-                <div *ngIf="uploadedFiles['ordre_conformite']" class="alert alert-success mt-2">
+                <div *ngIf="uploadedFiles['ordre_conformite']?.length" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
-                  <strong>Document téléchargé:</strong> {{ uploadedFiles['ordre_conformite'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
-                    (click)="removeFile('ordre_conformite')">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  <strong>Documents téléchargés:</strong>
+                  <ul class="mb-0">
+                    <li *ngFor="let f of uploadedFiles['ordre_conformite']; let i = index">{{ f.name }}
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('ordre_conformite', i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  </ul>
+                  <button *ngIf="uploadedFiles['ordre_conformite']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('ordre_conformite')">Supprimer tous</button>
+                </div>
+                <!-- Documents persistés côté backend -->
+                <div *ngIf="getDocumentsByType('ordre_conformite')?.length" class="mt-2">
+                  <label class="form-label">Documents enregistrés:</label>
+                  <ul class="mb-0">
+                    <li *ngFor="let d of getDocumentsByType('ordre_conformite')">
+                      <a [href]="getFileUrl(d.fichier)" target="_blank">{{ d.nom_fichier || (d.fichier.split('/')?.pop() || 'Document') }}</a>
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="deleteDocument(d.id)"><i class="bi bi-trash"></i></button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -609,7 +623,7 @@
               <div class="mb-3">
                 <label for="consignes_melange_file" class="form-label">Document des consignes de mélange</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="consignes_melange_file"
+                  <input type="file" multiple class="form-control" id="consignes_melange_file"
                     accept=".pdf,.doc,.docx,.txt, .jpg,.png,.jpeg"
                     (change)="onFileSelected($event, 'consignes_melange')" #consignesMelangeFile>
                   <div class="file-upload-info">
@@ -618,13 +632,26 @@
                     <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
-                <div *ngIf="uploadedFiles['consignes_melange']" class="alert alert-success mt-2">
+                <div *ngIf="uploadedFiles['consignes_melange']?.length" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
-                  <strong>Document téléchargé:</strong> {{ uploadedFiles['consignes_melange'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
-                    (click)="removeFile('consignes_melange')">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  <strong>Documents téléchargés:</strong>
+                  <ul class="mb-0">
+                    <li *ngFor="let f of uploadedFiles['consignes_melange']; let i = index">{{ f.name }}
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('consignes_melange', i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  </ul>
+                  <button *ngIf="uploadedFiles['consignes_melange']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('consignes_melange')">Supprimer tous</button>
+                </div>
+                <div *ngIf="getDocumentsByType('consignes_melange')?.length" class="mt-2">
+                  <label class="form-label">Documents enregistrés:</label>
+                  <ul class="mb-0">
+                    <li *ngFor="let d of getDocumentsByType('consignes_melange')">
+                      <a [href]="getFileUrl(d.fichier)" target="_blank">{{ d.nom_fichier || (d.fichier.split('/')?.pop() || 'Document') }}</a>
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="deleteDocument(d.id)"><i class="bi bi-trash"></i></button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -682,7 +709,7 @@
               <div class="mb-3">
                 <label for="controle_1_file" class="form-label">Rapports de contrôles</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_1_file"
+                  <input type="file" multiple class="form-control" id="controle_1_file"
                     accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png" (change)="onFileSelected($event, 'controle_1')"
                     #controle1File>
                   <div class="file-upload-info">
@@ -691,12 +718,28 @@
                     <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, XLS, XLSX (Max: 10MB)</small>
                   </div>
                 </div>
-                <div *ngIf="uploadedFiles['controle_1']" class="alert alert-success mt-2">
+                <div *ngIf="uploadedFiles['controle_1']?.length" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
-                  <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_1'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_1')">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  <strong>Rapports téléchargés:</strong>
+                  <ul class="mb-0">
+                    <li *ngFor="let f of uploadedFiles['controle_1']; let i = index">
+                      {{ f.name }}
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_1', i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  </ul>
+                  <button *ngIf="uploadedFiles['controle_1']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('controle_1')">Supprimer tous</button>
+                </div>
+                <!-- Documents persistés côté backend (MelangeDocument) -->
+                <div *ngIf="getDocumentsByType('controle_1')?.length" class="mt-2">
+                  <label class="form-label">Fichiers enregistrés:</label>
+                  <ul class="mb-0">
+                    <li *ngFor="let d of getDocumentsByType('controle_1')">
+                      <a [href]="getFileUrl(d.fichier)" target="_blank">{{ d.nom_fichier || (d.fichier.split('/')?.pop() || 'Document') }}</a>
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="deleteDocument(d.id)"><i class="bi bi-trash"></i></button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -732,7 +775,7 @@
               <div class="mb-3">
                 <label for="controle_2_file" class="form-label">Sélectionner la fiche produit</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="controle_2_file"
+                  <input type="file" multiple class="form-control" id="controle_2_file"
                     accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.png,.jpeg"
                     (change)="onFileSelected($event, 'controle_2')" #controle2File>
                   <div class="file-upload-info">
@@ -742,12 +785,27 @@
                       10MB)</small>
                   </div>
                 </div>
-                <div *ngIf="uploadedFiles['controle_2']" class="alert alert-success mt-2">
+                <div *ngIf="uploadedFiles['controle_2']?.length" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
-                  <strong>Rapport téléchargé:</strong> {{ uploadedFiles['controle_2'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_2')">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  <strong>Rapports téléchargés:</strong>
+                  <ul class="mb-0">
+                    <li *ngFor="let f of uploadedFiles['controle_2']; let i = index">
+                      {{ f.name }}
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('controle_2', i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  </ul>
+                  <button *ngIf="uploadedFiles['controle_2']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('controle_2')">Supprimer tous</button>
+                </div>
+                <div *ngIf="getDocumentsByType('controle_2')?.length" class="mt-2">
+                  <label class="form-label">Fichiers enregistrés:</label>
+                  <ul class="mb-0">
+                    <li *ngFor="let d of getDocumentsByType('controle_2')">
+                      <a [href]="getFileUrl(d.fichier)" target="_blank">{{ d.nom_fichier || (d.fichier.split('/')?.pop() || 'Document') }}</a>
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="deleteDocument(d.id)"><i class="bi bi-trash"></i></button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -918,10 +976,16 @@
               <div class="mb-3">
                 <label for="normes_conformite" class="form-label">Composition</label>
                 <div *ngIf="melange.ordre_conformite; else noNormesConformite">
-                  <a [href]="getFileUrl(melange.ordre_conformite)" target="_blank"
-                    class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-file-pdf"></i> Voir le document
-                  </a>
+                  <ng-container *ngIf="isArray(melange.ordre_conformite); else singleOrdre">
+                    <a *ngFor="let f of melange.ordre_conformite; let i = index" [href]="getFileUrl(f)" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+                      <i class="bi bi-file-pdf"></i> Voir le document {{ i + 1 }}
+                    </a>
+                  </ng-container>
+                  <ng-template #singleOrdre>
+                    <a [href]="getFileUrl(melange.ordre_conformite)" target="_blank" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-file-pdf"></i> Voir le document
+                    </a>
+                  </ng-template>
                 </div>
                 <ng-template #noNormesConformite>
                   <textarea class="form-control" id="normes_conformite" rows="3" formControlName="ordre_conformite"
@@ -933,10 +997,16 @@
                 <div class="col-md-6 mb-3">
                   <label for="conditions_utilisation" class="form-label">Ordre fabrication</label>
                   <div *ngIf="melange.consignes_melange; else noConditionsUtilisation">
-                    <a [href]="getFileUrl(melange.consignes_melange)" target="_blank"
-                      class="btn btn-sm btn-outline-primary">
-                      <i class="bi bi-file-word"></i> Voir le document
-                    </a>
+                    <ng-container *ngIf="isArray(melange.consignes_melange); else singleConsignes">
+                      <a *ngFor="let f of melange.consignes_melange; let i = index" [href]="getFileUrl(f)" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="bi bi-file-word"></i> Voir le document {{ i + 1 }}
+                      </a>
+                    </ng-container>
+                    <ng-template #singleConsignes>
+                      <a [href]="getFileUrl(melange.consignes_melange)" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-file-word"></i> Voir le document
+                      </a>
+                    </ng-template>
                   </div>
                   <ng-template #noConditionsUtilisation>
                     <textarea class="form-control" id="conditions_utilisation" rows="3"
@@ -949,9 +1019,16 @@
                 <div class="col-md-6 mb-3">
                   <label for="controle_qualite_1" class="form-label">Consignes de brassage et stockage</label>
                   <div *ngIf="melange.controle_1; else noControle1">
-                    <a [href]="getFileUrl(melange.controle_1)" target="_blank" class="btn btn-sm btn-outline-primary">
-                      <i class="bi bi-file-excel"></i> Voir le document
-                    </a>
+                    <ng-container *ngIf="isArray(melange.controle_1); else singleControle1">
+                      <a *ngFor="let f of melange.controle_1; let i = index" [href]="getFileUrl(f)" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="bi bi-file-excel"></i> Voir le document {{ i + 1 }}
+                      </a>
+                    </ng-container>
+                    <ng-template #singleControle1>
+                      <a [href]="getFileUrl(melange.controle_1)" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-file-excel"></i> Voir le document
+                      </a>
+                    </ng-template>
                   </div>
                   <ng-template #noControle1>
                     <textarea class="form-control" id="controle_qualite_1" rows="3" formControlName="controle_1"
@@ -962,9 +1039,16 @@
                   <label for="controle_qualite_2" class="form-label">Suivi des étapes de stockage et maturation (de 30
                     jours à 8 mois)</label>
                   <div *ngIf="melange.controle_2; else noControle2">
-                    <a [href]="getFileUrl(melange.controle_2)" target="_blank" class="btn btn-sm btn-outline-primary">
-                      <i class="bi bi-file-excel"></i> Voir le document
-                    </a>
+                    <ng-container *ngIf="isArray(melange.controle_2); else singleControle2">
+                      <a *ngFor="let f of melange.controle_2; let i = index" [href]="getFileUrl(f)" target="_blank" class="btn btn-sm btn-outline-primary me-1">
+                        <i class="bi bi-file-excel"></i> Voir le document {{ i + 1 }}
+                      </a>
+                    </ng-container>
+                    <ng-template #singleControle2>
+                      <a [href]="getFileUrl(melange.controle_2)" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-file-excel"></i> Voir le document
+                      </a>
+                    </ng-template>
                   </div>
                   <ng-template #noControle2>
                     <textarea class="form-control" id="controle_qualite_2" rows="3" formControlName="controle_2"
@@ -988,7 +1072,7 @@
               <div class="mb-3">
                 <label for="fiche_technique_file" class="form-label">Fiche technique finale</label>
                 <div class="file-upload-container">
-                  <input type="file" class="form-control" id="fiche_technique_file"
+                  <input type="file" multiple class="form-control" id="fiche_technique_file"
                     accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg" (change)="onFileSelected($event, 'fiche_technique')"
                     #ficheTechniqueFile>
                   <div class="file-upload-info">
@@ -997,13 +1081,26 @@
                     <small class="text-muted">Formats acceptés: PDF, DOC, DOCX, TXT, JPG, PNG, JPEG (Max: 10MB)</small>
                   </div>
                 </div>
-                <div *ngIf="uploadedFiles['fiche_technique']" class="alert alert-success mt-2">
+                <div *ngIf="uploadedFiles['fiche_technique']?.length" class="alert alert-success mt-2">
                   <i class="bi bi-check-circle"></i>
-                  <strong>Fiche technique téléchargée:</strong> {{ uploadedFiles['fiche_technique'].name }}
-                  <button type="button" class="btn btn-sm btn-outline-danger ms-2"
-                    (click)="removeFile('fiche_technique')">
-                    <i class="bi bi-trash"></i>
-                  </button>
+                  <strong>Fiches téléchargées:</strong>
+                  <ul class="mb-0">
+                    <li *ngFor="let f of uploadedFiles['fiche_technique']; let i = index">{{ f.name }}
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeFile('fiche_technique', i)">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </li>
+                  </ul>
+                  <button *ngIf="uploadedFiles['fiche_technique']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('fiche_technique')">Supprimer tous</button>
+                </div>
+                <div *ngIf="getDocumentsByType('fiche_technique')?.length" class="mt-2">
+                  <label class="form-label">Documents enregistrés:</label>
+                  <ul class="mb-0">
+                    <li *ngFor="let d of getDocumentsByType('fiche_technique')">
+                      <a [href]="getFileUrl(d.fichier)" target="_blank">{{ d.nom_fichier || (d.fichier.split('/')?.pop() || 'Document') }}</a>
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="deleteDocument(d.id)"><i class="bi bi-trash"></i></button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 

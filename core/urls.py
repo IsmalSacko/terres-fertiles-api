@@ -11,10 +11,10 @@ from .views import (
     AmendementOrganiqueViewSet,
     MelangeAmendementViewSet,
     MelangeViewSet,
+    MelangeDocumentViewSet,
     PlanningViewSet, 
     ProduitVenteViewSet, 
     DocumentTechniqueViewSet, 
-    AnalysePdfParseView,
     DocumentGisementViewSet,
     PlateformeViewSet,
     SaisieVenteViewSet,
@@ -35,6 +35,7 @@ router.register(r'melange-amendements', MelangeAmendementViewSet, basename='mela
 router.register(r'melanges', MelangeViewSet, basename='melanges')  # basename pour éviter les conflits de noms
 router.register(r'produits', ProduitVenteViewSet)
 router.register(r'documents-techniques', DocumentTechniqueViewSet)
+router.register(r'melange-documents', MelangeDocumentViewSet)
 router.register(r'documents-produits-vente', DocumentProduitVenteViewSet, basename='documents-produits-vente')  # basename pour éviter les conflits de noms
 router.register(r'documents-gisements', DocumentGisementViewSet)
 router.register(r'plateformes', PlateformeViewSet)
@@ -51,7 +52,6 @@ urlpatterns = [
     path('auth/', include('djoser.urls')),  # gestion utilisateurs
     path('auth/', include('djoser.urls.authtoken')),  # authentification token
     path('auth/', include('rest_framework.urls')),  # navigateur DRF
-    path('analyse-pdf-parse/', AnalysePdfParseView.as_view(), name='analyse_pre_remplir'),
     path('', include(router.urls)),  # toutes les routes des modèles
     path('user/me/', CurrentUserView.as_view(), name='current_user'),  # pour récupérer l'utilisateur courant
     path('users/custom-reset-password/', custom_reset_password, name='custom_reset_password'),

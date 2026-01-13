@@ -197,8 +197,8 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   amendementForm: FormGroup;
   selectedAmendements: { amendementId: number, pourcentage: number }[] = [];
 
-  // Propriétés pour la gestion des fichiers
-  uploadedFiles: { [key: string]: File } = {};
+  // Propriétés pour la gestion des fichiers (support multiple)
+  uploadedFiles: { [key: string]: File[] } = {};
   fileErrors: { [key: string]: string } = {};
 
   // Propriété pour contrôler le mode d'édition
@@ -1245,37 +1245,38 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     switch (this.melange.etat) {
       case MelangeEtat.CONFORMITE:
         if (this.uploadedFiles['ordre_conformite']) {
-          // Envoyer le fichier directement au backend Django
-          updateData.ordre_conformite = this.uploadedFiles['ordre_conformite'];
+          // Si plusieurs fichiers sélectionnés, envoyer le premier en tant que File
+          const val = this.uploadedFiles['ordre_conformite'];
+          updateData.ordre_conformite = Array.isArray(val) ? val[0] : val;
         }
         break;
 
       case MelangeEtat.CONSIGNE:
         if (this.uploadedFiles['consignes_melange']) {
-          // Envoyer le fichier directement au backend Django
-          updateData.consignes_melange = this.uploadedFiles['consignes_melange'];
+          const val = this.uploadedFiles['consignes_melange'];
+          updateData.consignes_melange = Array.isArray(val) ? val[0] : val;
         }
         break;
 
       case MelangeEtat.CONTROLE_1:
         if (this.uploadedFiles['controle_1']) {
-          // Envoyer le fichier directement au backend Django
-          updateData.controle_1 = this.uploadedFiles['controle_1'];
+          const val = this.uploadedFiles['controle_1'];
+          updateData.controle_1 = Array.isArray(val) ? val[0] : val;
         }
         break;
 
       case MelangeEtat.CONTROLE_2:
         if (this.uploadedFiles['controle_2']) {
-          // Envoyer le fichier directement au backend Django
-          updateData.controle_2 = this.uploadedFiles['controle_2'];
+          const val = this.uploadedFiles['controle_2'];
+          updateData.controle_2 = Array.isArray(val) ? val[0] : val;
         }
         break;
 
       case MelangeEtat.VALIDATION:
         // Pour l'étape de validation, on traite fiche_technique comme un fichier uploadé
         if (this.uploadedFiles['fiche_technique']) {
-          // Envoyer le fichier directement au backend Django
-          updateData.fiche_technique = this.uploadedFiles['fiche_technique'];
+          const val = this.uploadedFiles['fiche_technique'];
+          updateData.fiche_technique = Array.isArray(val) ? val[0] : val;
         }
         break;
     }
@@ -1323,54 +1324,33 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
 
       // --- FIN CONTRÔLE FICHIER REQUIS ---
 
-      // Upload des fichiers si présents
-      const updateData: any = {};
-      switch (this.melange.etat) {
-        case 2:
-          if (this.uploadedFiles['ordre_conformite']) {
-            const fileUrl = await this.uploadFile(this.uploadedFiles['ordre_conformite'], 'ordre_conformite');
-            if (fileUrl) {
-              updateData.ordre_conformite = fileUrl;
-              (this.melange as any)['ordre_conformite'] = fileUrl;
-            }
-          }
-          break;
-        case 3:
-          if (this.uploadedFiles['consignes_melange']) {
-            const fileUrl = await this.uploadFile(this.uploadedFiles['consignes_melange'], 'consignes_melange');
-            if (fileUrl) {
-              updateData.consignes_melange = fileUrl;
-              (this.melange as any)['consignes_melange'] = fileUrl;
-            }
-          }
-          break;
-        case 4:
-          if (this.uploadedFiles['controle_1']) {
-            const fileUrl = await this.uploadFile(this.uploadedFiles['controle_1'], 'controle_1');
-            if (fileUrl) {
-              updateData.controle_1 = fileUrl;
-              (this.melange as any)['controle_1'] = fileUrl;
-            }
-          }
-          break;
-        case 5:
-          if (this.uploadedFiles['controle_2']) {
-            const fileUrl = await this.uploadFile(this.uploadedFiles['controle_2'], 'controle_2');
-            if (fileUrl) {
-              updateData.controle_2 = fileUrl;
-              (this.melange as any)['controle_2'] = fileUrl;
-            }
-          }
-          break;
-        case 6:
-          if (this.uploadedFiles['fiche_technique']) {
-            const fileUrl = await this.uploadFile(this.uploadedFiles['fiche_technique'], 'fiche_technique');
-            if (fileUrl) {
-              updateData.fiche_technique = fileUrl;
-              (this.melange as any)['fiche_technique'] = fileUrl;
-            }
-          }
-          break;
+      // Upload des fichiers persistés via le nouvel endpoint `melange-documents`
+      // (on envoie tous les fichiers sélectionnés pour le type courant)
+      const docFieldByEtat: any = {
+        2: 'ordre_conformite',
+        3: 'consignes_melange',
+        4: 'controle_1',
+        5: 'controle_2',
+        6: 'fiche_technique'
+      };
+      docField = docFieldByEtat[this.melange.etat];
+      if (docField && this.uploadedFiles[docField] && this.uploadedFiles[docField].length) {
+        // S'assurer que le mélange est enregistré pour obtenir un ID
+        await this.saveMelange();
+        if (!this.melange?.id) {
+          this.error = 'Impossible d\'uploader le fichier: mélange sans identifiant.';
+          return;
+        }
+        try {
+          await this.melangeService.uploadMelangeDocuments(this.melange.id, this.uploadedFiles[docField], docField);
+          // Effacer la sélection locale et recharger le mélange pour voir les fichiers enregistrés
+          delete this.uploadedFiles[docField];
+          this.melange = await this.melangeService.getById(this.melange.id);
+        } catch (uploadErr: any) {
+          console.error('Erreur upload documents:', uploadErr);
+          this.error = 'Erreur lors de l\'upload des documents. Réessayez.';
+          return;
+        }
       }
 
       // D'abord sauvegarder le mélange avec les données actuelles
@@ -1626,25 +1606,28 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
   // Méthodes pour la gestion des fichiers
   onFileSelected(event: Event, fieldName: string): void {
     const target = event.target as HTMLInputElement;
-    const file = target.files?.[0];
+    const files = target.files;
+    if (!files || files.length === 0) return;
 
-    if (file) {
-      // Validation du fichier
+    for (let i = 0; i < files.length; i++) {
+      const file = files.item(i);
+      if (!file) continue;
+
       const error = this.validateFile(file);
       if (error) {
         this.fileErrors[fieldName] = error;
-        target.value = '';
-        return;
+        continue;
       }
 
-      // Supprimer l'erreur précédente
       delete this.fileErrors[fieldName];
 
-      // Ajouter le fichier
-      this.uploadedFiles[fieldName] = file;
-
-      console.log(`Fichier sélectionné pour ${fieldName}:`, file.name);
+      if (!this.uploadedFiles[fieldName]) this.uploadedFiles[fieldName] = [];
+      this.uploadedFiles[fieldName].push(file);
+      console.log(`Fichier ajouté pour ${fieldName}:`, file.name);
     }
+
+    // Reset input to allow re-selection of same files if needed
+    if (target) target.value = '';
   }
 
   validateFile(file: File): string | null {
@@ -1673,8 +1656,15 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     return null;
   }
 
-  removeFile(fieldName: string): void {
-    delete this.uploadedFiles[fieldName];
+  removeFile(fieldName: string, index?: number): void {
+    if (!this.uploadedFiles[fieldName]) return;
+
+    if (typeof index === 'number') {
+      this.uploadedFiles[fieldName].splice(index, 1);
+      if (this.uploadedFiles[fieldName].length === 0) delete this.uploadedFiles[fieldName];
+    } else {
+      delete this.uploadedFiles[fieldName];
+    }
     delete this.fileErrors[fieldName];
 
     // Réinitialiser l'input file
@@ -1711,6 +1701,29 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Erreur lors de l\'upload:', error);
       return null;
+    }
+  }
+
+  // Retourne les documents persistés pour un type donné (utilise le champ `documents` renvoyé par l'API)
+  getDocumentsByType(type: string): any[] {
+    if (!this.melange || !this.melange.documents) return [];
+    try {
+      return (this.melange.documents as any[]).filter(d => d.type_document === type);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Supprime un document persistant et recharge le mélange
+  async deleteDocument(documentId: number): Promise<void> {
+    if (!documentId) return;
+    if (!confirm('Supprimer ce document ?')) return;
+    try {
+      await this.melangeService.deleteMelangeDocument(documentId);
+      if (this.melange?.id) await this.loadMelange(this.melange.id);
+    } catch (err) {
+      console.error('Erreur suppression document', err);
+      this.error = 'Erreur lors de la suppression du document.';
     }
   }
 
@@ -1824,11 +1837,19 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
     return lines.join('\n');
   }
 
-  getFileUrl(file: string): string {
+  getFileUrl(file: any): string {
+    if (!file) return '';
+    // if array, return first
+    if (Array.isArray(file)) file = file[0];
+    if (typeof file !== 'string') return '';
     // Si le champ est déjà une URL absolue, retourne tel quel
     if (file.startsWith('http')) return file;
     // Sinon, construit l'URL complète
     return `${window.location.origin}/media/${file}`;
+  }
+
+  isArray(val: any): boolean {
+    return Array.isArray(val);
   }
 
   getFicheTechniqueResumeHtml(): string {

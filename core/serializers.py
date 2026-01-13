@@ -15,7 +15,7 @@ from rest_framework import serializers
 from .models import ( 
     ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, Gisement, AmendementOrganique, MelangeAmendement, MelangeIngredient, Planning, Plateforme,
     Melange, SaisieVente, ProduitVente, DocumentTechnique,
-    FicheAgroPedodeSol, FicheHorizon, FichePhoto
+    FicheAgroPedodeSol, FicheHorizon, FichePhoto, MelangeDocument
 )
 from django.conf import settings
 from django.templatetags.static import static
@@ -244,6 +244,16 @@ class MelangeAmendementSerializer(serializers.ModelSerializer):
         return instance
 
 
+class MelangeDocumentSerializer(serializers.ModelSerializer):
+    utilisateur = serializers.ReadOnlyField(source='utilisateur.username')
+    fichier = serializers.FileField(use_url=True)
+
+    class Meta:
+        model = MelangeDocument
+        fields = ('id', 'melange', 'type_document', 'fichier', 'nom_fichier', 'utilisateur', 'date_ajout')
+        read_only_fields = ('utilisateur', 'date_ajout')
+
+
 
 class MelangeSerializer(serializers.ModelSerializer):
 
@@ -260,6 +270,7 @@ class MelangeSerializer(serializers.ModelSerializer):
     controle_1 = FlexibleFileField(required=False)
     controle_2 = FlexibleFileField(required=False)
     fiche_technique = FlexibleFileField(required=False)
+    documents = MelangeDocumentSerializer(many=True, read_only=True)
 
 
     class Meta:

@@ -14,12 +14,13 @@ import { environment } from '../../../../environments/environment';
 export class ActivateComponent implements OnInit {
   success = false;
   error: string | null = null;
-
+  
   constructor(private route: ActivatedRoute, private router: Router) {}
   private readonly base = environment.apiUrl;
   async ngOnInit() {
     const uid = this.route.snapshot.paramMap.get('uid');
     const token = this.route.snapshot.paramMap.get('token');
+    
 
     if (uid && token) {
       try {

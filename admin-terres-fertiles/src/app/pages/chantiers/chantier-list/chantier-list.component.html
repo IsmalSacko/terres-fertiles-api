@@ -25,9 +25,19 @@
    </h1>
   <div class="filter-bar">
   <mat-form-field appearance="outline">
-    <mat-label>Nom</mat-label>
-    <mat-icon matPrefix>badge</mat-icon>
-    <input matInput [(ngModel)]="filters.nom" (keyup.enter)="applyFilter()" />
+    <mat-label>Date de création (du)</mat-label>
+    <mat-icon matPrefix>calendar_today</mat-icon>
+    <input matInput [matDatepicker]="pickerFrom" [(ngModel)]="filters.date_creation_from" (dateChange)="applyFilter()" />
+    <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+    <mat-datepicker #pickerFrom></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Date de création (au)</mat-label>
+    <mat-icon matPrefix>calendar_today</mat-icon>
+    <input matInput [matDatepicker]="pickerTo" [(ngModel)]="filters.date_creation_to" (dateChange)="applyFilter()" />
+    <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+    <mat-datepicker #pickerTo></mat-datepicker>
   </mat-form-field>
 
   <mat-form-field appearance="outline">
@@ -89,6 +99,9 @@
             <mat-icon>business</mat-icon>
             <span>{{ chantier.entreprise_terrassement || 'Entreprise à définir' }}</span>
           </div>
+          <div class="detail-item">
+            <mat-icon>calendar_today</mat-icon>
+            <span>Créé le {{ chantier.date_creation | date:'longDate' }}</span>
         </div>
       </div>
       

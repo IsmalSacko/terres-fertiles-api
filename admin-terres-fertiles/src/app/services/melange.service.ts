@@ -96,6 +96,7 @@ export interface Melange {
   ingredients: MelangeIngredient[];
   gisements: number[];
   amendements: MelangeAmendement [];
+  documents?: { id: number; type_document: string; fichier: string; nom_fichier?: string }[];
   // Nouveaux champs pour la gestion des brouillons
   is_draft?: boolean;
   draft_timestamp?: string;
@@ -347,6 +348,26 @@ async addAmendement(amendement: MelangeAmendement): Promise<MelangeAmendement> {
 
   async deleteAmendement(amendementId: number): Promise<void> {
     await axios.delete(`${this.melangeAmendementsApiUrl}${amendementId}/`, this.getHeaders());
+  }
+
+  // Upload multiple documents for a melange
+  async uploadMelangeDocuments(melangeId: number, files: File[], type_document: string): Promise<any> {
+    const formData = new FormData();
+    for (const f of files) {
+      formData.append('fichier', f);
+    }
+    formData.append('melange', String(melangeId));
+    formData.append('type_document', type_document);
+
+    const token = localStorage.getItem('token');
+    const headers = { headers: { Authorization: `Token ${token}` } };
+
+    const response = await axios.post(`${this.base}melange-documents/`, formData, headers);
+    return response.data;
+  }
+
+  async deleteMelangeDocument(documentId: number): Promise<void> {
+    await axios.delete(`${this.base}melange-documents/${documentId}/`, this.getHeaders());
   }
 
   async updateAmendement(id: number, data: any): Promise<any> {

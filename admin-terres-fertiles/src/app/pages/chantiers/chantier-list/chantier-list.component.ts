@@ -7,6 +7,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { ChantierService, Chantier } from '../../../services/chantier.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Subject } from 'rxjs';
@@ -33,6 +35,8 @@ import { MatInputModule } from '@angular/material/input';
 
   MatFormFieldModule,   // <-- nécessaire pour <mat-form-field>
   MatInputModule,       // <-- nécessaire pour <input matInput>
+  MatDatepickerModule,
+  MatNativeDateModule,
 ],
   templateUrl: './chantier-list.component.html',
   styleUrl: './chantier-list.component.css'
@@ -46,11 +50,20 @@ export class ChantierListComponent implements OnInit, OnDestroy {
   rowHeight = '200px'; // Default row height
 
   // filtrage des chantiers
-  filters = {
-  nom: '',
-  commune: '',
-  maitre_ouvrage: '',
-  entreprise_terrassement: ''  
+  filters: {
+    nom: string;
+    date_creation_from: Date | string | null;
+    date_creation_to: Date | string | null;
+    commune: string;
+    maitre_ouvrage: string;
+    entreprise_terrassement: string;
+  } = {
+    nom: '',
+    date_creation_from: null,
+    date_creation_to: null,
+    commune: '',
+    maitre_ouvrage: '',
+    entreprise_terrassement: ''  
   };
   originalChantiers: Chantier[] = [];
 
@@ -74,20 +87,41 @@ export class ChantierListComponent implements OnInit, OnDestroy {
   }
   // Appliquer les filtres aux chantiers affichés quand l'utilisateur clique sur "Filtrer"
    applyFilter() {
-  this.chantiers = this.originalChantiers.filter(c => {
-    const matchesNom = this.filters.nom ? c.nom.toLowerCase().includes(this.filters.nom.toLowerCase()) : true;
-    const matchesCommune = this.filters.commune ? c.commune.toLowerCase().includes(this.filters.commune.toLowerCase()) : true;
-    const matchesMaitreOuvrage = this.filters.maitre_ouvrage ? c.maitre_ouvrage.toLowerCase().includes(this.filters.maitre_ouvrage.toLowerCase()) : true;
-    const matchesEntreprise = this.filters.entreprise_terrassement ? c.entreprise_terrassement.toLowerCase().includes(this.filters.entreprise_terrassement.toLowerCase()) : true;
+    this.chantiers = this.originalChantiers.filter(c => {
+      // Date range filter (inclusive)
+      const dateFrom = this.filters.date_creation_from ? new Date(this.filters.date_creation_from) : null;
+      const dateTo = this.filters.date_creation_to ? new Date(this.filters.date_creation_to) : null;
+      let matchesdate_creation = true;
+      if (dateFrom || dateTo) {
+        const chantierDate = c.date_creation ? new Date(c.date_creation) : null;
+        if (!chantierDate) {
+          matchesdate_creation = false;
+        } else {
+          if (dateFrom && dateTo) {
+            matchesdate_creation = chantierDate >= dateFrom && chantierDate <= dateTo;
+          } else if (dateFrom) {
+            matchesdate_creation = chantierDate >= dateFrom;
+          } else if (dateTo) {
+            matchesdate_creation = chantierDate <= dateTo;
+          }
+        }
+      }
 
-    return matchesNom && matchesCommune && matchesMaitreOuvrage && matchesEntreprise;
-  });
+      const matchesNom = this.filters.nom ? c.nom.toLowerCase().includes(this.filters.nom.toLowerCase()) : true;
+      const matchesCommune = this.filters.commune ? c.commune.toLowerCase().includes(this.filters.commune.toLowerCase()) : true;
+      const matchesMaitreOuvrage = this.filters.maitre_ouvrage ? c.maitre_ouvrage.toLowerCase().includes(this.filters.maitre_ouvrage.toLowerCase()) : true;
+      const matchesEntreprise = this.filters.entreprise_terrassement ? c.entreprise_terrassement.toLowerCase().includes(this.filters.entreprise_terrassement.toLowerCase()) : true;
+
+      return matchesdate_creation && matchesNom && matchesCommune && matchesMaitreOuvrage && matchesEntreprise;
+    });
 }
 
 // Réinitialiser tous les filtres
 resetFilter() {
   this.filters = {
     nom: '',
+    date_creation_from: null,
+    date_creation_to: null,
     commune: '',
     maitre_ouvrage: '',
     entreprise_terrassement: ''
