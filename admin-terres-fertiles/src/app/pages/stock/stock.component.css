@@ -1,9 +1,23 @@
 .stock-container {
+    top: 15px;
     display: flex;
     flex-direction: column;
     gap: 16px; 
  
     }
+ .div-btn-ajout{
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+
+ }
+  .btn-ajout {
+      display: flex;
+      align-items: center;
+      color: white;
+      gap: 8px;
+      background: linear-gradient(to right, #2b612d, #81C784);
+  }
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .kpi .kpi-value { font-size: 1.6rem; font-weight: 600; margin-top: 8px; }
 .panel { padding: 8px; }
@@ -13,4 +27,81 @@
 @media (max-width: 900px) {
   .kpis { grid-template-columns: 1fr; }
   .charts { grid-template-columns: 1fr; }
+  .div-btn-ajout { justify-content: center;}
+  
+  
+}
+
+/* Prevent card header title/icon from overflowing on small screens */
+.mat-mdc-card-header,
+.mat-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.mat-mdc-card-header .mat-mdc-card-header-title,
+.mat-mdc-card-header .mat-mdc-card-header-subtitle,
+.mat-card-header .mat-card-title,
+.mat-card-header .mat-card-subtitle {
+  flex: 1 1 auto;
+  min-width: 0; /* allow flex children to shrink for ellipsis */
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 480px) {
+  /* On very small screens allow wrapping if needed */
+  .mat-mdc-card-header .mat-mdc-card-header-title,
+  .mat-card-header .mat-card-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+   
+}
+
+/* Prevent horizontal overflow: make containers, tables and canvases responsive */
+.stock-container {
+  box-sizing: border-box;
+  padding-left: 12px;
+  padding-right: 12px;
+  overflow-x: hidden;
+}
+
+.charts canvas,
+.chart-card canvas {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+/* Make panel span both columns of the charts grid when placed inside .charts */
+.charts > .panel {
+  grid-column: 1 / -1;
+  width: auto; /* let grid control width */
+  margin: 0; /* align with grid gutters */
+}
+
+.panel mat-card-content {
+  overflow-x: auto; /* allow table scrolling instead of page overflow */
+}
+
+table.mat-elevation-z1 {
+  width: 100%;
+  box-sizing: border-box;
+  table-layout: fixed; /* keep columns inside container */
+  word-break: break-word;
+}
+
+table.mat-elevation-z1 td, table.mat-elevation-z1 th {
+  min-width: 0; /* allow cells to shrink */
+}
+
+/* Slightly reduce KPI font on small screens to avoid overflow */
+@media (max-width: 480px) {
+  .kpi .kpi-value { font-size: 1.25rem; }
 }

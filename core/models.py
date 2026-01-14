@@ -1,6 +1,5 @@
 from decimal import Decimal
 import re
-
 from django.utils.text import slugify
 from datetime import date
 from django.utils import timezone
@@ -26,7 +25,6 @@ class CustomUser(AbstractUser):
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     company_name = models.CharField("Nom de l'entreprise", max_length=255)
-    siret_number = models.CharField("SIRET", max_length=14, unique=True, null=True, blank=True)
     address = models.CharField("Adresse", max_length=255, null=True, blank=True)
     city = models.CharField("Ville", max_length=100, null=True, blank=True)
     postal_code = models.CharField("Code postal", max_length=10, null=True, blank=True)
@@ -1118,8 +1116,6 @@ class DocumentProduitVente(models.Model):
     def __str__(self):
         return f"{self.get_type_document_display()} - {self.produit.reference_produit}"
 
-
-
 class DocumentTechnique(models.Model):
     produit = models.ForeignKey(ProduitVente, on_delete=models.CASCADE, related_name="documents")
     nom_fichier = models.CharField(max_length=255)
@@ -1269,3 +1265,22 @@ class Planning(models.Model):
 
     def __str__(self):
         return f"{self.titre} ({self.melange})"
+    
+class Stock(models.Model):
+
+    melange = models.ForeignKey("Melange", on_delete=models.CASCADE, related_name="melanges",verbose_name="Mélange")
+    volume = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Volume (en m3)", help_text="En mètres cubes (m3)")
+    date_mise_en_stock = models.DateField(auto_now_add=True, verbose_name="Date de mise en stock")
+    etat_stock = models.CharField(max_length=50, choices=[
+        ("maturation", "En maturation"),
+        ("vente", "En vente"),
+        ("vendu", "Vendu")
+    ])
+
+    def __str__(self):
+        return f"Stock de {self.valumes} m3 pour {self.melange}"
+    class Meta:
+        db_table = 'stock'
+        verbose_name = "Stock"
+        verbose_name_plural = "Stocks"
+        ordering = ['-date_mise_en_stock']

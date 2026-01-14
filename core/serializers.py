@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import  Gisement
+from .models import  Gisement, Stock
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
@@ -70,7 +70,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'last_name',
             'role',
             'company_name',
-            'siret_number',
             'address',
             'city',
             'postal_code',
@@ -78,31 +77,19 @@ class CustomUserSerializer(serializers.ModelSerializer):
             'phone_number',
         )
         read_only_fields = ['id', 'username']  # On empêche la modification côté frontend
-    
-    def validate_siret_number(self, value):
-        if value == "":
-            return None
-        return value
-        
+  
 class CustomUserCreateSerializer(serializers.ModelSerializer):
     role = serializers.ChoiceField(choices=CustomUser.ROLE_CHOICES)
     email = serializers.EmailField(required=True)
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password', 'role', 'company_name', 'siret_number')
+        fields = ('username', 'email', 'password', 'role', 'company_name')
         extra_kwargs = {
             'password': {'write_only': True}
         }
-    def validate_siret_number(self, value):
-        if value == "":
-            return None
-        if value and len(value) != 14:
-            raise serializers.ValidationError("Le numéro SIRET doit avoir 14 caractères.")
-        return value
-    
+
     def create(self, validated_data):
-        validated_data['siret_number'] = validated_data.get('siret_number') or None
         user = CustomUser.objects.create_user(**validated_data)
         user.is_active = False
         
@@ -587,3 +574,10 @@ class FicheAgroPedodeSolSerializer(serializers.ModelSerializer):
     
     def get_fiche(self, obj):
         return obj.horizon.fiche.id if obj.horizon and obj.horizon.fiche else None
+
+class StockageSerializer(serializers.ModelSerializer):
+    melange_nom = serializers.CharField(source='melange.nom', read_only=True)
+    class Meta:
+        model = Stock
+        fields = '__all__'
+        read_only_fields = ['id', 'date_mise_en_stock']

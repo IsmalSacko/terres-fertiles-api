@@ -49,7 +49,6 @@ export class UserProfileComponent implements OnInit {
       last_name: [''],
       role: [{ value: '', disabled: true }],
       company_name: [''],
-      siret_number: [''],
       address: [''],
       city: [''],
       postal_code: [''],

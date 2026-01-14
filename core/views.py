@@ -1,22 +1,47 @@
 import logging
-from rest_framework import status
 from rest_framework.parsers import MultiPartParser
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Prefetch
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import action
-from rest_framework import status   
-from rest_framework.response import Response  # ✅ BON import
-from rest_framework import status
+from rest_framework import status 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.conf import settings
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework import viewsets, permissions, generics
-from rest_framework.decorators import api_view
-from rest_framework.permissions import AllowAny
 from core.filters import ChantierFilter, GisementFilter, MelangeFilter
 from core.models import FicheAgroPedodeSol
+from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, build_absolute_link
+from .models import (
+    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, FicheAgroPedodeSol, FicheHorizon, FichePhoto, Gisement, AmendementOrganique,
+    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, SaisieVente,
+    MelangeDocument, Stock,
+   
+)
+from .serializers import (
+    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, 
+    DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, 
+    GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,ChantierRecepteurSerializer,
+    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, 
+    ProduitVenteDetailSerializer, DocumentTechniqueSerializer, SaisieVenteSerializer, 
+    MelangeDocumentSerializer, StockageSerializer,
+    
+)
+
+logger = logging.getLogger(__name__)
+
+
 
 @api_view(['GET'])
 def next_eap(request):
@@ -34,25 +59,6 @@ def next_eap(request):
     next_num = max(nums) + 1 if nums else 1
     next_eap = f"EAP-25-{ville_code}-{next_num:03d}"
     return Response({"next_eap": next_eap})
-from core.utils import HasCustomAccessPermission, IsClientOrEntrepriseOrStaffOrSuperuser, build_absolute_link
-from .models import (
-    ChantierRecepteur, CustomUser, Chantier, DocumentGisement, DocumentProduitVente, FicheAgroPedodeSol, FicheHorizon, FichePhoto, Gisement, AmendementOrganique,
-    Melange, MelangeAmendement, MelangeIngredient, Planning, Plateforme, ProduitVente, DocumentTechnique, SaisieVente,
-    MelangeDocument,
-   
-)
-from .serializers import (
-    AmendementOrganiqueSerializer, CustomUserSerializer, ChantierSerializer, DocumentGisementSerializer, 
-    DocumentProduitVenteSerializer, FicheAgroPedodeSolSerializer, FicheHorizonSerializer, FichePhotoSerializer, 
-    GisementSerializer, MelangeAmendementSerializer, MelangeIngredientSerializer,ChantierRecepteurSerializer,
-    MelangeSerializer, PlanningSerializer, PlateformeSerializer, ProduitVenteCreateSerializer, 
-    ProduitVenteDetailSerializer, DocumentTechniqueSerializer, SaisieVenteSerializer, 
-    MelangeDocumentSerializer,
-    
-)
-
-logger = logging.getLogger(__name__)
-
 
 
 # View pour récupérer l'utilisateur courant
@@ -239,20 +245,6 @@ class PlateformeViewSet(viewsets.ModelViewSet):
 
 
 
-
-from django.contrib.auth import get_user_model
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode
-from django.utils.encoding import force_bytes
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
-from django.conf import settings
-
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-
-
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def custom_reset_password(request):
@@ -418,4 +410,11 @@ class FicheHorizonViewSet(viewsets.ModelViewSet):
 class FichePhotoViewSet(viewsets.ModelViewSet):
     queryset = FichePhoto.objects.all()
     serializer_class = FichePhotoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+# Vues pour le stock de mélanges
+class StockageViewSet(viewsets.ModelViewSet):
+    queryset = Stock.objects.all().order_by('-date_mise_en_stock')
+    serializer_class = StockageSerializer
     permission_classes = [permissions.IsAuthenticated]

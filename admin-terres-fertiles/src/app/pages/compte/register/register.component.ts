@@ -40,7 +40,6 @@ export class RegisterComponent {
       email: [''],
       role: ['', Validators.required],
       company_name: ['', Validators.required],
-      siret_number: [''],
     })
   }
 
@@ -51,9 +50,7 @@ export class RegisterComponent {
       this.errorMessage = null;
       try{
         const data = { ...this.registerForm.value };
-        if (!data.siret_number) {
-          delete data.siret_number;
-        }
+        
         const response = await axios.post(`${this.base}auth/users/`, data);
         this.successMessage = "Inscription réussie ! Redirection vers la connexion...";
         this.cdr.detectChanges();

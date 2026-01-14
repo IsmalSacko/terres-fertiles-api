@@ -1,0 +1,38 @@
+<div class="container">
+    <h2 class="edit-stock-title">
+        <mat-icon>edit</mat-icon>
+        Modifier le stock
+    </h2>
+    <form [formGroup]="stockForm" (ngSubmit)="onSubmit()">
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Mélange</mat-label>
+            <input matInput formControlName="nom_melange" placeholder="Laissez vide pour génération automatique">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Volume</mat-label>
+            <input matInput formControlName="volume" required placeholder="Volume du mélange en m³" type="number" min="0"
+                step="0.01">
+            <mat-error *ngIf="stockForm.get('volume')?.hasError('required')">Le volume
+                est obligatoire</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>État de stock</mat-label>
+            <mat-select formControlName="etat_stock" required>
+                <mat-option value="maturation">Maturation</mat-option>
+                <mat-option value="disponible">Disponible</mat-option>
+                <mat-option value="vendu">Vendu</mat-option>
+            </mat-select>
+            <mat-error *ngIf="stockForm.get('etat_stock')?.hasError('required')">L'état de stock est
+                obligatoire</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Date de mise en stock</mat-label>
+            <input matInput type="date" formControlName="date_mise_en_stock" placeholder="Date de mise en stock">
+        </mat-form-field>
+    
+        <button mat-raised-button color="primary" type="submit" [disabled]="stockForm.invalid">
+            Enregistrer
+        </button>
+        <button mat-button type="button" (click)="goBack()">Annuler</button>
+        </form>
+</div>

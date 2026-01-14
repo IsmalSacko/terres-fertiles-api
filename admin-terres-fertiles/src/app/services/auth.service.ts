@@ -10,7 +10,6 @@ export interface User {
   last_name: string;
   role: string;
   company_name: string;
-  siret_number: string;
   address: string;
   city: string;
   postal_code: string;

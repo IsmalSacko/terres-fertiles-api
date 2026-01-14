@@ -16,10 +16,6 @@ import { ActivateComponent } from './pages/compte/activate/activate.component';
 import { ResetPasswordComponent } from './pages/compte/reset-password/reset-password.component';
 import { ResetPasswordConfirmComponent } from './pages/compte/auth/reset-password-confirm/reset-password-confirm.component';
 import {PlanningComponent} from './pages/planning/planning.component';
-import { SaisieVenteComponent } from './pages/ventes/saisie-vente/saisie-vente.component';
-import { CreateSaisieVenteComponent } from './pages/ventes/create-saisie-vente/create-saisie-vente.component';
-import { EditSaisieVenteComponent } from './pages/ventes/edit-saisie-vente/edit-saisie-vente.component';
-import { DetailSaisieVenteComponent } from './pages/ventes/detail-saisie-vente/detail-saisie-vente.component';
 import { ListPlateformeComponent } from './pages/plateformes/list-plateforme/list-plateforme.component';
 import { DetailPlateformeComponent } from './pages/plateformes/detai-plateforme/detail-plateforme.component';
 import { EditPlateformeComponent } from './pages/plateformes/edit-plateforme/edit-plateforme.component';
@@ -47,6 +43,8 @@ import { PhotoEditComponent } from './pages/fiche-agropedodesol/photo-edit/photo
 import { PhotoListComponent } from './pages/fiche-agropedodesol/photo-list/photo-list.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { authGuard } from './guards/auth.guard';
+import { EditComponent } from './pages/stock/edit/edit.component';
+import { AjoutComponent } from './pages/stock/ajout/ajout.component';
 // SuiviStock (lecture seule)
 
 
@@ -80,10 +78,7 @@ export const routes: Routes = [
   { path: 'produits/nouveau', component: CreateProduitVenteComponent, canActivate:[authGuard] },
   { path: 'produits/edit/:id', component: ProduitVenteEditComponent, canActivate:[authGuard] },
   { path: 'produits/:id', component: ProduitVenteDetailComponent, canActivate:[authGuard] },
-  // Routes pour les saisies de vente
-  { path: 'saisies-vente', component: SaisieVenteComponent, canActivate:[authGuard] },
-  { path: 'saisies-vente/new', component: CreateSaisieVenteComponent, canActivate:[authGuard] },
-  { path: 'saisies-vente/edit/:id', component: EditSaisieVenteComponent, canActivate:[authGuard] },
+ 
 
 
   // Fiches de renseignement
@@ -94,7 +89,6 @@ export const routes: Routes = [
   // Routes pour la planification
   {path: 'planning', component: PlanningComponent, canActivate:[authGuard]},
 
-  { path: 'detail-saisie-vente/:id', component: DetailSaisieVenteComponent, canActivate:[authGuard] },
   // Routes pour les plateformes
   { path: 'plateformes/new', component: CreatePlateformeComponent, canActivate:[authGuard] },
   { path: 'plateformes', component: ListPlateformeComponent, canActivate:[authGuard] },
@@ -127,5 +121,8 @@ export const routes: Routes = [
   
   // Suivi des stocks (lecture seule)
   { path: 'suivistock', component: StockComponent, canActivate:[authGuard] },
+  { path: 'stock/edit/:id', component: EditComponent, canActivate:[authGuard] },
+  { path: 'stock/ajout', component: AjoutComponent, canActivate:[authGuard] },
+
 
 ];

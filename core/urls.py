@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    StockageViewSet,
     next_eap,
     CurrentUserView,
     CustomUserViewSet,
@@ -45,6 +46,8 @@ router.register(r'chantiers-recepteurs', ChantierRecepteurViewSet)
 router.register(r'fiches-agro', FicheAgroPedodeSolViewSet)
 router.register(r'fiches-horizons', FicheHorizonViewSet)
 router.register(r'fiches-photos', FichePhotoViewSet)
+router.register(r'stockages-melanges', StockageViewSet, basename='stockages')  # basename pour éviter les conflits de noms
+
 
 
 

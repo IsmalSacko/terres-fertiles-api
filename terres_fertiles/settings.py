@@ -164,7 +164,7 @@ REST_FRAMEWORK = {
 # SITE_NAME=localhost   en dev
 # DOMAIN=localhost:4200  en dev
 SITE_NAME = config("SITE_NAME", default="Terres Fertiles")
-DOMAIN = config("DOMAIN", default="tf.ismael-dev.com")
+DOMAIN = config("DOMAIN", default="tef.terres-fertiles.com")
 
 DJOSER = {
     'LOGIN_FIELD': 'username',

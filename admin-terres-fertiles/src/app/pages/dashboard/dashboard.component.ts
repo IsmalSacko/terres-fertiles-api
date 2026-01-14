@@ -9,7 +9,7 @@ import { ChantierService } from '../../services/chantier.service';
 import { GisementService } from '../../services/gisement.service';
 import { PlanningService } from '../../services/planning/planning.service';
 import { MelangeService } from '../../services/melange.service';
-import { SaisieventeService } from '../../services/saisievente.service';
+import {  StockageMelangeService} from '../../services/stock.service';
 import { ProduitVenteService } from '../../services/produit-vente.service';
 import { AmendementOrganiqueService } from '../../services/amendement-organique.service';
 import { FicheAgroService } from '../../services/ficheAgroPedoServcices/fiche-agro-pedo.service';
@@ -31,12 +31,11 @@ export class DashboardComponent implements OnInit {
     private planningService: PlanningService,
     private melangeService: MelangeService,
     private produitVenteService: ProduitVenteService,
-    private saisiesVenteService: SaisieventeService,
+    private stockageMelangeService: StockageMelangeService,
     private amendementService: AmendementOrganiqueService,
     private ficheAgroService: FicheAgroService,
     private router: Router
   ) {}
-
 chantierActifs: number = 0;
 gisements: number = 0;
 plannings: number = 0;
@@ -107,7 +106,7 @@ async loadProduitVenteCount() {
 }
 
 async loadSaisiesVenteCount() {
-  const result = await this.saisiesVenteService.getSaisiesVenteCount();
+  const result = await this.stockageMelangeService.getStockagesMelangeCount();
   this.animateCounter('saisiesVente', result);
 }
 
