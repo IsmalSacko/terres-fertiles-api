@@ -598,7 +598,7 @@
                   <button *ngIf="uploadedFiles['ordre_conformite']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('ordre_conformite')">Supprimer tous</button>
                 </div>
                 <!-- Documents persistés côté backend -->
-                <div *ngIf="getDocumentsByType('ordre_conformite')?.length" class="mt-2">
+                <div *ngIf="getDocumentsByType('ordre_conformite').length" class="mt-2">
                   <label class="form-label">Documents enregistrés:</label>
                   <ul class="mb-0">
                     <li *ngFor="let d of getDocumentsByType('ordre_conformite')">
@@ -644,7 +644,7 @@
                   </ul>
                   <button *ngIf="uploadedFiles['consignes_melange']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('consignes_melange')">Supprimer tous</button>
                 </div>
-                <div *ngIf="getDocumentsByType('consignes_melange')?.length" class="mt-2">
+                <div *ngIf="getDocumentsByType('consignes_melange').length" class="mt-2">
                   <label class="form-label">Documents enregistrés:</label>
                   <ul class="mb-0">
                     <li *ngFor="let d of getDocumentsByType('consignes_melange')">
@@ -732,7 +732,7 @@
                   <button *ngIf="uploadedFiles['controle_1']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('controle_1')">Supprimer tous</button>
                 </div>
                 <!-- Documents persistés côté backend (MelangeDocument) -->
-                <div *ngIf="getDocumentsByType('controle_1')?.length" class="mt-2">
+                <div *ngIf="getDocumentsByType('controle_1').length" class="mt-2">
                   <label class="form-label">Fichiers enregistrés:</label>
                   <ul class="mb-0">
                     <li *ngFor="let d of getDocumentsByType('controle_1')">
@@ -798,7 +798,7 @@
                   </ul>
                   <button *ngIf="uploadedFiles['controle_2']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('controle_2')">Supprimer tous</button>
                 </div>
-                <div *ngIf="getDocumentsByType('controle_2')?.length" class="mt-2">
+                <div *ngIf="getDocumentsByType('controle_2').length" class="mt-2">
                   <label class="form-label">Fichiers enregistrés:</label>
                   <ul class="mb-0">
                     <li *ngFor="let d of getDocumentsByType('controle_2')">
@@ -1093,7 +1093,7 @@
                   </ul>
                   <button *ngIf="uploadedFiles['fiche_technique']?.length" type="button" class="btn btn-sm btn-outline-danger mt-2" (click)="removeFile('fiche_technique')">Supprimer tous</button>
                 </div>
-                <div *ngIf="getDocumentsByType('fiche_technique')?.length" class="mt-2">
+                <div *ngIf="getDocumentsByType('fiche_technique').length" class="mt-2">
                   <label class="form-label">Documents enregistrés:</label>
                   <ul class="mb-0">
                     <li *ngFor="let d of getDocumentsByType('fiche_technique')">

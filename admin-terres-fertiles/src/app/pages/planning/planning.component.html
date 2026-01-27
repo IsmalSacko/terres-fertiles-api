@@ -1,4 +1,10 @@
-<div *ngIf="!loading && !error" class="container-fluid planning-container mt-5 page-with-intense-plants standard-page-content">
+<div *ngIf="!loading && !error"
+  class="container-fluid planning-container mt-5 page-with-intense-plants standard-page-content">
+
+  <div class="planning-controls mb-2 w-50">
+    <input type="text" [(ngModel)]="filterText" placeholder="Filtrer les mélanges" class="form-control" />
+  </div>
+
   <div class="planning-table">
 
     <div class="header-row">
@@ -7,54 +13,62 @@
       <div *ngFor="let month of months" class="month-section">
         <div class="month-name">{{ month }} {{ currentYear }}</div>
 
-        <!-- Ligne des semaines avec jours inclus -->
         <div class="week-row">
           <div *ngFor="let week of weeksInMonth[month]" class="week-cell">
             <div class="week-label">S{{ week }}</div>
             <div class="days-inside-week">
-          <span *ngFor="let day of daysInWeekMonth[month][week]" class="day-item">
-            {{ day }}
-          </span>
+              <span *ngFor="let day of daysInWeekMonth[month][week]" class="day-item">
+                {{ day }}
+              </span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
+    <div *ngFor="let plateforme of getFilteredMelanges()" class="plateforme-row"
+      [class.row-selected]="isRowSelected(plateforme)">
 
-    <!-- Lignes pour chaque plateforme -->
-    <div *ngFor="let plateforme of getAllMelangesDisponibles()"  class="plateforme-row">
-      <div  class="plateforme-name">{{ plateforme }} </div>
-
+      <div class="plateforme-name" (click)="$event.stopPropagation(); toggleSelectRow(plateforme)">
+        {{ plateforme }}
+      </div>
 
       <div *ngFor="let month of months" class="month-section">
         <div class="week-row">
-          <div *ngFor="let week of weeksInMonth[month]"
+          <div *ngFor="let week of weeksInMonth[month]" class="week-cell clickable"
+            (click)="onCellClick(plateforme, week, month)" (mouseenter)="onCellHover(plateforme, week, month)"
+            (mouseleave)="onCellLeave()">
 
-               class="week-cell clickable"
-               (click)="onCellClick(plateforme, week, month)"
-               (mouseenter)="onCellHover(plateforme, week, month)"
-               (mouseleave)="onCellLeave()">
+            <div class="notes-container" *ngIf="getInterventions(plateforme, week, month).length > 0">
+              <span *ngFor="let intervention of getInterventions(plateforme, week, month)" 
+                [class]="'note note-' + intervention.statut">
+                {{ intervention.note }}
+              </span>
+            </div>
 
-            <span *ngIf="getNote(plateforme, week, month)" [class]="getNoteClass(plateforme, week, month)">
-              {{ getNote(plateforme, week, month) }}
-            </span>
+            <div *ngIf="hoveredIntervention
+              && hoveredIntervention.melange === plateforme
+              && hoveredIntervention.week === week
+              && hoveredIntervention.month === month" class="hover-info">
 
-            <!-- Tooltip étendu -->
-            <div *ngIf="hoveredIntervention &&
-                        hoveredIntervention.melange === plateforme &&
-                        hoveredIntervention.week === week &&
-                        hoveredIntervention.month === month"
+              <div class="hover-title">Interventions ({{ hoveredIntervention.items.length }})</div>
 
-                 class="hover-info">
+              <div class="hover-list">
+                <div class="hover-item" *ngFor="let it of hoveredIntervention.items">
+                  <div class="hover-item-header">
+                    <span class="hover-note">{{ it.note }}</span>
+                    <span class="hover-status" [class]="'status-pill ' + (getStatutLabel(it.statut) | lowercase)">
+                      {{ getStatutLabel(it.statut) }}
+                    </span>
+                  </div>
+                  <div class="hover-meta">
+                    <span>{{ it.date | date:'dd/MM/yyyy' }}</span>
+                    <span class="separator">•</span>
+                    <span>Resp. {{ it.responsable }}</span>
+                  </div>
+                </div>
+              </div>
 
-              <strong>Mélange :</strong> {{ hoveredIntervention.melange }}<br>
-              <strong>Semaine :</strong> S{{ hoveredIntervention.week }}<br>
-              <strong>Mois :</strong> {{ hoveredIntervention.month }}<br>
-              <strong>Note :</strong> {{ hoveredIntervention.note }}<br>
-              <strong>Statut :</strong> {{ hoveredIntervention.statutLabel || 'N/A' }}<br>
-              <strong>Date :</strong> {{ hoveredIntervention.date || 'N/A' }}<br>
-              <strong>Responsable :</strong> {{ hoveredIntervention.responsable || 'N/A' }}<br>
             </div>
           </div>
         </div>
@@ -62,27 +76,22 @@
     </div>
 
   </div>
-  
-  <!-- Légende des statuts -->
-  <div class="status-legend mt-3">
-    <h6>Légende des statuts :</h6>
-    <div class="legend-items">
-      <span class="legend-item">
-        <span class="legend-color note-planned"></span>
-        Planifié 🗓️
-      </span>
-      <span class="legend-item">
-        <span class="legend-color note-active"></span>
-        En cours⏳
-      </span>
-      <span class="legend-item">
-        <span class="legend-color note-done"></span>
-        Terminé <span class="done-icon">✅</span>
-      </span>
-    </div>
+
+  <div class="legend">
+    <span class="legend-item">
+      <span class="legend-color note-planned"></span>
+      Planifié 🗓️
+    </span>
+    <span class="legend-item">
+      <span class="legend-color note-active"></span>
+      En cours 🔄
+    </span>
+    <span class="legend-item">
+      <span class="legend-color note-done"></span>
+      Terminé ✅
+    </span>
   </div>
-  
-  <!-- Sélecteur d'année en bas -->
+
   <div class="year-selector mt-4">
     <label for="year-select">Année :</label>
     <select [(ngModel)]="currentYear" (change)="onYearChange()" id="year-select">
@@ -90,7 +99,3 @@
     </select>
   </div>
 </div>
-
-
-<div *ngIf="loading">Chargement en cours...</div>
-<div *ngIf="error">{{ error }}</div>

@@ -12,7 +12,6 @@ import { StockageMelangeService } from '../../services/stock.service';
 import { MelangeService } from '../../services/melange.service';
 import { StockageMelange } from '../../models/stock-melange.model';
 import { Router } from '@angular/router';
-import { ConfirmDialogComponent } from "../../shared/navbar/confirm-dialog.component";
 
 @Component({
   selector: 'app-stock',

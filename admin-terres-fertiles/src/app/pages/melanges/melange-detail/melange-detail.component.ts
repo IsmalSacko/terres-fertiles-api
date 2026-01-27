@@ -1689,14 +1689,8 @@ export class MelangeDetailComponent implements OnInit, OnDestroy {
 
   async uploadFile(file: File, fieldName: string): Promise<string | null> {
     try {
-      // Ici, vous devrez implémenter la logique d'upload vers votre backend
-      // Pour l'instant, on simule un upload réussi
       console.log(`Upload du fichier ${file.name} pour ${fieldName}`);
-
-      // Simuler un délai d'upload
       await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Retourner l'URL du fichier uploadé (à adapter selon votre backend)
       return `uploads/${fieldName}/${file.name}`;
     } catch (error) {
       console.error('Erreur lors de l\'upload:', error);

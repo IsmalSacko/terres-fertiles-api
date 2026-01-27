@@ -1,10 +1,9 @@
 .planning-table {
-  display: flex;
-  flex-direction: column;
+  display: block;
   border: 1px solid var(--background-color);
   overflow-x: auto;
+  overflow-y: visible;
   font-size: 14px;
-  top: 25px;
   position: relative;
   width: calc(100% - 40px);
   background: rgba(255, 255, 255, 0.85);
@@ -15,74 +14,62 @@
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
-/* Nouvelle ligne verticale pour les semaines + jours dans l'en-tête */
-.week-row-vertical {
+.planning-controls {
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-}
-
-.week-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 60px;
-  margin: 0 4px;
-}
-
-.week-cell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 4px;
-  border: 1px solid #ccc;
-  min-width: 60px;
-}
-
-.week-label {
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.days-inside-week {
-  display: flex;
-  flex-wrap: wrap;
   justify-content: center;
-  gap: 2px;
+  width: 100%;
 }
 
-.day-item {
-  font-size: 0.75em;
-  padding: 1px 3px;
-  background-color: #f0f0f0;
-  border-radius: 3px;
+.planning-controls .form-control {
+  max-width: 420px;
+  width: 100%;
 }
 
-/* Anciennes lignes si encore utilisées */
-.day-row {
+/* =======================
+   LIGNES (header + rows)
+======================= */
+.header-row,
+.plateforme-row {
   display: flex;
+  width: max-content;
 }
 
-.day-cell {
-  flex: 1;
-  text-align: center;
-  border: 4px solid var(--background-color);
-  padding: 4px 0;
+.plateforme-row {
+  border: 1px solid #d0d0d0;
+    border-right: 2px solid #c0c0c0;
+    border-bottom: 2px solid #c0c0c0;
 }
-
-
-
-.day-cell span {
-  margin: 0 2px;
-  font-size: 0.75em;
-  cursor: default;
+.header-row{
+  position: sticky !important;
+    top: 0;
+    z-index: 120 !important;
+    background: rgb(red, green, blue);
 }
+.planning-table {
+  display: block;
+  position: relative;
 
-.header-row, .plateforme-row {
-  display: flex;
+  /* SCROLL */
+  max-height: 75vh;
+  overflow-x: auto;
+  overflow-y: auto;
+
+  /* VISUEL */
+  width: calc(100% - 40px);
+  margin: 0 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--background-color);
 }
-
-.corner-cell, .plateforme-name {
+/* =======================
+   COLONNE FIXE GAUCHE
+======================= */
+.corner-cell,
+.plateforme-name {
+  position: sticky;
+  left: 0;
+  z-index: 50;
   width: 160px;
   min-width: 160px;
   background: var(--primary-color);
@@ -94,20 +81,34 @@
   justify-content: center;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  user-select: none;
-  padding: 0;
-  margin: 0;
+  user-select: text;
   box-sizing: border-box;
-  outline: 1px solid var(--background-color);
 }
 
+/* Header + colonne fixe priorité max */
+.corner-cell {
+  top: 0;
+  z-index: 100;
+}
+
+.plateforme-name {
+  cursor: pointer;
+}
+
+/* =======================
+   MOIS / SEMAINES
+======================= */
 .month-section {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--background-color);
+  overflow: visible;
 }
 
 .month-section .month-name {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   text-align: center;
   background: var(--primary-color);
   color: white;
@@ -119,78 +120,255 @@
 
 .month-section .week-row {
   display: flex;
+  overflow: visible;
 }
 
 .month-section .week-cell {
-  width: 100px;
-  height: 90px;
-  border: 1px solid var(--background-color);
+  width: 110px;
+  min-height: 100px;
+  padding: 10px 6px;
+  border: 1px solid #d0d0d0;
+  border-right: 1px solid #c0c0c0;
+  border-bottom: 1px solid #c0c0c0;
   text-align: center;
   position: relative;
-
   color: var(--text-primary);
-  font-weight: 500;
-  cursor: default;
-  transition: background-color var(--transition-speed);
+  cursor: pointer;
+  transition: all 0.2s ease;
   flex-shrink: 0;
+  background: white;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
 }
 
 .month-section .week-cell:hover {
-  background: linear-gradient(0.25turn, #3f87a6, #ebf8e1, #f69d3c);
+  background: linear-gradient(135deg, rgba(63, 135, 166, 0.15), rgba(235, 248, 225, 0.2), rgba(246, 157, 60, 0.15));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+  z-index: 10;
+}
 
+/* =======================
+   SEMAINES + JOURS
+======================= */
+.week-label {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-color);
+  margin-bottom: 2px;
+  padding: 2px 0;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.days-inside-week {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.day-item {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 6px;
+  background-color: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  border-radius: 4px;
+  color: #333;
+  min-width: 28px;
+  text-align: center;
+}
+
+/* =======================
+   NOTES / STATUTS
+======================= */
+.notes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  align-items: center;
 }
 
 .month-section .week-cell .note {
   background: var(--accent-color);
   color: white;
-  padding: 2px 6px;
-  font-size: 0.85rem;
+  padding: 4px 8px;
+  font-size: 0.75rem;
   border-radius: 6px;
-  position: absolute;
-  top: 6px;
-  left: 6px;
-  right: 6px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   user-select: none;
+  width: 100%;
+  text-align: center;
+  max-width: 100px;
 }
 
-/* Styles pour les différents statuts */
 .note-planned {
-  background: #ffa500 !important; /* Orange pour planifié */
-  color: white;
+  background: #ffa500 !important;
 }
 
 .note-active {
-  background: #2196f3 !important; /* Bleu pour en cours */
-  color: white;
+  background: #2196f3 !important;
 }
 
 .note-done {
-  background: #4caf50 !important; /* Vert pour terminé */
-  color: white;
+  background: #4caf50 !important;
 }
 
-/* Styles pour la légende des statuts */
-.status-legend {
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.9);
+/* =======================
+   TOOLTIP
+======================= */
+.hover-info {
+  position: absolute;
+  top: -10px;
+  left: 110px;
+  background: white;
+  padding: 10px 12px;
+  border: 1px solid #01090e;
+  font-size: 12px;
+  z-index: 200;
   border-radius: 8px;
-  box-shadow: var(--card-shadow);
-  margin: 0 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  min-width: 260px;
+  max-width: 320px;
+  z-index: 999;
 }
 
-.status-legend h6 {
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: var(--text-color);
+.hover-title {
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 8px;
 }
 
-.legend-items {
+.hover-list {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hover-item {
+  padding: 8px 10px;
+  border: 1px solid #e6e6e6;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.hover-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.hover-note {
+  font-weight: 600;
+  color: #333;
+}
+
+.hover-status {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  background: #e0e0e0;
+  color: #444;
+}
+
+.status-pill.planifié {
+  background: #fff3d9;
+  color: #c07a00;
+}
+
+.status-pill.en\ cours {
+  background: #e5f2ff;
+  color: #1769aa;
+}
+
+.status-pill.terminé {
+  background: #e6f5ea;
+  color: #2e7d32;
+}
+
+.hover-meta {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  color: #666;
+}
+
+.hover-meta .separator {
+  color: #999;
+}
+
+/* =======================
+   LIGNE SÉLECTIONNÉE
+======================= */
+.plateforme-row.row-selected {
+  background: rgba(126, 211, 33, 0.12);
+}
+
+.plateforme-row.row-selected .plateforme-name {
+  background: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(126, 211, 33, 0.3);
+}
+
+.plateforme-row.row-selected .week-cell {
+  background: rgba(126, 211, 33, 0.12) !important;
+  border: 2px solid rgba(126, 211, 33, 0.4);
+  box-shadow: inset 0 0 8px rgba(126, 211, 33, 0.15);
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 768px) {
+
+  .corner-cell,
+  .plateforme-name {
+    width: 120px;
+    min-width: 120px;
+    font-size: 0.85rem;
+  }
+
+  .month-section .week-cell {
+    width: 50px;
+    height: 40px;
+    font-size: 0.75rem;
+  }
+
+  .month-section .month-name {
+    font-size: 0.85rem;
+    padding: 8px 6px;
+  }
+}
+
+/* Clickable */
+.clickable {
+  cursor: pointer;
+}
+
+/* =======================
+   LÉGENDE
+======================= */
+.legend {
+  display: flex;
+  gap: 30px;
+  margin: 20px 20px 0 20px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
   flex-wrap: wrap;
-  gap: 15px;
 }
 
 .legend-item {
@@ -198,6 +376,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  color: var(--text-primary);
 }
 
 .legend-color {
@@ -207,78 +386,43 @@
   display: inline-block;
 }
 
-/* Couleurs spécifiques pour chaque statut dans la légende */
-.legend-color.note-planned {
-  background: #ffa500; /* Orange pour planifié */
-}
-
-.legend-color.note-active {
-  background: #2196f3; /* Bleu pour en cours */
-}
-
-.legend-color.note-done {
-  background: #4caf50; /* Vert pour terminé */
-}
-
-.hover-info {
-  position: absolute;
-  top: -26px;
-  left: 100px;
-  background: var(--surface-color);
-  padding: 4px 8px;
-  border: 1px solid #ccc;
-  font-size: 12px;
-  z-index: 10;
-  border-radius: 4px;
-  white-space: nowrap;
-  justify-content: left;
-}
-
+/* =======================
+   SÉLECTEUR D'ANNÉE
+======================= */
 .year-selector {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: white;
-  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 20px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.85);
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  width: fit-content;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .corner-cell, .plateforme-name {
-    width: 120px;
-    min-width: 120px;
-    font-size: 0.85rem;
-    height: 40px;
-    line-height: 40px;
-  }
-
-  .month-section .week-cell {
-    width: 50px;
-    height: 40px;
-    font-size: 0.75rem;
-  }
-
-  .day-row-full .day-cell {
-    min-width: 50px;
-    max-width: 50px;
-    font-size: 0.7rem;
-  }
-
-  .month-section .month-name {
-    font-size: 0.85rem;
-    padding: 8px 6px;
-  }
+.year-selector label {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
 }
 
-/* Classe pour les cellules cliquables */
-.clickable {
+.year-selector select {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--text-primary);
+  background-color: white;
   cursor: pointer;
+  transition: border-color 0.2s ease;
 }
 
-.clickable:hover {
-  background-color: #f0f0f0;
+.year-selector select:hover {
+  border-color: var(--primary-color);
+}
+
+.year-selector select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(126, 211, 33, 0.1);
 }

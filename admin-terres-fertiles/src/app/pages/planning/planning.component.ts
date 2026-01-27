@@ -23,21 +23,21 @@ export class PlanningComponent implements OnInit {
   currentYear: number = new Date().getUTCFullYear();
   allMelanges: MelangeModel[] = [];
   allMelangesDisponibles: any[] = []; // Tous les mélanges disponibles (avec et sans planning)
+  filterText: string = '';
+  // Set des lignes sélectionnées (nom des mélanges)
+  selectedRows = new Set<string>();
   months: string[] = [
     'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
     'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
   ];
 
   weeksInMonth: { [month: string]: number[] } = {}; //Nombre de semaines par mois
-  // Interventions pour chaque mélange, semaine et mois
+  // Interventions pour chaque mélange, semaine et mois (groupées par cellule)
   interventions: {
-    responsable: string;
     melange: string;
     week: number;
     month: string;
-    note: string;
-    date: string;
-    statut: string; // Ajoutons le statut
+    items: { responsable: string; note: string; date: string; statut: string }[];
   }[] = [];
 
   years: number[] = []; // Années disponibles pour le planning
@@ -112,47 +112,33 @@ export class PlanningComponent implements OnInit {
   }
 
   updateInterventions() {
-    this.interventions = this.melanges
-      .filter(m => {
-      const year = new Date(m.date_debut).getUTCFullYear();
-      return year === this.currentYear;
-      })
-      .map(m => {
-      const date = new Date(m.date_debut);
-      const [_, week] = this.getWeekNumber(date);
-      const month = this.months[date.getMonth()];
-      let note = m.titre;
-      // Ajout d'un emoji selon le statut
-      let emoji = '';
-      switch (m.statut) {
-        case 'planned':
-        emoji = '🗓️';
-        break;
-        case 'active':
-        emoji = '⏳';
-        break;
-        case 'done':
-        emoji = '✅';
-        break;
-        default:
-        emoji = '';
-        break;
-      }
-      note += emoji ? ` ${emoji}` : '';
-      return {
-        melange: m.melange_nom,
-        responsable: m.responsable || 'N/A',
-        week,
-        month,
-        note,
-        date: m.date_debut,
-        statut: m.statut // Ajoutons le statut directement dans les interventions
-      };
-      });
-    // on met à jour les interventions
+    // Regrouper les interventions par cellule (melange|week|month)
+    const map = new Map<string, { melange: string; week: number; month: string; items: { responsable: string; note: string; date: string; statut: string }[] }>();
 
-    console.log('Interventions mises à jour:', this.interventions.length);
-    console.log('Exemple d\'intervention:', this.interventions[0]); // Debug
+    this.melanges
+      .filter(m => new Date(m.date_debut).getUTCFullYear() === this.currentYear)
+      .forEach(m => {
+        const date = new Date(m.date_debut);
+        const [_, week] = this.getWeekNumber(date);
+        const month = this.months[date.getMonth()];
+        const key = `${m.melange_nom}||${week}||${month}`;
+
+        const noteBase = m.titre || '';
+        let emoji = '';
+        switch (m.statut) {
+          case 'planned': emoji = '🗓️'; break;
+          case 'active': emoji = '⏳'; break;
+          case 'done': emoji = '✅'; break;
+          default: emoji = '';
+        }
+        const note = noteBase + (emoji ? ` ${emoji}` : '');
+
+        if (!map.has(key)) map.set(key, { melange: m.melange_nom, week, month, items: [] });
+        map.get(key)!.items.push({ responsable: m.responsable || 'N/A', note, date: m.date_debut, statut: m.statut });
+      });
+
+    this.interventions = Array.from(map.values());
+    console.log('Interventions mises à jour (groupées):', this.interventions.length);
   }
 
   getWeekNumber(date: Date): [number, number] {
@@ -169,38 +155,60 @@ export class PlanningComponent implements OnInit {
     return Array.from(nomsUniques);
   }
 
+  // Basculer la sélection d'une ligne comme dans Excel
+  toggleSelectRow(melange: string) {
+    if (this.selectedRows.has(melange)) {
+      this.selectedRows.delete(melange);
+    } else {
+      this.selectedRows.add(melange);
+    }
+  }
+
+  // Indique si une ligne est sélectionnée
+  isRowSelected(melange: string): boolean {
+    return this.selectedRows.has(melange);
+  }
+
   // Nouvelle méthode pour obtenir TOUS les mélanges disponibles
   getAllMelangesDisponibles(): string[] {
     return this.allMelangesDisponibles.map(m => m.nom);
+  }
+
+  // Renvoie la liste des mélanges filtrée par `filterText`
+  getFilteredMelanges(): string[] {
+    const all = this.getAllMelangesDisponibles();
+    if (!this.filterText || this.filterText.trim() === '') return all;
+    const q = this.filterText.toLowerCase();
+    return all.filter(n => n.toLowerCase().includes(q));
   }
 
   hasAnyIntervention(melange: string): boolean {
     return this.interventions.some(i => i.melange === melange);
   }
 
-
+  // Méthode pour obtenir toutes les interventions d'une cellule
+  getInterventions(melange: string, week: number, month: string): { note: string; statut: string }[] {
+    const found = this.interventions.find(i => i.melange === melange && i.week === week && i.month === month);
+    if (!found) return [];
+    return found.items;
+  }
 
   getNote(melange: string, week: number, month: string): string | null {
-    const found = this.interventions.find(i =>
-        i.melange === melange && i.week === week && i.month === month
-    );
-    return found ? found.note : null;
+    const found = this.interventions.find(i => i.melange === melange && i.week === week && i.month === month);
+    if (!found) return null;
+    if (found.items.length === 1) return found.items[0].note;
+    return `${found.items[0].note} (+${found.items.length - 1})`;
   }
 
   // Nouvelle méthode pour obtenir le statut d'une intervention
   getStatut(melange: string, week: number, month: string): string | null {
-    // Chercher dans les interventions qui ont déjà le statut
-    const found = this.interventions.find(i =>
-        i.melange === melange && i.week === week && i.month === month
-    );
-    
-    if (found) {
-      console.log(`getStatut found: melange=${found.melange}, statut=${found.statut}`);
-      return found.statut;
-    }
-    
-    console.log(`getStatut NOT found for: melange=${melange}, week=${week}, month=${month}`);
-    return null;
+    const found = this.interventions.find(i => i.melange === melange && i.week === week && i.month === month);
+    if (!found) return null;
+    // Priorité: active > planned > done
+    if (found.items.some(it => it.statut === 'active')) return 'active';
+    if (found.items.some(it => it.statut === 'planned')) return 'planned';
+    if (found.items.some(it => it.statut === 'done')) return 'done';
+    return found.items[0].statut || null;
   }
 
   // Méthode pour obtenir la classe CSS selon le statut
@@ -244,18 +252,15 @@ export class PlanningComponent implements OnInit {
   }
 
   onCellHover(plateforme: string, week: number, month: string): void {
-    const intervention = this.interventions.find(i =>
-        i.melange === plateforme &&
-        i.week === week &&
-        i.month === month
-    );
-    
+    const intervention = this.interventions.find(i => i.melange === plateforme && i.week === week && i.month === month);
     if (intervention) {
-      // Ajouter le statut à l'objet intervention pour l'affichage
       const statut = this.getStatut(plateforme, week, month);
       this.hoveredIntervention = {
-        ...intervention,
-        statut: statut,
+        melange: intervention.melange,
+        week: intervention.week,
+        month: intervention.month,
+        items: intervention.items,
+        statut,
         statutLabel: this.getStatutLabel(statut || '')
       };
     } else {
@@ -285,26 +290,25 @@ export class PlanningComponent implements OnInit {
       melangeId = melangeDisponible.id;
     }
 
-    // Trouver l'intervention existante sur cette cellule
-    const existingIntervention = this.melanges.find(m => {
-      const date = new Date(m.date_debut);
-      const [_, w] = this.getWeekNumber(date);
-      const mth = this.months[date.getMonth()];
-      return m.melange === melangeId && w === week && mth === month;
-    });
-
-    // Calcul date début de la semaine/mois sélectionné pour création si nécessaire
+    // Calcul date début de la semaine/mois sélectionné pour création
     const monthIndex = this.months.indexOf(month);
     const firstDayOfMonth = new Date(Date.UTC(this.currentYear, monthIndex, 1));
     const dayOffset = (week - this.getWeekNumber(firstDayOfMonth)[1]) * 7;
     const dateDebut = new Date(firstDayOfMonth);
     dateDebut.setUTCDate(firstDayOfMonth.getUTCDate() + dayOffset);
+    // Récupérer toutes les interventions existantes sur cette cellule (pour affichage/édition)
+    const existingItems = this.melanges.filter(m => {
+      const d = new Date(m.date_debut);
+      const [_, w] = this.getWeekNumber(d);
+      const mth = this.months[d.getMonth()];
+      return m.melange === melangeId && w === week && mth === month;
+    });
 
-    // Ouvrir la modale avec les données existantes ou nouvelle intervention
+    // Ouvrir la modale en fournissant les interventions existantes et une fiche vierge pour création
     const dialogRef = this.dialog.open(PlanningFormComponent, {
-      width: '500px',
+      width: '700px',
       data: {
-        melange: existingIntervention ? {...existingIntervention} : {
+        melange: {
           id: 0,
           titre: '',
           date_debut: dateDebut.toISOString().substring(0, 10),
@@ -312,7 +316,8 @@ export class PlanningComponent implements OnInit {
           statut: 'pending',
           melange: melangeId,
           melange_nom: melangeNom
-        }
+        },
+        existingItems: existingItems
       }
     });
 

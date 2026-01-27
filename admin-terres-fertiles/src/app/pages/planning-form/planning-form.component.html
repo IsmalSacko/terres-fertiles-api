@@ -1,5 +1,23 @@
 <h2>Modifier ou créer une intervention</h2>
 
+<!-- Liste des interventions existantes pour cette cellule -->
+<div *ngIf="existingItems && existingItems.length > 0" style="padding:10px;">
+  <h4>Interventions existantes</h4>
+  <div *ngFor="let it of existingItems" style="display:flex; align-items:flex-start; gap:8px; padding:6px; border-bottom:1px solid #eee;">
+    <input type="checkbox" [checked]="selectedToDelete.has(it.id)" (change)="toggleSelect(it.id)" />
+    <div style="flex:1">
+      <strong>{{ it.titre || '(sans titre)' }}</strong><br>
+      <small>Date: {{ it.date_debut }} • Responsable: {{ it.responsable || 'N/A' }} • Statut: {{ it.statut }}</small>
+    </div>
+    <div>
+      <button type="button" (click)="editItem(it)">Éditer</button>
+    </div>
+  </div>
+  <div style="margin-top:8px; text-align:right;">
+    <button type="button" (click)="deleteSelected()" [disabled]="selectedToDelete.size === 0">Supprimer sélection</button>
+  </div>
+</div>
+
 <form (ngSubmit)="onSave()" #form="ngForm" class="planning-table">
 
   <div class="plateforme-row" style="flex-direction: column; gap: 12px; padding: 10px;">
@@ -78,7 +96,6 @@
   <div class="actions" style="display:flex; justify-content:flex-end; margin-top: 20px; gap: 12px;">
 
     <button type="button" (click)="onCancel()">Annuler</button>
-    <button (click)="onDelete()">Supprimer</button>
 
     <button type="submit" [disabled]="!form.form.valid">Enregistrer</button>
   </div>
