@@ -145,4 +145,9 @@ export class NavbarComponent implements OnDestroy {
     this.router.navigate(['/produits/nouveau']);
     this.closeSidenav();
   }
+
+  // Navigue vers la page admin
+  goToAdmin(): void {
+    window.location.href = 'https://api.terres-fertiles.com/admin/';
+  }
 }
